@@ -177,7 +177,10 @@ Class Parser
     Dim left = Me.ParsePrimaryExpression
 
     While Me.Current.Kind = SyntaxKind.PlusToken OrElse
-          Me.Current.Kind = SyntaxKind.MinusToken
+          Me.Current.Kind = SyntaxKind.MinusToken OrElse
+          Me.Current.Kind = SyntaxKind.StarToken OrElse
+          Me.Current.Kind = SyntaxKind.SlashToken
+
 
       Dim operatorToken = Me.NextToken()
       Dim right = Me.ParsePrimaryExpression()
