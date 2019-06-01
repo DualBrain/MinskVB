@@ -5,10 +5,11 @@
   MinusToken
   StarToken
   SlashToken
-  ParenOpenToken
-  ParenCloseToken
+  OpenParenToken
+  CloseParenToken
   BadToken
   EndOfFileToken
   BinaryExpression
   NumberExpression
+  ParenExpression
 End Enum

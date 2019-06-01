@@ -36,32 +36,53 @@ Module Program
 
   Sub Main(args As String())
 
+    Dim showTree = False
+
     Do
 
       Write("> ")
 
       Dim line = ReadLine()
 
-      'TODO: This will eventually go away
-      '      once we have some parsing going on.
+      ' Handle "special commands / circumstances" within the "REPL".
+
       If String.IsNullOrWhiteSpace(line) Then
-        Exit Do
+        Continue Do
       End If
 
-      Dim parser = New Parser(line)
-      Dim syntaxTree = parser.Parse
-      Dim color = Console.ForegroundColor
-      Console.ForegroundColor = ConsoleColor.DarkGray
-      PrettyPrint(syntaxTree.Root)
-      Console.ResetColor()
+      Select Case line.ToLower
+        Case "option tree on"
+          showTree = True : Continue Do
+        Case "option tree off"
+          showTree = False : Continue Do
+        Case "cls"
+          Clear() : Continue Do
+        Case "exit"
+          Exit Do
+        Case Else
+      End Select
 
-      If Not syntaxTree.Diagnostics.Any Then
-        Dim e = New Evaluator(syntaxTree.Root)
+      ' Otherwise, attempt to parse what was entered...
+
+      Dim tree = SyntaxTree.Parse(line)
+
+      ' Only show the parse tree if we have enabled doing so.
+      If showTree Then
+        Dim color = Console.ForegroundColor
+        Console.ForegroundColor = ConsoleColor.DarkGray
+        PrettyPrint(tree.Root)
+        Console.ResetColor()
+      End If
+
+      If Not tree.Diagnostics.Any Then
+        ' No errors detected, attemp to evaluate (execute).
+        Dim e = New Evaluator(tree.Root)
         Dim result = e.Evaluate
         WriteLine(result)
       Else
+        ' We have errors, so don't try to evaluate (execute).
         Console.ForegroundColor = ConsoleColor.DarkRed
-        For Each diagnostic In syntaxTree.Diagnostics
+        For Each diagnostic In tree.Diagnostics
           WriteLine(diagnostic)
         Next
         Console.ResetColor()
@@ -100,6 +121,7 @@ Module Program
 End Module
 
 NotInheritable Class SyntaxTree
+
   Sub New(diagnostics As IEnumerable(Of String), root As ExpressionSyntax, endOfFileToken As SyntaxToken)
     Me.Diagnostics = diagnostics.ToArray
     Me.Root = root
@@ -109,6 +131,13 @@ NotInheritable Class SyntaxTree
   Public ReadOnly Property Diagnostics As IReadOnlyList(Of String)
   Public ReadOnly Property Root As ExpressionSyntax
   Public ReadOnly Property EndOfFileToken As SyntaxToken
+
+  Public Shared Function Parse(text As String) As SyntaxTree
+    Dim parser = New Parser(text)
+    Return parser.Parse
+  End Function
+
+
 End Class
 
 Class Parser
@@ -166,21 +195,24 @@ Class Parser
     End If
   End Function
 
+  Private Function ParseExpression() As ExpressionSyntax
+    Return Me.ParseTerm()
+  End Function
+
   Public Function Parse() As SyntaxTree
-    Dim expression = Me.ParseExpression()
+    Dim expression = Me.ParseTerm
     Dim endOfFileToken = Me.Match(SyntaxKind.EndOfFileToken)
     Return New SyntaxTree(Me.m_diagnostics, expression, endOfFileToken)
   End Function
 
-  Private Function ParseExpression() As ExpressionSyntax
+  Private Function ParseTerm() As ExpressionSyntax
 
-    Dim left = Me.ParsePrimaryExpression
+    Debug.WriteLine("ParseTerm")
+
+    Dim left = Me.ParseFactor
 
     While Me.Current.Kind = SyntaxKind.PlusToken OrElse
-          Me.Current.Kind = SyntaxKind.MinusToken OrElse
-          Me.Current.Kind = SyntaxKind.StarToken OrElse
-          Me.Current.Kind = SyntaxKind.SlashToken
-
+          Me.Current.Kind = SyntaxKind.MinusToken
 
       Dim operatorToken = Me.NextToken()
       Dim right = Me.ParsePrimaryExpression()
@@ -192,7 +224,33 @@ Class Parser
 
   End Function
 
+  Private Function ParseFactor() As ExpressionSyntax
+
+    Debug.WriteLine("ParseFactor")
+
+    Dim left = Me.ParsePrimaryExpression
+
+    While Me.Current.Kind = SyntaxKind.StarToken OrElse
+          Me.Current.Kind = SyntaxKind.SlashToken
+
+      Dim operatorToken = Me.NextToken()
+      Dim right = Me.ParsePrimaryExpression()
+      left = New BinaryExpressionSyntax(left, operatorToken, right)
+
+    End While
+
+    Return left
+
+  End Function
   Private Function ParsePrimaryExpression() As ExpressionSyntax
+
+    If Me.Current.Kind = SyntaxKind.OpenParenToken Then
+      Dim left = Me.NextToken
+      Dim expression = Me.ParseExpression
+      Dim right = Me.Match(SyntaxKind.CloseParenToken)
+      Return New ParenExpressionSyntax(left, expression, right)
+    End If
+
     Dim numberToken = Match(SyntaxKind.NumberToken)
     Return New NumberExpressionSyntax(numberToken)
   End Function
@@ -203,7 +261,7 @@ MustInherit Class SyntaxNode
 
   Public MustOverride ReadOnly Property Kind() As SyntaxKind
 
-  Public MustOverride Function GetChildren() As IEnumerable(Of SyntaxNode)
+  Public MustOverride Iterator Function GetChildren() As IEnumerable(Of SyntaxNode)
 
 End Class
 
@@ -248,6 +306,28 @@ NotInheritable Class BinaryExpressionSyntax
   End Function
 End Class
 
+NotInheritable Class ParenExpressionSyntax
+  Inherits ExpressionSyntax
+
+  Sub New(openParenToken As SyntaxToken, expression As ExpressionSyntax, closeParenToken As SyntaxToken)
+    Me.OpenParenToken = openParenToken
+    Me.Expression = expression
+    Me.CloseParenToken = closeParenToken
+  End Sub
+
+  Public Overrides ReadOnly Property Kind As SyntaxKind = SyntaxKind.ParenExpression
+  Public ReadOnly Property OpenParenToken As SyntaxToken
+  Public ReadOnly Property Expression As ExpressionSyntax
+  Public ReadOnly Property CloseParenToken As SyntaxToken
+
+  Public Overrides Iterator Function GetChildren() As IEnumerable(Of SyntaxNode)
+    Yield Me.OpenParenToken
+    Yield Me.Expression
+    Yield Me.CloseParenToken
+  End Function
+
+End Class
+
 Class Evaluator
 
   Sub New(root As ExpressionSyntax)
@@ -280,6 +360,11 @@ Class Evaluator
         Case Else
           Throw New Exception($"Unexpected binary operator {b.OperatorToken.Kind}")
       End Select
+    End If
+
+    If TypeOf node Is ParenExpressionSyntax Then
+      Dim p = DirectCast(node, ParenExpressionSyntax)
+      Return Me.EvaluateExpression(p.Expression)
     End If
 
     Throw New Exception($"Unexpected node {node.Kind}")

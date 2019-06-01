@@ -89,8 +89,8 @@ Class Lexer
       Case "-"c : Return New SyntaxToken(SyntaxKind.MinusToken, Me.PositionPlusPlus, "-", Nothing)
       Case "*"c : Return New SyntaxToken(SyntaxKind.StarToken, Me.PositionPlusPlus, "*", Nothing)
       Case "/"c : Return New SyntaxToken(SyntaxKind.SlashToken, Me.PositionPlusPlus, "/", Nothing)
-      Case "("c : Return New SyntaxToken(SyntaxKind.ParenOpenToken, Me.PositionPlusPlus, "(", Nothing)
-      Case ")"c : Return New SyntaxToken(SyntaxKind.ParenCloseToken, Me.PositionPlusPlus, ")", Nothing)
+      Case "("c : Return New SyntaxToken(SyntaxKind.OpenParenToken, Me.PositionPlusPlus, "(", Nothing)
+      Case ")"c : Return New SyntaxToken(SyntaxKind.CloseParenToken, Me.PositionPlusPlus, ")", Nothing)
       Case Else
     End Select
 
