@@ -1,4 +1,4 @@
-Option Explicit On ' Variables must be "declared".
+﻿Option Explicit On ' Variables must be "declared".
 Option Strict On ' They must have a "type".
 Option Infer On ' Where we can, the "type" can be inferred.
 
@@ -11,6 +11,26 @@ Option Infer On ' Where we can, the "type" can be inferred.
 ' Feel free to join in and contribute!
 
 Imports System.Console
+Imports bc
+
+' 1 + 2 * 3
+'
+' Could be...
+'
+'   +
+'  / \ 
+' 1   *
+'    / \
+'   2   3
+'
+' Desired...
+'
+'     *
+'    / \ 
+'   +   3
+'  / \
+' 1   2
+
 
 Module Program
 
@@ -28,145 +48,159 @@ Module Program
         Exit Do
       End If
 
-      Dim lexer = New Lexer(line)
-      Do
-
-        Dim token = lexer.NextToken
-        If token.Kind = SyntaxKind.EndOfFileToken Then
-          Exit Do
-        End If
-        Write($"{token.Kind}: '{token.Text}'")
-        If token.Value IsNot Nothing Then
-          Write($" {token.Value}")
-        End If
-        WriteLine()
-
-      Loop
+      Dim parser = New Parser(line)
+      Dim expression = parser.Parse
+      Dim color = Console.ForegroundColor
+      Console.ForegroundColor = ConsoleColor.DarkGray
+      PrettyPrint(expression)
+      Console.ResetColor()
 
     Loop
 
   End Sub
 
+  Sub PrettyPrint(node As SyntaxNode, Optional indent As String = "", Optional isLast As Boolean = True)
+
+    Dim marker = If(isLast, "└──", "├──")
+
+    Write(indent)
+    Write(marker)
+
+    Write($"{node.Kind}")
+
+    If TryCast(node, SyntaxToken)?.Value IsNot Nothing Then
+      Write(" ")
+      Write(DirectCast(node, SyntaxToken).Value)
+    End If
+
+    WriteLine()
+
+    indent += If(isLast, "   ", "│  ")
+
+    Dim lastChild = node.GetChildren.LastOrDefault
+
+    For Each child In node.GetChildren
+      PrettyPrint(child, indent, child Is lastChild)
+    Next
+
+  End Sub
+
 End Module
 
-Class Lexer
+Class Parser
 
-  Private ReadOnly Property Text As String
+  Private ReadOnly Property Tokens As SyntaxToken()
   Private Property Position As Integer
 
-  Public Sub New(text As String)
-    Me.Text = text
-  End Sub
-
-  Private ReadOnly Property Current As Char
-    Get
-      If Me.Position >= Me.Text.Length Then
-        Return Chr(0)
+  Sub New(text As String)
+    Dim tokens = New List(Of SyntaxToken)
+    Dim lexer = New Lexer(text)
+    Dim token As SyntaxToken
+    Do
+      token = lexer.NextToken
+      If token.Kind <> SyntaxKind.WhitespaceToken AndAlso
+         token.Kind <> SyntaxKind.BadToken Then
+        tokens.Add(token)
       End If
-      Return Me.Text(Me.Position)
-    End Get
-  End Property
-
-  Private Sub [Next]()
-    Me.Position += 1
+    Loop While token.Kind <> SyntaxKind.EndOfFileToken
+    Me.Tokens = tokens.ToArray
   End Sub
 
-  Public Function NextToken() As SyntaxToken
-
-    ' numbers
-    ' symbols
-    ' whitespace
-    ' "end of file"
-
-    If Me.Position >= Me.Text.Length Then
-      Return New SyntaxToken(SyntaxKind.EndOfFileToken, Me.PositionPlusPlus, Chr(0), Nothing)
+  Private Function Peek(offset As Integer) As SyntaxToken
+    Dim index = Me.Position + offset
+    If index >= Me.Tokens.Length Then
+      Return Me.Tokens(Me.Tokens.Length - 1)
     End If
+    Return Me.Tokens(index)
+  End Function
 
-    If Char.IsDigit(Me.Current) Then
+  Private Function Current() As SyntaxToken
+    Return Me.Peek(0)
+  End Function
 
-      Dim start = Me.Position
+  Private Function NextToken() As SyntaxToken
+    Dim current = Me.Current
+    Me.Position += 1
+    Return current
+  End Function
 
-      While Char.IsDigit(Me.Current)
-        Me.Next()
-      End While
-
-      Dim length = Me.Position - start
-      Dim text = Me.Text.Substring(start, length)
-
-      Dim value As Integer
-      Integer.TryParse(text, value)
-      Return New SyntaxToken(SyntaxKind.NumberToken, start, text, value)
-
+  Private Function Match(kind As SyntaxKind) As SyntaxToken
+    If Me.Current.Kind = kind Then
+      Return Me.NextToken()
+    Else
+      Return New SyntaxToken(kind, Me.Current.Position, Nothing, Nothing)
     End If
+  End Function
 
-    If Char.IsWhiteSpace(Me.Current) Then
+  Public Function Parse() As ExpressionSyntax
 
-      Dim start = Me.Position
+    Dim left = Me.ParsePrimaryExpression
 
-      While Char.IsWhiteSpace(Me.Current)
-        Me.Next()
-      End While
+    While Me.Current.Kind = SyntaxKind.PlusToken OrElse
+          Me.Current.Kind = SyntaxKind.MinusToken
 
-      Dim length = Me.Position - start
-      Dim text = Me.Text.Substring(start, length)
+      Dim operatorToken = Me.NextToken()
+      Dim right = Me.ParsePrimaryExpression()
+      left = New BinaryExpressionSyntax(left, operatorToken, right)
 
-      Return New SyntaxToken(SyntaxKind.WhitespaceToken, start, text, Nothing)
+    End While
 
-    End If
-
-    Select Case Me.Current
-      Case "+"c : Return New SyntaxToken(SyntaxKind.PlusToken, Me.PositionPlusPlus, "+", Nothing)
-      Case "-"c : Return New SyntaxToken(SyntaxKind.MinusToken, Me.PositionPlusPlus, "-", Nothing)
-      Case "*"c : Return New SyntaxToken(SyntaxKind.StarToken, Me.PositionPlusPlus, "*", Nothing)
-      Case "/"c : Return New SyntaxToken(SyntaxKind.SlashToken, Me.PositionPlusPlus, "/", Nothing)
-      Case "("c : Return New SyntaxToken(SyntaxKind.ParenOpenToken, Me.PositionPlusPlus, "(", Nothing)
-      Case ")"c : Return New SyntaxToken(SyntaxKind.ParenCloseToken, Me.PositionPlusPlus, ")", Nothing)
-      Case Else
-    End Select
-
-    Return New SyntaxToken(SyntaxKind.BadToken, Me.PositionPlusPlus, Me.Text.Substring(Me.Position - 1, 1), Nothing)
+    Return left
 
   End Function
 
-  Private Function PositionPlusPlus() As Integer
-
-    ' This will return the current Position as the "current" value and
-    ' increment the Position for use the next time around...
-    ' Effectively working similar to the C style post ++ addition:
-    ' ..., position++, 
-
-    Dim result = Me.Position
-    Me.Position += 1
-    Return result
+  Private Function ParsePrimaryExpression() As ExpressionSyntax
+    Dim numberToken = Match(SyntaxKind.NumberToken)
+    Return New NumberExpressionSyntax(numberToken)
   End Function
 
 End Class
 
-Class SyntaxToken
+MustInherit Class SyntaxNode
 
-  Sub New(kind As SyntaxKind, position As Integer, text As String, value As Object)
-    Me.Kind = kind
-    Me.Position = position
-    Me.Text = text
-    Me.Value = value
-  End Sub
+  Public MustOverride ReadOnly Property Kind() As SyntaxKind
 
-  Public ReadOnly Property Kind As SyntaxKind
-  Public ReadOnly Property Position As Integer
-  Public ReadOnly Property Text As String
-  Public ReadOnly Property Value As Object
+  Public MustOverride Function GetChildren() As IEnumerable(Of SyntaxNode)
 
 End Class
 
-Enum SyntaxKind
-  NumberToken
-  WhitespaceToken
-  PlusToken
-  MinusToken
-  StarToken
-  SlashToken
-  ParenOpenToken
-  ParenCloseToken
-  BadToken
-  EndOfFileToken
-End Enum
+MustInherit Class ExpressionSyntax
+  Inherits SyntaxNode
+End Class
+
+NotInheritable Class NumberExpressionSyntax
+  Inherits ExpressionSyntax
+
+  Sub New(numberToken As SyntaxToken)
+    Me.NumberToken = numberToken
+  End Sub
+
+  Public Overrides Iterator Function GetChildren() As IEnumerable(Of SyntaxNode)
+    Yield Me.NumberToken
+  End Function
+
+  Public Overrides ReadOnly Property Kind As SyntaxKind = SyntaxKind.NumberExpression
+  Public ReadOnly NumberToken As SyntaxToken
+
+End Class
+
+NotInheritable Class BinaryExpressionSyntax
+  Inherits ExpressionSyntax
+
+  Sub New(left As ExpressionSyntax, operatorToken As SyntaxToken, right As ExpressionSyntax)
+    Me.Left = left
+    Me.OperatorToken = operatorToken
+    Me.Right = right
+  End Sub
+
+  Public Overrides ReadOnly Property Kind As SyntaxKind = SyntaxKind.BinaryExpression
+  Public ReadOnly Property Left As ExpressionSyntax
+  Public ReadOnly Property OperatorToken As SyntaxToken
+  Public ReadOnly Property Right As ExpressionSyntax
+
+  Public Overrides Iterator Function GetChildren() As IEnumerable(Of SyntaxNode)
+    Yield Me.Left
+    Yield Me.OperatorToken
+    Yield Me.Right
+  End Function
+End Class
