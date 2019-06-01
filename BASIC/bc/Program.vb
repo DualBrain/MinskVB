@@ -55,7 +55,11 @@ Module Program
       PrettyPrint(syntaxTree.Root)
       Console.ResetColor()
 
-      If syntaxTree.Diagnostics.Any Then
+      If Not syntaxTree.Diagnostics.Any Then
+        Dim e = New Evaluator(syntaxTree.Root)
+        Dim result = e.Evaluate
+        WriteLine(result)
+      Else
         Console.ForegroundColor = ConsoleColor.DarkRed
         For Each diagnostic In syntaxTree.Diagnostics
           WriteLine(diagnostic)
@@ -238,5 +242,44 @@ NotInheritable Class BinaryExpressionSyntax
     Yield Me.Left
     Yield Me.OperatorToken
     Yield Me.Right
+  End Function
+End Class
+
+Class Evaluator
+
+  Sub New(root As ExpressionSyntax)
+    Me.Root = root
+  End Sub
+
+  Public ReadOnly Property Root As ExpressionSyntax
+
+  Public Function Evaluate() As Integer
+    Return Me.EvaluateExpression(Me.Root)
+  End Function
+
+  Private Function EvaluateExpression(node As ExpressionSyntax) As Integer
+    ' BinaryExpression
+    ' Number Expression
+
+    If TypeOf node Is NumberExpressionSyntax Then
+      Return CInt(DirectCast(node, NumberExpressionSyntax).NumberToken.Value)
+    End If
+
+    If TypeOf node Is BinaryExpressionSyntax Then
+      Dim b = DirectCast(node, BinaryExpressionSyntax)
+      Dim left = Me.EvaluateExpression(b.Left)
+      Dim right = Me.EvaluateExpression(b.Right)
+      Select Case b.OperatorToken.Kind
+        Case SyntaxKind.PlusToken : Return left + right
+        Case SyntaxKind.MinusToken : Return left - right
+        Case SyntaxKind.StarToken : Return left * right
+        Case SyntaxKind.SlashToken : Return left \ right
+        Case Else
+          Throw New Exception($"Unexpected binary operator {b.OperatorToken.Kind}")
+      End Select
+    End If
+
+    Throw New Exception($"Unexpected node {node.Kind}")
+
   End Function
 End Class

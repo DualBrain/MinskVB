@@ -62,7 +62,9 @@ Class Lexer
       Dim text = Me.Text.Substring(start, length)
 
       Dim value As Integer
-      Integer.TryParse(text, value)
+      If Not Integer.TryParse(text, value) Then
+        Me.m_diagnostics.Add($"The number {Me.Text} isn't a valid Integer")
+      End If
       Return New SyntaxToken(SyntaxKind.NumberToken, start, text, value)
 
     End If
