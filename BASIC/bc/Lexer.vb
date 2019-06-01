@@ -14,10 +14,17 @@ Class Lexer
 
   Private ReadOnly Property Text As String
   Private Property Position As Integer
+  Private m_diagnostics As List(Of String) = New List(Of String)
 
   Public Sub New(text As String)
     Me.Text = text
   End Sub
+
+  Public ReadOnly Property Diagnostics As IEnumerable(Of String)
+    Get
+      Return Me.m_diagnostics
+    End Get
+  End Property
 
   Private ReadOnly Property Current As Char
     Get
@@ -85,6 +92,7 @@ Class Lexer
       Case Else
     End Select
 
+    Me.m_diagnostics.Add($"ERROR: Bad character input: '{Me.Current}'")
     Return New SyntaxToken(SyntaxKind.BadToken, Me.PositionPlusPlus, Me.Text.Substring(Me.Position - 1, 1), Nothing)
 
   End Function

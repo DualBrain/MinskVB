@@ -49,11 +49,19 @@ Module Program
       End If
 
       Dim parser = New Parser(line)
-      Dim expression = parser.Parse
+      Dim syntaxTree = parser.Parse
       Dim color = Console.ForegroundColor
       Console.ForegroundColor = ConsoleColor.DarkGray
-      PrettyPrint(expression)
+      PrettyPrint(syntaxTree.Root)
       Console.ResetColor()
+
+      If syntaxTree.Diagnostics.Any Then
+        Console.ForegroundColor = ConsoleColor.DarkRed
+        For Each diagnostic In syntaxTree.Diagnostics
+          WriteLine(diagnostic)
+        Next
+        Console.ResetColor()
+      End If
 
     Loop
 
@@ -87,10 +95,24 @@ Module Program
 
 End Module
 
+NotInheritable Class SyntaxTree
+  Sub New(diagnostics As IEnumerable(Of String), root As ExpressionSyntax, endOfFileToken As SyntaxToken)
+    Me.Diagnostics = diagnostics.ToArray
+    Me.Root = root
+    Me.EndOfFileToken = endOfFileToken
+  End Sub
+
+  Public ReadOnly Property Diagnostics As IReadOnlyList(Of String)
+  Public ReadOnly Property Root As ExpressionSyntax
+  Public ReadOnly Property EndOfFileToken As SyntaxToken
+End Class
+
 Class Parser
 
   Private ReadOnly Property Tokens As SyntaxToken()
   Private Property Position As Integer
+
+  Private m_diagnostics As List(Of String) = New List(Of String)
 
   Sub New(text As String)
     Dim tokens = New List(Of SyntaxToken)
@@ -104,7 +126,14 @@ Class Parser
       End If
     Loop While token.Kind <> SyntaxKind.EndOfFileToken
     Me.Tokens = tokens.ToArray
+    Me.m_diagnostics.AddRange(lexer.Diagnostics)
   End Sub
+
+  Public ReadOnly Property Diagnostics As IEnumerable(Of String)
+    Get
+      Return Me.m_diagnostics
+    End Get
+  End Property
 
   Private Function Peek(offset As Integer) As SyntaxToken
     Dim index = Me.Position + offset
@@ -128,11 +157,18 @@ Class Parser
     If Me.Current.Kind = kind Then
       Return Me.NextToken()
     Else
+      Me.m_diagnostics.Add($"ERROR: Unexpected token <{Me.Current.Kind}>, expected <{kind}>")
       Return New SyntaxToken(kind, Me.Current.Position, Nothing, Nothing)
     End If
   End Function
 
-  Public Function Parse() As ExpressionSyntax
+  Public Function Parse() As SyntaxTree
+    Dim expression = Me.ParseExpression()
+    Dim endOfFileToken = Me.Match(SyntaxKind.EndOfFileToken)
+    Return New SyntaxTree(Me.m_diagnostics, expression, endOfFileToken)
+  End Function
+
+  Private Function ParseExpression() As ExpressionSyntax
 
     Dim left = Me.ParsePrimaryExpression
 
