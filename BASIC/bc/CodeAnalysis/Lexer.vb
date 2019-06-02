@@ -33,7 +33,7 @@ Namespace Global.Basic.CodeAnalysis
       Me.Position += 1
     End Sub
 
-    Public Function NextToken() As SyntaxToken
+    Public Function Lex() As SyntaxToken
 
       ' numbers
       ' symbols

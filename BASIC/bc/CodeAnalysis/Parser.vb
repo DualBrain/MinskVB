@@ -16,7 +16,7 @@ Namespace Global.Basic.CodeAnalysis
       Dim lexer = New Lexer(text)
       Dim token As SyntaxToken
       Do
-        token = lexer.NextToken
+        token = lexer.Lex
         If token.Kind <> SyntaxKind.WhitespaceToken AndAlso
            token.Kind <> SyntaxKind.BadToken Then
           tokens.Add(token)
