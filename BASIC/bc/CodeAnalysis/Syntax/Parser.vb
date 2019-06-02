@@ -88,7 +88,6 @@ Namespace Global.Basic.CodeAnalysis.Syntax
 
     Private Function ParseExpression(Optional parentPrecedence As Integer = 0) As ExpressionSyntax
 
-
       Dim left As ExpressionSyntax
       Dim unaryOperatorPrecedence = Me.Current.Kind.GetUnaryOperatorPrecedence
       If unaryOperatorPrecedence <> 0 AndAlso unaryOperatorPrecedence >= parentPrecedence Then
@@ -152,15 +151,21 @@ Namespace Global.Basic.CodeAnalysis.Syntax
 
     Private Function ParsePrimaryExpression() As ExpressionSyntax
 
-      If Me.Current.Kind = SyntaxKind.OpenParenToken Then
-        Dim left = Me.NextToken
-        Dim expression = Me.ParseExpression
-        Dim right = Me.MatchToken(SyntaxKind.CloseParenToken)
-        Return New ParenExpressionSyntax(left, expression, right)
-      End If
+      Select Case Me.Current.Kind
+        Case SyntaxKind.OpenParenToken
+          Dim left = Me.NextToken
+          Dim expression = Me.ParseExpression
+          Dim right = Me.MatchToken(SyntaxKind.CloseParenToken)
+          Return New ParenExpressionSyntax(left, expression, right)
+        Case SyntaxKind.FalseKeyword, SyntaxKind.TrueKeyword
+          Dim keywordToken = Me.NextToken()
+          Dim value = Me.Current.Kind = SyntaxKind.TrueKeyword
+          Return New LiteralExpressionSyntax(keywordToken, value)
+        Case Else
+          Dim numberToken = MatchToken(SyntaxKind.NumberToken)
+          Return New LiteralExpressionSyntax(numberToken)
+      End Select
 
-      Dim numberToken = MatchToken(SyntaxKind.NumberToken)
-      Return New LiteralExpressionSyntax(numberToken)
     End Function
 
   End Class

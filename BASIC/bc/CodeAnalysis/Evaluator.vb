@@ -14,23 +14,23 @@ Namespace Global.Basic.CodeAnalysis
 
     Public ReadOnly Property Root As BoundExpression
 
-    Public Function Evaluate() As Integer
+    Public Function Evaluate() As Object
       Return Me.EvaluateExpression(Me.Root)
     End Function
 
-    Private Function EvaluateExpression(node As BoundExpression) As Integer
+    Private Function EvaluateExpression(node As BoundExpression) As Object
 
       ' NumberExpression
       ' BinaryExpression
       ' ParenExpression
 
       If TypeOf node Is BoundLiteralExpression Then
-        Return CInt(DirectCast(node, BoundLiteralExpression).Value)
+        Return DirectCast(node, BoundLiteralExpression).Value
       End If
 
       If TypeOf node Is BoundUnaryExpression Then
         Dim u = DirectCast(node, BoundUnaryExpression)
-        Dim operand = Me.EvaluateExpression(u.Operand)
+        Dim operand = CInt(Me.EvaluateExpression(u.Operand))
         Select Case u.OperatorKind
           Case BoundUnaryOperatorKind.Identity
             Return operand
@@ -43,8 +43,8 @@ Namespace Global.Basic.CodeAnalysis
 
       If TypeOf node Is BoundBinaryExpression Then
         Dim b = DirectCast(node, BoundBinaryExpression)
-        Dim left = Me.EvaluateExpression(b.Left)
-        Dim right = Me.EvaluateExpression(b.Right)
+        Dim left = CInt(Me.EvaluateExpression(b.Left))
+        Dim right = CInt(Me.EvaluateExpression(b.Right))
         Select Case b.OperatorKind
           Case BoundBinaryOperatorKind.Addition : Return left + right
           Case BoundBinaryOperatorKind.Subtraction : Return left - right

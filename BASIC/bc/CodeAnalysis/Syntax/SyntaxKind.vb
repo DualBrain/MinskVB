@@ -17,6 +17,12 @@ Namespace Global.Basic.CodeAnalysis.Syntax
     SlashToken
     OpenParenToken
     CloseParenToken
+    IdentifierToken
+
+    ' Keywords
+
+    FalseKeyword
+    TrueKeyword
 
     ' Expressions
 

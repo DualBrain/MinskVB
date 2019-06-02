@@ -9,7 +9,11 @@ Namespace Global.Basic.CodeAnalysis.Binding
 
     Private ReadOnly m_diagnostics As List(Of String) = New List(Of String)
 
-    Public Property Diagnostics As IEnumerable(Of String) = Me.m_diagnostics
+    Public ReadOnly Property Diagnostics As IEnumerable(Of String)
+      Get
+        Return Me.m_diagnostics
+      End Get
+    End Property
 
     Public Function BindExpression(syntax As ExpressionSyntax) As BoundExpression
 
@@ -27,7 +31,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
     End Function
 
     Private Function BindLiteralEpression(syntax As LiteralExpressionSyntax) As BoundExpression
-      Dim value = If(syntax.LiteralToken?.Value, 0)
+      Dim value = If(syntax.Value, 0)
       Return New BoundLiteralExpression(value)
     End Function
 

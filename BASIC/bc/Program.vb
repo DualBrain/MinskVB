@@ -86,7 +86,7 @@ Friend Module Program
       Else
         ' We have errors, so don't try to evaluate (execute).
         Console.ForegroundColor = ConsoleColor.DarkRed
-        For Each diagnostic In tree.Diagnostics
+        For Each diagnostic In diagnostics
           WriteLine(diagnostic)
         Next
         Console.ResetColor()

@@ -34,6 +34,17 @@ Namespace Global.Basic.CodeAnalysis.Syntax
 
     End Function
 
+    Friend Function GetKeywordKind(text As String) As SyntaxKind
+      Select Case text.ToLower
+        Case "true"
+          Return SyntaxKind.TrueKeyword
+        Case "false"
+          Return SyntaxKind.FalseKeyword
+        Case Else
+          Return SyntaxKind.IdentifierToken
+      End Select
+
+    End Function
   End Module
 
 End Namespace

@@ -78,6 +78,25 @@ Namespace Global.Basic.CodeAnalysis.Syntax
 
       End If
 
+      If Char.IsLetter(Me.Current) Then
+
+        Dim start = Me.Position
+
+        While Char.IsLetter(Me.Current)
+          Me.Next()
+        End While
+
+        Dim length = Me.Position - start
+        Dim text = Me.Text.Substring(start, length)
+        Dim kind = SyntaxFacts.GetKeywordKind(text)
+
+        Return New SyntaxToken(kind, start, text, Nothing)
+
+      End If
+
+      ' true
+      ' false
+
       Select Case Me.Current
         Case "+"c : Return New SyntaxToken(SyntaxKind.PlusToken, Me.PositionPlusPlus, "+", Nothing)
         Case "-"c : Return New SyntaxToken(SyntaxKind.MinusToken, Me.PositionPlusPlus, "-", Nothing)
