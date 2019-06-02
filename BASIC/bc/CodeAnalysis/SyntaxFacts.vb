@@ -9,6 +9,18 @@ Namespace Global.Basic.CodeAnalysis
   Friend Module SyntaxFacts
 
     <Extension()>
+    Public Function GetUnaryOperatorPrecedence(kind As SyntaxKind) As Integer
+
+      Select Case kind
+        Case SyntaxKind.PlusToken, SyntaxKind.MinusToken
+          Return 3
+        Case Else
+          Return 0
+      End Select
+
+    End Function
+
+    <Extension()>
     Public Function GetBinaryOperatorPrecedence(kind As SyntaxKind) As Integer
 
       Select Case kind

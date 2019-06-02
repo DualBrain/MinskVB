@@ -4,6 +4,23 @@ Option Infer On
 
 Namespace Global.Basic.CodeAnalysis
 
+  '
+  ' +1
+  ' -1 * -3
+  ' -(3 * 3)
+  '
+  '   -
+  '   |
+  '   1
+  '
+  ' or 
+  '
+  '   -
+  '   |
+  '   +
+  '  / \
+  ' 1   2
+
   Friend NotInheritable Class Parser
 
     Private ReadOnly Property Tokens As SyntaxToken()
@@ -71,7 +88,17 @@ Namespace Global.Basic.CodeAnalysis
 
     Private Function ParseExpression(Optional parentPrecedence As Integer = 0) As ExpressionSyntax
 
-      Dim left = Me.ParsePrimaryExpression
+
+      Dim left As ExpressionSyntax
+      Dim unaryOperatorPrecedence = Me.Current.Kind.GetUnaryOperatorPrecedence
+      If unaryOperatorPrecedence <> 0 AndAlso unaryOperatorPrecedence >= parentPrecedence Then
+        Dim operatorToken = Me.NextToken()
+        'Dim operand = Me.ParsePrimaryExpression()
+        Dim operand = Me.ParseExpression(unaryOperatorPrecedence)
+        left = New UnaryExpressionSyntax(operatorToken, operand)
+      Else
+        left = Me.ParsePrimaryExpression
+      End If
 
       While True
 

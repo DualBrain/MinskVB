@@ -21,6 +21,7 @@ Namespace Global.Basic.CodeAnalysis
     ' Expressions
 
     LiteralExpression
+    UnaryExpression
     BinaryExpression
     ParenExpression
 

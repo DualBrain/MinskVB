@@ -26,6 +26,18 @@ Namespace Global.Basic.CodeAnalysis
         Return CInt(DirectCast(node, LiteralExpressionSyntax).LiteralToken.Value)
       End If
 
+      If TypeOf node Is UnaryExpressionSyntax Then
+        Dim u = DirectCast(node, UnaryExpressionSyntax)
+        Dim operand = Me.EvaluateExpression(u.Operand)
+        If u.OperatorToken.Kind = SyntaxKind.PlusToken Then
+          Return operand
+        ElseIf u.OperatorToken.Kind = SyntaxKind.MinusToken Then
+          Return -operand
+        Else
+          Throw New Exception($"Unexpected unary operator {u.OperatorToken.Kind}")
+        End If
+      End If
+
       If TypeOf node Is BinaryExpressionSyntax Then
         Dim b = DirectCast(node, BinaryExpressionSyntax)
         Dim left = Me.EvaluateExpression(b.Left)

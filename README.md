@@ -2,11 +2,33 @@
 
 BASIC for .NET
 
-Going to build a BASIC compiler for .NET using VB.NET on .NET Core (currently targeting 3.0).
+Building a BASIC compiler for .NET using VB.NET on .NET Core (currently targeting 3.0).
+
+## History
+
+In the past I've built a 100% language-compatible version of the classic GW-BASIC MS-DOS environment.  It was made 
+available through Windows Phone and as a SilverLight web-hosted application.  (Man, I really picked two "winners" there...)
+
+The GW-BASIC project was built mostly through "brute force" without any thought to making the project (code) publically 
+visible.  As such, I've never released the code.
+
+Fast forward a few years to now...
+
+## What is this?
+
+The original GW-BASIC projects was an "IDE" and an interpreter (REPL).  This project is going to take this all in a very 
+different direction by starting with the compiler as the ultimate goal.  I'm sure that some of the original project will 
+make it's way into this one... but for the most part, this project is "starting from scratch" with the ultimate goal of 
+having a pretty good representation of "classic" BASIC targetting .NET Core!
 
 ## Credits
 
-Although not the same compiler, the process of building this compiler is inspired in part by [Minsk by Immo Landwerth (YouTube)](https://www.youtube.com/watch?v=wgHIkdUQbp0&list=PLRAdsfhKI4OWNOSfS7EUu5GRAVmze1t2y).  If you are interested in how to build a C-style compiler for .NET, please see his [video series](https://www.youtube.com/watch?v=wgHIkdUQbp0&list=PLRAdsfhKI4OWNOSfS7EUu5GRAVmze1t2y).  Some key differences are:
+As I already stated, much of the work on this project will be "borrowed" from my previous work; however, I'm also borrowing
+(learning) from Immo Landwerth's video series on the subject of "building a compiler".  He's not claiming to be a "master"; 
+however, he's certainly has more knowledge on the subject than I do and a good amount of experience on Roslyn (and .NET) that
+I feel I can definately learn from and am treating his video series as a sort of "master class" on the subject. ;-)
+
+Although not the same compiler, as I said the *process* of building this compiler is inspired in part by [Minsk by Immo Landwerth (YouTube)](https://www.youtube.com/watch?v=wgHIkdUQbp0&list=PLRAdsfhKI4OWNOSfS7EUu5GRAVmze1t2y).  If you are interested in how to build a C-style compiler for .NET, please see his [video series](https://www.youtube.com/watch?v=wgHIkdUQbp0&list=PLRAdsfhKI4OWNOSfS7EUu5GRAVmze1t2y).  Some key differences are:
 
 - A language similar to BASIC instead of C/JScript.
 - Using Visual Studio 2019 Community Edition (instead of Visual Studio Code).
