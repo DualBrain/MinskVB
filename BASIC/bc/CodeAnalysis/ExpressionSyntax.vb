@@ -4,7 +4,7 @@ Option Infer On
 
 Namespace Global.Basic.CodeAnalysis
 
-  MustInherit Class ExpressionSyntax
+  Public MustInherit Class ExpressionSyntax
     Inherits SyntaxNode
   End Class
 

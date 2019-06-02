@@ -3,7 +3,8 @@ Option Strict On
 Option Infer On
 
 Namespace Global.Basic.CodeAnalysis
-  Class Parser
+
+  Friend NotInheritable Class Parser
 
     Private ReadOnly Property Tokens As SyntaxToken()
     Private Property Position As Integer
@@ -49,7 +50,7 @@ Namespace Global.Basic.CodeAnalysis
       Return current
     End Function
 
-    Private Function Match(kind As SyntaxKind) As SyntaxToken
+    Private Function MatchToken(kind As SyntaxKind) As SyntaxToken
       If Me.Current.Kind = kind Then
         Return Me.NextToken()
       Else
@@ -58,14 +59,14 @@ Namespace Global.Basic.CodeAnalysis
       End If
     End Function
 
-    Private Function ParseExpression() As ExpressionSyntax
-      Return Me.ParseTerm()
+    Public Function Parse() As SyntaxTree
+      Dim expression = Me.ParseExpression
+      Dim endOfFileToken = Me.MatchToken(SyntaxKind.EndOfFileToken)
+      Return New SyntaxTree(Me.m_diagnostics, expression, endOfFileToken)
     End Function
 
-    Public Function Parse() As SyntaxTree
-      Dim expression = Me.ParseTerm
-      Dim endOfFileToken = Me.Match(SyntaxKind.EndOfFileToken)
-      Return New SyntaxTree(Me.m_diagnostics, expression, endOfFileToken)
+    Private Function ParseExpression() As ExpressionSyntax
+      Return Me.ParseTerm()
     End Function
 
     Private Function ParseTerm() As ExpressionSyntax
@@ -106,12 +107,12 @@ Namespace Global.Basic.CodeAnalysis
       If Me.Current.Kind = SyntaxKind.OpenParenToken Then
         Dim left = Me.NextToken
         Dim expression = Me.ParseExpression
-        Dim right = Me.Match(SyntaxKind.CloseParenToken)
+        Dim right = Me.MatchToken(SyntaxKind.CloseParenToken)
         Return New ParenExpressionSyntax(left, expression, right)
       End If
 
-      Dim numberToken = Match(SyntaxKind.NumberToken)
-      Return New NumberExpressionSyntax(numberToken)
+      Dim numberToken = MatchToken(SyntaxKind.NumberToken)
+      Return New LiteralExpressionSyntax(numberToken)
     End Function
 
   End Class

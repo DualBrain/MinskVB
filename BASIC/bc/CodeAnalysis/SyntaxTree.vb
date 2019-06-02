@@ -4,7 +4,7 @@ Option Infer On
 
 Namespace Global.Basic.CodeAnalysis
 
-  NotInheritable Class SyntaxTree
+  Public NotInheritable Class SyntaxTree
 
     Sub New(diagnostics As IEnumerable(Of String), root As ExpressionSyntax, endOfFileToken As SyntaxToken)
       Me.Diagnostics = diagnostics.ToArray

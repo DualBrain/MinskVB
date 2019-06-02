@@ -4,20 +4,26 @@ Option Infer On
 
 Namespace Global.Basic.CodeAnalysis
 
-  Enum SyntaxKind
-    NumberToken
+  Public Enum SyntaxKind
+
+    ' Tokens
+    BadToken
+    EndOfFileToken
     WhitespaceToken
+    NumberToken
     PlusToken
     MinusToken
     StarToken
     SlashToken
     OpenParenToken
     CloseParenToken
-    BadToken
-    EndOfFileToken
-    BinaryExpression
+
+    ' Expressions
+
     NumberExpression
+    BinaryExpression
     ParenExpression
+
   End Enum
 
 End Namespace

@@ -4,7 +4,7 @@ Option Infer On
 
 Namespace Global.Basic.CodeAnalysis
 
-  MustInherit Class SyntaxNode
+  Public MustInherit Class SyntaxNode
 
     Public MustOverride ReadOnly Property Kind() As SyntaxKind
 

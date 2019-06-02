@@ -4,7 +4,7 @@ Option Infer On
 
 Namespace Global.Basic.CodeAnalysis
 
-  Class Lexer
+  Friend NotInheritable Class Lexer
 
     Private ReadOnly Property Text As String
     Private Property Position As Integer

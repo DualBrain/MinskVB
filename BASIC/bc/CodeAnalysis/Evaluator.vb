@@ -4,7 +4,7 @@ Option Infer On
 
 Namespace Global.Basic.CodeAnalysis
 
-  Class Evaluator
+  Public NotInheritable Class Evaluator
 
     Sub New(root As ExpressionSyntax)
       Me.Root = root
@@ -22,8 +22,8 @@ Namespace Global.Basic.CodeAnalysis
       ' BinaryExpression
       ' ParenExpression
 
-      If TypeOf node Is NumberExpressionSyntax Then
-        Return CInt(DirectCast(node, NumberExpressionSyntax).NumberToken.Value)
+      If TypeOf node Is LiteralExpressionSyntax Then
+        Return CInt(DirectCast(node, LiteralExpressionSyntax).LiteralToken.Value)
       End If
 
       If TypeOf node Is BinaryExpressionSyntax Then

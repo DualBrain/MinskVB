@@ -4,7 +4,7 @@ Option Infer On
 
 Namespace Global.Basic.CodeAnalysis
 
-  NotInheritable Class ParenExpressionSyntax
+  Public NotInheritable Class ParenExpressionSyntax
     Inherits ExpressionSyntax
 
     Sub New(openParenToken As SyntaxToken, expression As ExpressionSyntax, closeParenToken As SyntaxToken)

@@ -31,9 +31,9 @@ Option Infer On ' Where we can, the "type" can be inferred.
 Imports Basic.CodeAnalysis
 Imports System.Console
 
-Module Program
+Friend Module Program
 
-  Sub Main(args As String())
+  Sub Main()
 
     Dim showTree = False
 

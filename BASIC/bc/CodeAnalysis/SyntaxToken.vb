@@ -4,7 +4,7 @@ Option Infer On
 
 Namespace Global.Basic.CodeAnalysis
 
-  Class SyntaxToken
+  Public NotInheritable Class SyntaxToken
     Inherits SyntaxNode
 
     Sub New(kind As SyntaxKind, position As Integer, text As String, value As Object)

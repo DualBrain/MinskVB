@@ -4,19 +4,19 @@ Option Infer On
 
 Namespace Global.Basic.CodeAnalysis
 
-  NotInheritable Class NumberExpressionSyntax
+  Public NotInheritable Class LiteralExpressionSyntax
     Inherits ExpressionSyntax
 
-    Sub New(numberToken As SyntaxToken)
-      Me.NumberToken = numberToken
+    Sub New(literalToken As SyntaxToken)
+      Me.LiteralToken = literalToken
     End Sub
 
     Public Overrides Iterator Function GetChildren() As IEnumerable(Of SyntaxNode)
-      Yield Me.NumberToken
+      Yield Me.LiteralToken
     End Function
 
     Public Overrides ReadOnly Property Kind As SyntaxKind = SyntaxKind.NumberExpression
-    Public ReadOnly NumberToken As SyntaxToken
+    Public ReadOnly LiteralToken As SyntaxToken
 
   End Class
 
