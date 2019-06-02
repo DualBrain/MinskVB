@@ -29,6 +29,7 @@ Option Infer On ' Where we can, the "type" can be inferred.
 ' 1   2
 
 Imports Basic.CodeAnalysis
+Imports Basic.CodeAnalysis.Binding
 Imports Basic.CodeAnalysis.Syntax
 Imports System.Console
 
@@ -65,6 +66,9 @@ Friend Module Program
       ' Otherwise, attempt to parse what was entered...
 
       Dim tree = SyntaxTree.Parse(line)
+      Dim binder = New Binder()
+      Dim boundExpression = binder.BindExpression(tree.Root)
+      Dim diagnostics = tree.Diagnostics.Concat(binder.Diagnostics).ToArray
 
       ' Only show the parse tree if we have enabled doing so.
       If showTree Then
@@ -74,9 +78,9 @@ Friend Module Program
         Console.ResetColor()
       End If
 
-      If Not tree.Diagnostics.Any Then
+      If Not diagnostics.Any Then
         ' No errors detected, attemp to evaluate (execute).
-        Dim e = New Evaluator(tree.Root)
+        Dim e = New Evaluator(boundExpression)
         Dim result = e.Evaluate
         WriteLine(result)
       Else
