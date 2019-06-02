@@ -4,7 +4,7 @@ Option Infer On
 
 Imports System.Runtime.CompilerServices
 
-Namespace Global.Basic.CodeAnalysis
+Namespace Global.Basic.CodeAnalysis.Syntax
 
   Friend Module SyntaxFacts
 

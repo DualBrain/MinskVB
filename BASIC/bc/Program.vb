@@ -29,6 +29,7 @@ Option Infer On ' Where we can, the "type" can be inferred.
 ' 1   2
 
 Imports Basic.CodeAnalysis
+Imports Basic.CodeAnalysis.Syntax
 Imports System.Console
 
 Friend Module Program

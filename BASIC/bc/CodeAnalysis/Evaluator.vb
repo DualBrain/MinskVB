@@ -2,6 +2,8 @@
 Option Strict On
 Option Infer On
 
+Imports Basic.CodeAnalysis.Syntax
+
 Namespace Global.Basic.CodeAnalysis
 
   Public NotInheritable Class Evaluator
