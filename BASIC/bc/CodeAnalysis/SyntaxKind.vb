@@ -20,7 +20,7 @@ Namespace Global.Basic.CodeAnalysis
 
     ' Expressions
 
-    NumberExpression
+    LiteralExpression
     BinaryExpression
     ParenExpression
 

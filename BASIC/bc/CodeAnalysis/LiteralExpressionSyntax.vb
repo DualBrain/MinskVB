@@ -15,7 +15,7 @@ Namespace Global.Basic.CodeAnalysis
       Yield Me.LiteralToken
     End Function
 
-    Public Overrides ReadOnly Property Kind As SyntaxKind = SyntaxKind.NumberExpression
+    Public Overrides ReadOnly Property Kind As SyntaxKind = SyntaxKind.LiteralExpression
     Public ReadOnly LiteralToken As SyntaxToken
 
   End Class
