@@ -65,36 +65,22 @@ Namespace Global.Basic.CodeAnalysis
       Return New SyntaxTree(Me.m_diagnostics, expression, endOfFileToken)
     End Function
 
-    Private Function ParseExpression() As ExpressionSyntax
-      Return Me.ParseTerm()
-    End Function
+    'Private Function ParseExpression() As ExpressionSyntax
+    '  Return Me.ParseTerm()
+    'End Function
 
-    Private Function ParseTerm() As ExpressionSyntax
-
-      Dim left = Me.ParseFactor
-
-      While Me.Current.Kind = SyntaxKind.PlusToken OrElse
-            Me.Current.Kind = SyntaxKind.MinusToken
-
-        Dim operatorToken = Me.NextToken()
-        Dim right = Me.ParsePrimaryExpression()
-        left = New BinaryExpressionSyntax(left, operatorToken, right)
-
-      End While
-
-      Return left
-
-    End Function
-
-    Private Function ParseFactor() As ExpressionSyntax
+    Private Function ParseExpression(Optional parentPrecedence As Integer = 0) As ExpressionSyntax
 
       Dim left = Me.ParsePrimaryExpression
 
-      While Me.Current.Kind = SyntaxKind.StarToken OrElse
-            Me.Current.Kind = SyntaxKind.SlashToken
+      While True
 
+        Dim precedence = GetBinaryOperatorPrecedence(Me.Current.Kind)
+        If precedence = 0 OrElse precedence <= parentPrecedence Then
+          Exit While
+        End If
         Dim operatorToken = Me.NextToken()
-        Dim right = Me.ParsePrimaryExpression()
+        Dim right = Me.ParseExpression(precedence)
         left = New BinaryExpressionSyntax(left, operatorToken, right)
 
       End While
@@ -102,6 +88,54 @@ Namespace Global.Basic.CodeAnalysis
       Return left
 
     End Function
+
+    Private Shared Function GetBinaryOperatorPrecedence(kind As SyntaxKind) As Integer
+
+      Select Case kind
+        Case SyntaxKind.StarToken, SyntaxKind.SlashToken
+          Return 2
+        Case SyntaxKind.PlusToken, SyntaxKind.MinusToken
+          Return 1
+        Case Else
+          Return 0
+      End Select
+
+    End Function
+
+    'Private Function ParseTerm() As ExpressionSyntax
+
+    '  Dim left = Me.ParseFactor
+
+    '  While Me.Current.Kind = SyntaxKind.PlusToken OrElse
+    '        Me.Current.Kind = SyntaxKind.MinusToken
+
+    '    Dim operatorToken = Me.NextToken()
+    '    Dim right = Me.ParsePrimaryExpression()
+    '    left = New BinaryExpressionSyntax(left, operatorToken, right)
+
+    '  End While
+
+    '  Return left
+
+    'End Function
+
+    'Private Function ParseFactor() As ExpressionSyntax
+
+    '  Dim left = Me.ParsePrimaryExpression
+
+    '  While Me.Current.Kind = SyntaxKind.StarToken OrElse
+    '        Me.Current.Kind = SyntaxKind.SlashToken
+
+    '    Dim operatorToken = Me.NextToken()
+    '    Dim right = Me.ParsePrimaryExpression()
+    '    left = New BinaryExpressionSyntax(left, operatorToken, right)
+
+    '  End While
+
+    '  Return left
+
+    'End Function
+
     Private Function ParsePrimaryExpression() As ExpressionSyntax
 
       If Me.Current.Kind = SyntaxKind.OpenParenToken Then
