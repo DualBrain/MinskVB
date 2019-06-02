@@ -22,10 +22,23 @@ Namespace Global.Basic.CodeAnalysis.Syntax
 
     Private ReadOnly Property Current As Char
       Get
-        If Me.Position >= Me.Text.Length Then
+        Return Me.Peek(0)
+      End Get
+    End Property
+
+    Private ReadOnly Property LookAhead As Char
+      Get
+        Return Me.Peek(1)
+      End Get
+    End Property
+
+    Private ReadOnly Property Peek(offset As Integer) As Char
+      Get
+        Dim index = Me.Position + offset
+        If index >= Me.Text.Length Then
           Return Chr(0)
         End If
-        Return Me.Text(Me.Position)
+        Return Me.Text(index)
       End Get
     End Property
 
@@ -104,6 +117,21 @@ Namespace Global.Basic.CodeAnalysis.Syntax
         Case "/"c : Return New SyntaxToken(SyntaxKind.SlashToken, Me.PositionPlusPlus, "/", Nothing)
         Case "("c : Return New SyntaxToken(SyntaxKind.OpenParenToken, Me.PositionPlusPlus, "(", Nothing)
         Case ")"c : Return New SyntaxToken(SyntaxKind.CloseParenToken, Me.PositionPlusPlus, ")", Nothing)
+
+        Case "!"c : Return New SyntaxToken(SyntaxKind.BangToken, Me.PositionPlusPlus, "!", Nothing)
+        Case "&"c
+          If Me.LookAhead = "&"c Then
+            Dim position = Me.Position
+            Me.Position += 2
+            Return New SyntaxToken(SyntaxKind.AmpersandAmpersandToken, position, "&&", Nothing)
+          End If
+        Case "|"c
+          If Me.LookAhead = "|"c Then
+            Dim position = Me.Position
+            Me.Position += 2
+            Return New SyntaxToken(SyntaxKind.PipePipeToken, position, "||", Nothing)
+          End If
+
         Case Else
       End Select
 

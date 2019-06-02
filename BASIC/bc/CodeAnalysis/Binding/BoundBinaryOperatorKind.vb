@@ -9,6 +9,8 @@ Namespace Global.Basic.CodeAnalysis.Binding
     Subtraction
     Multiplication
     Division
+    LogicalAnd
+    LogicalOr
   End Enum
 
 End Namespace

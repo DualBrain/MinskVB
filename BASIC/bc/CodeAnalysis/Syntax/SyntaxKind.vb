@@ -15,6 +15,9 @@ Namespace Global.Basic.CodeAnalysis.Syntax
     MinusToken
     StarToken
     SlashToken
+    BangToken
+    AmpersandAmpersandToken
+    PipePipeToken
     OpenParenToken
     CloseParenToken
     IdentifierToken
@@ -23,6 +26,11 @@ Namespace Global.Basic.CodeAnalysis.Syntax
 
     FalseKeyword
     TrueKeyword
+    NotKeyword
+    AndKeyword
+    AndAlsoKeyword
+    OrKeyword
+    OrElseKeyword
 
     ' Expressions
 

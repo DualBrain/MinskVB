@@ -92,7 +92,6 @@ Namespace Global.Basic.CodeAnalysis.Syntax
       Dim unaryOperatorPrecedence = Me.Current.Kind.GetUnaryOperatorPrecedence
       If unaryOperatorPrecedence <> 0 AndAlso unaryOperatorPrecedence >= parentPrecedence Then
         Dim operatorToken = Me.NextToken()
-        'Dim operand = Me.ParsePrimaryExpression()
         Dim operand = Me.ParseExpression(unaryOperatorPrecedence)
         left = New UnaryExpressionSyntax(operatorToken, operand)
       Else
@@ -159,10 +158,10 @@ Namespace Global.Basic.CodeAnalysis.Syntax
           Return New ParenExpressionSyntax(left, expression, right)
         Case SyntaxKind.FalseKeyword, SyntaxKind.TrueKeyword
           Dim keywordToken = Me.NextToken()
-          Dim value = Me.Current.Kind = SyntaxKind.TrueKeyword
+          Dim value = keywordToken.Kind = SyntaxKind.TrueKeyword
           Return New LiteralExpressionSyntax(keywordToken, value)
         Case Else
-          Dim numberToken = MatchToken(SyntaxKind.NumberToken)
+          Dim numberToken = Me.MatchToken(SyntaxKind.NumberToken)
           Return New LiteralExpressionSyntax(numberToken)
       End Select
 

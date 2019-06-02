@@ -58,36 +58,56 @@ Namespace Global.Basic.CodeAnalysis.Binding
 
     Private Function BindUnaryOperatorKind(kind As SyntaxKind, operandType As Type) As BoundUnaryOperatorKind?
 
-      If operandType IsNot GetType(Integer) Then
-        Return Nothing
+      If operandType Is GetType(Integer) Then
+        Select Case kind
+          Case SyntaxKind.PlusToken
+            Return BoundUnaryOperatorKind.Identity
+          Case SyntaxKind.MinusToken
+            Return BoundUnaryOperatorKind.Negation
+          Case Else
+        End Select
       End If
 
-      Select Case kind
-        Case SyntaxKind.PlusToken
-          Return BoundUnaryOperatorKind.Identity
-        Case SyntaxKind.MinusToken
-          Return BoundUnaryOperatorKind.Negation
-        Case Else
-          Throw New Exception($"Unexpected unary operator {kind}")
-      End Select
+      If operandType Is GetType(Boolean) Then
+        Select Case kind
+          Case SyntaxKind.BangToken, SyntaxKind.NotKeyword
+            Return BoundUnaryOperatorKind.LogicalNegation
+          Case Else
+        End Select
+      End If
+
+      Return Nothing
 
     End Function
 
     Private Function BindBinaryOperatorKind(kind As SyntaxKind, leftType As Type, rightType As Type) As BoundBinaryOperatorKind?
 
-      If leftType IsNot GetType(Integer) OrElse
-         rightType IsNot GetType(Integer) Then
-        Return Nothing
+      If leftType Is GetType(Integer) AndAlso
+         rightType Is GetType(Integer) Then
+
+        Select Case kind
+          Case SyntaxKind.PlusToken : Return BoundBinaryOperatorKind.Addition
+          Case SyntaxKind.MinusToken : Return BoundBinaryOperatorKind.Subtraction
+          Case SyntaxKind.StarToken : Return BoundBinaryOperatorKind.Multiplication
+          Case SyntaxKind.SlashToken : Return BoundBinaryOperatorKind.Division
+          Case Else
+        End Select
+
       End If
 
-      Select Case kind
-        Case SyntaxKind.PlusToken : Return BoundBinaryOperatorKind.Addition
-        Case SyntaxKind.MinusToken : Return BoundBinaryOperatorKind.Subtraction
-        Case SyntaxKind.StarToken : Return BoundBinaryOperatorKind.Multiplication
-        Case SyntaxKind.SlashToken : Return BoundBinaryOperatorKind.Division
-        Case Else
-          Throw New Exception($"Unexpected binary operator {kind}")
-      End Select
+      If leftType Is GetType(Boolean) AndAlso
+         rightType Is GetType(Boolean) Then
+
+        Select Case kind
+          Case SyntaxKind.AmpersandAmpersandToken, SyntaxKind.AndKeyword : Return BoundBinaryOperatorKind.LogicalAnd
+          Case SyntaxKind.PipePipeToken, SyntaxKind.OrKeyword : Return BoundBinaryOperatorKind.LogicalOr
+          Case Else
+        End Select
+
+      End If
+
+      Return Nothing
+
     End Function
 
   End Class
