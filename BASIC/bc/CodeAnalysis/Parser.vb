@@ -75,7 +75,7 @@ Namespace Global.Basic.CodeAnalysis
 
       While True
 
-        Dim precedence = GetBinaryOperatorPrecedence(Me.Current.Kind)
+        Dim precedence = Me.Current.Kind.GetBinaryOperatorPrecedence
         If precedence = 0 OrElse precedence <= parentPrecedence Then
           Exit While
         End If
@@ -86,19 +86,6 @@ Namespace Global.Basic.CodeAnalysis
       End While
 
       Return left
-
-    End Function
-
-    Private Shared Function GetBinaryOperatorPrecedence(kind As SyntaxKind) As Integer
-
-      Select Case kind
-        Case SyntaxKind.StarToken, SyntaxKind.SlashToken
-          Return 2
-        Case SyntaxKind.PlusToken, SyntaxKind.MinusToken
-          Return 1
-        Case Else
-          Return 0
-      End Select
 
     End Function
 
