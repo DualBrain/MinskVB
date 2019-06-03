@@ -16,7 +16,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
     Public Overrides ReadOnly Property Kind As BoundNodeKind = BoundNodeKind.BinaryExpression
     Public Overrides ReadOnly Property Type As Type
       Get
-        Return Me.Left.Type
+        Return Me.Op.Type
       End Get
     End Property
     Public ReadOnly Property Left As BoundExpression

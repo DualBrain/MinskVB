@@ -11,6 +11,8 @@ Namespace Global.Basic.CodeAnalysis.Binding
     Division
     LogicalAnd
     LogicalOr
+    Equals
+    NotEquals
   End Enum
 
 End Namespace

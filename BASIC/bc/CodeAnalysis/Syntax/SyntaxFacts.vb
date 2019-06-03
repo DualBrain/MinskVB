@@ -13,7 +13,7 @@ Namespace Global.Basic.CodeAnalysis.Syntax
 
       Select Case kind
         Case SyntaxKind.PlusToken, SyntaxKind.MinusToken, SyntaxKind.BangToken, SyntaxKind.NotKeyword
-          Return 5
+          Return 6
 
         Case Else
           Return 0
@@ -27,8 +27,11 @@ Namespace Global.Basic.CodeAnalysis.Syntax
       Select Case kind
 
         Case SyntaxKind.StarToken, SyntaxKind.SlashToken
-          Return 4
+          Return 5
         Case SyntaxKind.PlusToken, SyntaxKind.MinusToken
+          Return 4
+
+        Case SyntaxKind.EqualsEqualsToken, SyntaxKind.BangEqualsToken, SyntaxKind.EqualsToken, SyntaxKind.LessThanGreaterThanToken
           Return 3
 
         Case SyntaxKind.AmpersandAmpersandToken, SyntaxKind.AndKeyword

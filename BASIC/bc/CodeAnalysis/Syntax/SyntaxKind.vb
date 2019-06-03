@@ -17,6 +17,10 @@ Namespace Global.Basic.CodeAnalysis.Syntax
     SlashToken
     BangToken
     AmpersandAmpersandToken
+    EqualsEqualsToken
+    EqualsToken
+    BangEqualsToken
+    LessThanGreaterThanToken
     PipePipeToken
     OpenParenToken
     CloseParenToken

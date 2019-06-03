@@ -16,13 +16,13 @@ Namespace Global.Basic.CodeAnalysis.Binding
       Me.SyntaxKind = syntaxKind
       Me.Kind = kind
       Me.OperandType = operandType
-      Me.ResultType = resultType
+      Me.Type = resultType
     End Sub
 
     Public ReadOnly Property SyntaxKind As SyntaxKind
     Public ReadOnly Property Kind As BoundUnaryOperatorKind
     Public ReadOnly Property OperandType As Type
-    Public ReadOnly Property ResultType As Type
+    Public ReadOnly Property Type As Type
 
     Private Shared _operators() As BoundUnaryOperator = {
       New BoundUnaryOperator(SyntaxKind.BangToken, BoundUnaryOperatorKind.LogicalNegation, GetType(Boolean)),

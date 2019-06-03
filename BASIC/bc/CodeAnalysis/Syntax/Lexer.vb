@@ -118,18 +118,36 @@ Namespace Global.Basic.CodeAnalysis.Syntax
         Case "("c : Return New SyntaxToken(SyntaxKind.OpenParenToken, Me.PositionPlusPlus, "(", Nothing)
         Case ")"c : Return New SyntaxToken(SyntaxKind.CloseParenToken, Me.PositionPlusPlus, ")", Nothing)
 
-        Case "!"c : Return New SyntaxToken(SyntaxKind.BangToken, Me.PositionPlusPlus, "!", Nothing)
+        'Case "!"c : Return New SyntaxToken(SyntaxKind.BangToken, Me.PositionPlusPlus, "!", Nothing)
         Case "&"c
           If Me.LookAhead = "&"c Then
-            Dim position = Me.Position
-            Me.Position += 2
+            Dim position = Me.Position : Me.Position += 2
             Return New SyntaxToken(SyntaxKind.AmpersandAmpersandToken, position, "&&", Nothing)
           End If
         Case "|"c
           If Me.LookAhead = "|"c Then
-            Dim position = Me.Position
-            Me.Position += 2
+            Dim position = Me.Position : Me.Position += 2
             Return New SyntaxToken(SyntaxKind.PipePipeToken, position, "||", Nothing)
+          End If
+
+        Case "="c
+          If Me.LookAhead = "="c Then
+            Dim position = Me.Position : Me.Position += 2
+            Return New SyntaxToken(SyntaxKind.EqualsEqualsToken, position, "==", Nothing)
+          Else
+            Return New SyntaxToken(SyntaxKind.EqualsToken, Me.PositionPlusPlus, "=", Nothing)
+          End If
+        Case "!"c
+          If Me.LookAhead = "="c Then
+            Dim position = Me.Position : Me.Position += 2
+            Return New SyntaxToken(SyntaxKind.BangEqualsToken, position, "!=", Nothing)
+          Else
+            Return New SyntaxToken(SyntaxKind.BangToken, Me.PositionPlusPlus, "!", Nothing)
+          End If
+        Case "<"c
+          If Me.LookAhead = ">"c Then
+            Dim position = Me.Position : Me.Position += 2
+            Return New SyntaxToken(SyntaxKind.LessThanGreaterThanToken, position, "<>", Nothing)
           End If
 
         Case Else

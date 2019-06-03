@@ -54,6 +54,8 @@ Namespace Global.Basic.CodeAnalysis
           Case BoundBinaryOperatorKind.Division : Return CInt(left) \ CInt(right)
           Case BoundBinaryOperatorKind.LogicalAnd : Return CBool(left) And CBool(right)
           Case BoundBinaryOperatorKind.LogicalOr : Return CBool(left) Or CBool(right)
+          Case BoundBinaryOperatorKind.Equals : Return Equals(left, right)
+          Case BoundBinaryOperatorKind.NotEquals : Return Not Equals(left, right)
           Case Else
             Throw New Exception($"Unexpected binary operator {b.Op}")
         End Select
