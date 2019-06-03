@@ -1,8 +1,6 @@
-# BASIC
+# BASIC for .NET
 
-BASIC for .NET
-
-Building a BASIC compiler for .NET using VB.NET on .NET Core (currently targeting 3.0).
+Building a BASIC compiler from scratch targetting .NET Core (v3) using VB.NET.
 
 ## History
 
@@ -16,10 +14,20 @@ Fast forward a few years to now...
 
 ## What is this?
 
-The original GW-BASIC projects was an "IDE" and an interpreter (REPL).  This project is going to take this all in a very 
-different direction by starting with the compiler as the ultimate goal.  I'm sure that some of the original project will 
-make it's way into this one... but for the most part, this project is "starting from scratch" with the ultimate goal of 
-having a pretty good representation of "classic" BASIC targetting .NET Core!
+The original GW-BASIC project was the classic/retro "IDE" and an interpreter (REPL).  This project is going to take this 
+all in a very different direction by starting with the compiler as the ultimate goal.  I'm sure that some of the original 
+project will make it's way into this one... but for the most part, this project is "starting from scratch" with the 
+ultimate goal of having a pretty good representation of "classic" BASIC targetting .NET Core!
+
+For now, yes, I'm planning on adding support for line numbers. ;-)
+
+## Why???
+
+Why not?
+
+## Progress...
+
+So far I've worked through the first two episodes of the video series (see below)... only 12 more to go (as of 6/2/2019).
 
 ## Credits
 
