@@ -37,78 +37,78 @@ Namespace Global.Basic.CodeAnalysis.Binding
 
     Private Function BindUnaryEpression(syntax As UnaryExpressionSyntax) As BoundExpression
       Dim boundOperand = Me.BindExpression(syntax.Operand)
-      Dim boundOperatorKind = Me.BindUnaryOperatorKind(syntax.OperatorToken.Kind, boundOperand.Type)
-      If boundOperatorKind Is Nothing Then
+      Dim boundOperator = BoundUnaryOperator.Bind(syntax.OperatorToken.Kind, boundOperand.Type)
+      If boundOperator Is Nothing Then
         Me.m_diagnostics.Add($"Unary operator '{syntax.OperatorToken.Text}' is not defined for type {boundOperand.Type}.")
         Return boundOperand
       End If
-      Return New BoundUnaryExpression(boundOperatorKind.Value, boundOperand)
+      Return New BoundUnaryExpression(boundOperator, boundOperand)
     End Function
 
     Private Function BindBinaryEpression(syntax As BinaryExpressionSyntax) As BoundExpression
       Dim boundLeft = Me.BindExpression(syntax.Left)
       Dim boundRight = Me.BindExpression(syntax.Right)
-      Dim boundOperatorKind = Me.BindBinaryOperatorKind(syntax.OperatorToken.Kind, boundLeft.Type, boundRight.Type)
-      If boundOperatorKind Is Nothing Then
+      Dim boundOperator = BoundBinaryOperator.Bind(syntax.OperatorToken.Kind, boundLeft.Type, boundRight.Type)
+      If boundOperator Is Nothing Then
         Me.m_diagnostics.Add($"Binary operator '{syntax.OperatorToken.Text}' is not defined for type {boundLeft.Type} and {boundRight.Type}.")
         Return boundLeft
       End If
-      Return New BoundBinaryExpression(boundLeft, boundOperatorKind.Value, boundRight)
+      Return New BoundBinaryExpression(boundLeft, boundOperator, boundRight)
     End Function
 
-    Private Function BindUnaryOperatorKind(kind As SyntaxKind, operandType As Type) As BoundUnaryOperatorKind?
+    'Private Function BindUnaryOperatorKind(kind As SyntaxKind, operandType As Type) As BoundUnaryOperatorKind?
 
-      If operandType Is GetType(Integer) Then
-        Select Case kind
-          Case SyntaxKind.PlusToken
-            Return BoundUnaryOperatorKind.Identity
-          Case SyntaxKind.MinusToken
-            Return BoundUnaryOperatorKind.Negation
-          Case Else
-        End Select
-      End If
+    '  If operandType Is GetType(Integer) Then
+    '    Select Case kind
+    '      Case SyntaxKind.PlusToken
+    '        Return BoundUnaryOperatorKind.Identity
+    '      Case SyntaxKind.MinusToken
+    '        Return BoundUnaryOperatorKind.Negation
+    '      Case Else
+    '    End Select
+    '  End If
 
-      If operandType Is GetType(Boolean) Then
-        Select Case kind
-          Case SyntaxKind.BangToken, SyntaxKind.NotKeyword
-            Return BoundUnaryOperatorKind.LogicalNegation
-          Case Else
-        End Select
-      End If
+    '  If operandType Is GetType(Boolean) Then
+    '    Select Case kind
+    '      Case SyntaxKind.BangToken, SyntaxKind.NotKeyword
+    '        Return BoundUnaryOperatorKind.LogicalNegation
+    '      Case Else
+    '    End Select
+    '  End If
 
-      Return Nothing
+    '  Return Nothing
 
-    End Function
+    'End Function
 
-    Private Function BindBinaryOperatorKind(kind As SyntaxKind, leftType As Type, rightType As Type) As BoundBinaryOperatorKind?
+    'Private Function BindBinaryOperatorKind(kind As SyntaxKind, leftType As Type, rightType As Type) As BoundBinaryOperatorKind?
 
-      If leftType Is GetType(Integer) AndAlso
-         rightType Is GetType(Integer) Then
+    '  If leftType Is GetType(Integer) AndAlso
+    '     rightType Is GetType(Integer) Then
 
-        Select Case kind
-          Case SyntaxKind.PlusToken : Return BoundBinaryOperatorKind.Addition
-          Case SyntaxKind.MinusToken : Return BoundBinaryOperatorKind.Subtraction
-          Case SyntaxKind.StarToken : Return BoundBinaryOperatorKind.Multiplication
-          Case SyntaxKind.SlashToken : Return BoundBinaryOperatorKind.Division
-          Case Else
-        End Select
+    '    Select Case kind
+    '      Case SyntaxKind.PlusToken : Return BoundBinaryOperatorKind.Addition
+    '      Case SyntaxKind.MinusToken : Return BoundBinaryOperatorKind.Subtraction
+    '      Case SyntaxKind.StarToken : Return BoundBinaryOperatorKind.Multiplication
+    '      Case SyntaxKind.SlashToken : Return BoundBinaryOperatorKind.Division
+    '      Case Else
+    '    End Select
 
-      End If
+    '  End If
 
-      If leftType Is GetType(Boolean) AndAlso
-         rightType Is GetType(Boolean) Then
+    '  If leftType Is GetType(Boolean) AndAlso
+    '     rightType Is GetType(Boolean) Then
 
-        Select Case kind
-          Case SyntaxKind.AmpersandAmpersandToken, SyntaxKind.AndKeyword : Return BoundBinaryOperatorKind.LogicalAnd
-          Case SyntaxKind.PipePipeToken, SyntaxKind.OrKeyword : Return BoundBinaryOperatorKind.LogicalOr
-          Case Else
-        End Select
+    '    Select Case kind
+    '      Case SyntaxKind.AmpersandAmpersandToken, SyntaxKind.AndKeyword : Return BoundBinaryOperatorKind.LogicalAnd
+    '      Case SyntaxKind.PipePipeToken, SyntaxKind.OrKeyword : Return BoundBinaryOperatorKind.LogicalOr
+    '      Case Else
+    '    End Select
 
-      End If
+    '  End If
 
-      Return Nothing
+    '  Return Nothing
 
-    End Function
+    'End Function
 
   End Class
 

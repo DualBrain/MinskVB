@@ -31,7 +31,7 @@ Namespace Global.Basic.CodeAnalysis
       If TypeOf node Is BoundUnaryExpression Then
         Dim u = DirectCast(node, BoundUnaryExpression)
         Dim operand = Me.EvaluateExpression(u.Operand)
-        Select Case u.OperatorKind
+        Select Case u.Op.Kind
           Case BoundUnaryOperatorKind.Identity
             Return CInt(operand)
           Case BoundUnaryOperatorKind.Negation
@@ -39,7 +39,7 @@ Namespace Global.Basic.CodeAnalysis
           Case BoundUnaryOperatorKind.LogicalNegation
             Return Not CBool(operand)
           Case Else
-            Throw New Exception($"Unexpected unary operator {u.OperatorKind}")
+            Throw New Exception($"Unexpected unary operator {u.Op}")
         End Select
       End If
 
@@ -47,7 +47,7 @@ Namespace Global.Basic.CodeAnalysis
         Dim b = DirectCast(node, BoundBinaryExpression)
         Dim left = Me.EvaluateExpression(b.Left)
         Dim right = Me.EvaluateExpression(b.Right)
-        Select Case b.OperatorKind
+        Select Case b.Op.Kind
           Case BoundBinaryOperatorKind.Addition : Return CInt(left) + CInt(right)
           Case BoundBinaryOperatorKind.Subtraction : Return CInt(left) - CInt(right)
           Case BoundBinaryOperatorKind.Multiplication : Return CInt(left) * CInt(right)
@@ -55,7 +55,7 @@ Namespace Global.Basic.CodeAnalysis
           Case BoundBinaryOperatorKind.LogicalAnd : Return CBool(left) And CBool(right)
           Case BoundBinaryOperatorKind.LogicalOr : Return CBool(left) Or CBool(right)
           Case Else
-            Throw New Exception($"Unexpected binary operator {b.OperatorKind}")
+            Throw New Exception($"Unexpected binary operator {b.Op}")
         End Select
       End If
 

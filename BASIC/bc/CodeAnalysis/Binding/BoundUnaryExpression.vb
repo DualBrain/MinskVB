@@ -7,8 +7,8 @@ Namespace Global.Basic.CodeAnalysis.Binding
   Friend NotInheritable Class BoundUnaryExpression
     Inherits BoundExpression
 
-    Sub New(operatorKind As BoundUnaryOperatorKind, operand As BoundExpression)
-      Me.OperatorKind = operatorKind
+    Sub New(op As BoundUnaryOperator, operand As BoundExpression)
+      Me.Op = op
       Me.Operand = operand
     End Sub
 
@@ -18,7 +18,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
         Return Me.Operand.Type
       End Get
     End Property
-    Public ReadOnly Property OperatorKind As BoundUnaryOperatorKind
+    Public ReadOnly Property Op As BoundUnaryOperator
     Public ReadOnly Property Operand As BoundExpression
 
   End Class

@@ -7,9 +7,9 @@ Namespace Global.Basic.CodeAnalysis.Binding
   Friend NotInheritable Class BoundBinaryExpression
     Inherits BoundExpression
 
-    Sub New(left As BoundExpression, operatorKind As BoundBinaryOperatorKind, right As BoundExpression)
+    Sub New(left As BoundExpression, op As BoundBinaryOperator, right As BoundExpression)
       Me.Left = left
-      Me.OperatorKind = operatorKind
+      Me.Op = op
       Me.Right = right
     End Sub
 
@@ -20,7 +20,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
       End Get
     End Property
     Public ReadOnly Property Left As BoundExpression
-    Public ReadOnly Property OperatorKind As BoundBinaryOperatorKind
+    Public ReadOnly Property Op As BoundBinaryOperator
     Public ReadOnly Property Right As BoundExpression
 
   End Class
