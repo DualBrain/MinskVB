@@ -4,29 +4,10 @@ Option Infer On
 
 Namespace Global.Basic.CodeAnalysis.Syntax
 
-  '
-  ' +1
-  ' -1 * -3
-  ' -(3 * 3)
-  '
-  '   -
-  '   |
-  '   1
-  '
-  ' or 
-  '
-  '   -
-  '   |
-  '   +
-  '  / \
-  ' 1   2
-
   Friend NotInheritable Class Parser
 
     Private ReadOnly Property Tokens As SyntaxToken()
     Private Property Position As Integer
-
-    Private m_diagnostics As List(Of String) = New List(Of String)
 
     Sub New(text As String)
       Dim tokens = New List(Of SyntaxToken)
@@ -40,14 +21,10 @@ Namespace Global.Basic.CodeAnalysis.Syntax
         End If
       Loop While token.Kind <> SyntaxKind.EndOfFileToken
       Me.Tokens = tokens.ToArray
-      Me.m_diagnostics.AddRange(lexer.Diagnostics)
+      Me.Diagnostics.AddRange(lexer.Diagnostics)
     End Sub
 
-    Public ReadOnly Property Diagnostics As IEnumerable(Of String)
-      Get
-        Return Me.m_diagnostics
-      End Get
-    End Property
+    Public ReadOnly Property Diagnostics As DiagnosticBag = New DiagnosticBag
 
     Private Function Peek(offset As Integer) As SyntaxToken
       Dim index = Me.Position + offset
@@ -71,7 +48,7 @@ Namespace Global.Basic.CodeAnalysis.Syntax
       If Me.Current.Kind = kind Then
         Return Me.NextToken()
       Else
-        Me.m_diagnostics.Add($"ERROR: Unexpected token <{Me.Current.Kind}>, expected <{kind}>")
+        Me.Diagnostics.ReportUnexpectedToken(Me.Current.Span, Me.Current.Kind, kind)
         Return New SyntaxToken(kind, Me.Current.Position, Nothing, Nothing)
       End If
     End Function
@@ -79,7 +56,7 @@ Namespace Global.Basic.CodeAnalysis.Syntax
     Public Function Parse() As SyntaxTree
       Dim expression = Me.ParseExpression
       Dim endOfFileToken = Me.MatchToken(SyntaxKind.EndOfFileToken)
-      Return New SyntaxTree(Me.m_diagnostics, expression, endOfFileToken)
+      Return New SyntaxTree(Me.Diagnostics, expression, endOfFileToken)
     End Function
 
     'Private Function ParseExpression() As ExpressionSyntax

@@ -1,32 +1,14 @@
-﻿Option Explicit On ' Variables must be "declared".
-Option Strict On ' They must have a "type".
-Option Infer On ' Where we can, the "type" can be inferred.
+﻿Option Explicit On
+Option Strict On
+Option Infer On
 
-' This is a .NET Core 3.0 VB.NET project.
-' I added the above Option's to enable how I like
-' to write software.
-
-' You can find the code at 
+' You can find the latest version at 
 ' https://github.com/dualbrain/basic
 ' Feel free to join in and contribute!
-
-' 1 + 2 * 3
-'
-' Could be...
-'
-'   +
-'  / \ 
-' 1   *
-'    / \
-'   2   3
-'
-' Desired...
-'
-'     *
-'    / \ 
-'   +   3
-'  / \
-' 1   2
+' You can watch me stream at
+' https://twitch.tv/gotbasic
+' Want to learn more about BASIC...
+' https://gotbasic.com
 
 Imports Basic.CodeAnalysis
 Imports Basic.CodeAnalysis.Binding
@@ -66,9 +48,10 @@ Friend Module Program
       ' Otherwise, attempt to parse what was entered...
 
       Dim tree = SyntaxTree.Parse(line)
-      Dim binder = New Binder()
-      Dim boundExpression = binder.BindExpression(tree.Root)
-      Dim diagnostics = tree.Diagnostics.Concat(binder.Diagnostics).ToArray
+      Dim compilation = New Compilation(tree)
+      Dim result = compilation.Evaluate
+
+      Dim diagnostics = result.Diagnostics
 
       ' Only show the parse tree if we have enabled doing so.
       If showTree Then
@@ -80,9 +63,7 @@ Friend Module Program
 
       If Not diagnostics.Any Then
         ' No errors detected, attemp to evaluate (execute).
-        Dim e = New Evaluator(boundExpression)
-        Dim result = e.Evaluate
-        WriteLine(result)
+        WriteLine(result.Value)
       Else
         ' We have errors, so don't try to evaluate (execute).
         Console.ForegroundColor = ConsoleColor.DarkRed

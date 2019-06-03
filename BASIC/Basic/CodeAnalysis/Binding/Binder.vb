@@ -7,13 +7,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
 
   Friend NotInheritable Class Binder
 
-    Private ReadOnly m_diagnostics As List(Of String) = New List(Of String)
-
-    Public ReadOnly Property Diagnostics As IEnumerable(Of String)
-      Get
-        Return Me.m_diagnostics
-      End Get
-    End Property
+    Public ReadOnly Property Diagnostics As DiagnosticBag = New DiagnosticBag
 
     Public Function BindExpression(syntax As ExpressionSyntax) As BoundExpression
 
@@ -41,7 +35,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
       Dim boundOperand = Me.BindExpression(syntax.Operand)
       Dim boundOperator = BoundUnaryOperator.Bind(syntax.OperatorToken.Kind, boundOperand.Type)
       If boundOperator Is Nothing Then
-        Me.m_diagnostics.Add($"Unary operator '{syntax.OperatorToken.Text}' is not defined for type {boundOperand.Type}.")
+        Me.Diagnostics.ReportUndefinedUnaryOperator(syntax.OperatorToken.Span, syntax.OperatorToken.Text, boundOperand.Type)
         Return boundOperand
       End If
       Return New BoundUnaryExpression(boundOperator, boundOperand)
@@ -52,7 +46,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
       Dim boundRight = Me.BindExpression(syntax.Right)
       Dim boundOperator = BoundBinaryOperator.Bind(syntax.OperatorToken.Kind, boundLeft.Type, boundRight.Type)
       If boundOperator Is Nothing Then
-        Me.m_diagnostics.Add($"Binary operator '{syntax.OperatorToken.Text}' is not defined for type {boundLeft.Type} and {boundRight.Type}.")
+        Me.Diagnostics.ReportUndefinedBinaryOperator(syntax.OperatorToken.Span, syntax.OperatorToken.Text, boundLeft.Type, boundRight.Type)
         Return boundLeft
       End If
       Return New BoundBinaryExpression(boundLeft, boundOperator, boundRight)

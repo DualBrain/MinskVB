@@ -8,17 +8,12 @@ Namespace Global.Basic.CodeAnalysis.Syntax
 
     Private ReadOnly Property Text As String
     Private Property Position As Integer
-    Private m_diagnostics As List(Of String) = New List(Of String)
 
     Public Sub New(text As String)
       Me.Text = text
     End Sub
 
-    Public ReadOnly Property Diagnostics As IEnumerable(Of String)
-      Get
-        Return Me.m_diagnostics
-      End Get
-    End Property
+    Public ReadOnly Property Diagnostics As DiagnosticBag = New DiagnosticBag
 
     Private ReadOnly Property Current As Char
       Get
@@ -36,7 +31,7 @@ Namespace Global.Basic.CodeAnalysis.Syntax
       Get
         Dim index = Me.Position + offset
         If index >= Me.Text.Length Then
-          Return Chr(0)
+          Return ChrW(0)
         End If
         Return Me.Text(index)
       End Get
@@ -54,7 +49,7 @@ Namespace Global.Basic.CodeAnalysis.Syntax
       ' "end of file"
 
       If Me.Position >= Me.Text.Length Then
-        Return New SyntaxToken(SyntaxKind.EndOfFileToken, Me.PositionPlusPlus, Chr(0), Nothing)
+        Return New SyntaxToken(SyntaxKind.EndOfFileToken, Me.PositionPlusPlus, ChrW(0), Nothing)
       End If
 
       If Char.IsDigit(Me.Current) Then
@@ -70,7 +65,7 @@ Namespace Global.Basic.CodeAnalysis.Syntax
 
         Dim value As Integer
         If Not Integer.TryParse(text, value) Then
-          Me.m_diagnostics.Add($"The number {Me.Text} isn't a valid Integer")
+          Me.Diagnostics.ReportInvalidNumber(New TextSpan(start, length), Me.Text, GetType(Integer))
         End If
         Return New SyntaxToken(SyntaxKind.NumberToken, start, text, value)
 
@@ -153,7 +148,7 @@ Namespace Global.Basic.CodeAnalysis.Syntax
         Case Else
       End Select
 
-      Me.m_diagnostics.Add($"ERROR: Bad character input: '{Me.Current}'")
+      Me.Diagnostics.ReportBadCharacter(Me.Position, Me.Current)
       Return New SyntaxToken(SyntaxKind.BadToken, Me.PositionPlusPlus, Me.Text.Substring(Me.Position - 1, 1), Nothing)
 
     End Function
