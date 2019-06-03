@@ -44,4 +44,6 @@ Although not the same compiler, as I said the *process* of building this compile
 
 I highly recommend [Immo's video series](https://www.youtube.com/watch?v=wgHIkdUQbp0&list=PLRAdsfhKI4OWNOSfS7EUu5GRAVmze1t2y)... it's awesome!
 
+You can also find the repo for Immo's version [here](https://github.com/terrajobst/minsk/).
+
 One additional note is that although not inspired by the comment he has at about 11 minutes into his first video, this project does attempt to answer the request someone made in his first live stream. ;-)
