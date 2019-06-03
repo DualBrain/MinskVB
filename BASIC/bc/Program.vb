@@ -66,11 +66,29 @@ Friend Module Program
         WriteLine(result.Value)
       Else
         ' We have errors, so don't try to evaluate (execute).
-        Console.ForegroundColor = ConsoleColor.DarkRed
         For Each diagnostic In diagnostics
+
+          WriteLine()
+
+          Console.ForegroundColor = ConsoleColor.DarkRed
           WriteLine(diagnostic)
+          Console.ResetColor()
+
+          'TODO: (1+2  <--- crashes
+          Dim prefix = line.Substring(0, diagnostic.Span.Start)
+          Dim er = line.Substring(diagnostic.Span.Start, diagnostic.Span.Length)
+          Dim suffix = line.Substring(diagnostic.Span.End)
+
+          Write($"    {prefix}")
+          Console.ForegroundColor = ConsoleColor.DarkRed
+          Write(er)
+          Console.ResetColor()
+          WriteLine(suffix)
+
         Next
-        Console.ResetColor()
+
+        WriteLine()
+
       End If
 
     Loop

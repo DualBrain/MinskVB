@@ -52,9 +52,9 @@ Namespace Global.Basic.CodeAnalysis.Syntax
         Return New SyntaxToken(SyntaxKind.EndOfFileToken, Me.PositionPlusPlus, ChrW(0), Nothing)
       End If
 
-      If Char.IsDigit(Me.Current) Then
+      Dim start = Me.Position
 
-        Dim start = Me.Position
+      If Char.IsDigit(Me.Current) Then
 
         While Char.IsDigit(Me.Current)
           Me.Next()
@@ -73,8 +73,6 @@ Namespace Global.Basic.CodeAnalysis.Syntax
 
       If Char.IsWhiteSpace(Me.Current) Then
 
-        Dim start = Me.Position
-
         While Char.IsWhiteSpace(Me.Current)
           Me.Next()
         End While
@@ -87,8 +85,6 @@ Namespace Global.Basic.CodeAnalysis.Syntax
       End If
 
       If Char.IsLetter(Me.Current) Then
-
-        Dim start = Me.Position
 
         While Char.IsLetter(Me.Current)
           Me.Next()
@@ -116,33 +112,34 @@ Namespace Global.Basic.CodeAnalysis.Syntax
         'Case "!"c : Return New SyntaxToken(SyntaxKind.BangToken, Me.PositionPlusPlus, "!", Nothing)
         Case "&"c
           If Me.LookAhead = "&"c Then
-            Dim position = Me.Position : Me.Position += 2
-            Return New SyntaxToken(SyntaxKind.AmpersandAmpersandToken, position, "&&", Nothing)
+            Me.Position += 2
+            Return New SyntaxToken(SyntaxKind.AmpersandAmpersandToken, start, "&&", Nothing)
           End If
         Case "|"c
           If Me.LookAhead = "|"c Then
-            Dim position = Me.Position : Me.Position += 2
-            Return New SyntaxToken(SyntaxKind.PipePipeToken, position, "||", Nothing)
+            Me.Position += 2
+            Return New SyntaxToken(SyntaxKind.PipePipeToken, start, "||", Nothing)
           End If
 
         Case "="c
           If Me.LookAhead = "="c Then
-            Dim position = Me.Position : Me.Position += 2
-            Return New SyntaxToken(SyntaxKind.EqualsEqualsToken, position, "==", Nothing)
+            Me.Position += 2
+            Return New SyntaxToken(SyntaxKind.EqualsEqualsToken, start, "==", Nothing)
           Else
             Return New SyntaxToken(SyntaxKind.EqualsToken, Me.PositionPlusPlus, "=", Nothing)
           End If
         Case "!"c
           If Me.LookAhead = "="c Then
-            Dim position = Me.Position : Me.Position += 2
-            Return New SyntaxToken(SyntaxKind.BangEqualsToken, position, "!=", Nothing)
+            Me.Position += 2
+            Return New SyntaxToken(SyntaxKind.BangEqualsToken, start, "!=", Nothing)
           Else
-            Return New SyntaxToken(SyntaxKind.BangToken, Me.PositionPlusPlus, "!", Nothing)
+            Me.Position += 1
+            Return New SyntaxToken(SyntaxKind.BangToken, start, "!", Nothing)
           End If
         Case "<"c
           If Me.LookAhead = ">"c Then
-            Dim position = Me.Position : Me.Position += 2
-            Return New SyntaxToken(SyntaxKind.LessThanGreaterThanToken, position, "<>", Nothing)
+            Me.Position += 2
+            Return New SyntaxToken(SyntaxKind.LessThanGreaterThanToken, start, "<>", Nothing)
           End If
 
         Case Else
