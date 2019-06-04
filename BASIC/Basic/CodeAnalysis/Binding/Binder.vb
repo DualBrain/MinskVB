@@ -7,28 +7,68 @@ Namespace Global.Basic.CodeAnalysis.Binding
 
   Friend NotInheritable Class Binder
 
+    Private ReadOnly m_variables As Dictionary(Of String, Object)
+
+    Public Sub New(variables As Dictionary(Of String, Object))
+      Me.m_variables = variables
+    End Sub
+
     Public ReadOnly Property Diagnostics As DiagnosticBag = New DiagnosticBag
 
     Public Function BindExpression(syntax As ExpressionSyntax) As BoundExpression
 
       Select Case syntax.Kind
+        Case SyntaxKind.ParenExpression
+          Return Me.BindParenExpression(DirectCast(syntax, ParenExpressionSyntax))
         Case SyntaxKind.LiteralExpression
           Return Me.BindLiteralEpression(DirectCast(syntax, LiteralExpressionSyntax))
+        Case SyntaxKind.NameExpression
+          Return Me.BindNameExpression(DirectCast(syntax, NameExpressionSyntax))
+        Case SyntaxKind.AssignmentExpression
+          Return Me.BindAssignmentExpression(DirectCast(syntax, AssignmentExpressionSyntax))
         Case SyntaxKind.UnaryExpression
           Return Me.BindUnaryEpression(DirectCast(syntax, UnaryExpressionSyntax))
         Case SyntaxKind.BinaryExpression
           Return Me.BindBinaryEpression(DirectCast(syntax, BinaryExpressionSyntax))
-        Case SyntaxKind.ParenExpression
-          Return Me.BindExpression(DirectCast(syntax, ParenExpressionSyntax).Expression)
         Case Else
           Throw New Exception($"Unexpected syntax {syntax.Kind}")
       End Select
 
     End Function
 
+    Private Function BindParenExpression(syntax As ParenExpressionSyntax) As BoundExpression
+      Return Me.BindExpression(syntax.Expression)
+    End Function
+
     Private Function BindLiteralEpression(syntax As LiteralExpressionSyntax) As BoundExpression
       Dim value = If(syntax.Value, 0)
       Return New BoundLiteralExpression(value)
+    End Function
+
+    Private Function BindNameExpression(syntax As NameExpressionSyntax) As BoundExpression
+      Dim name = syntax.IdentifierToken.Text
+      Dim value As Object = Nothing
+      If Not Me.m_variables.TryGetValue(name.ToLower, value) Then
+        Me.Diagnostics.ReportUndefinedName(syntax.IdentifierToken.Span, name)
+        Return New BoundLiteralExpression(0)
+      End If
+      Dim type = value.GetType()
+      Return New BoundVariableExpression(name, type)
+    End Function
+
+    Private Function BindAssignmentExpression(syntax As AssignmentExpressionSyntax) As BoundExpression
+      Dim name = syntax.IdentifierToken.Text
+      Dim boundExpression = Me.BindExpression(syntax.Expression)
+
+      Dim defaultValue = If(boundExpression.Type = GetType(Integer), CObj(0), If(boundExpression.Type = GetType(Boolean), False, Nothing))
+
+      If defaultValue Is Nothing Then
+        Throw New Exception($"Unsupported variable type: {boundExpression.Type}")
+      End If
+
+      Me.m_variables(name) = defaultValue
+
+      Return New BoundAssignmentExpression(name, boundExpression)
     End Function
 
     Private Function BindUnaryEpression(syntax As UnaryExpressionSyntax) As BoundExpression

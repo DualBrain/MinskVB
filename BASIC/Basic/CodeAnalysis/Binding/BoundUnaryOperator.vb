@@ -24,7 +24,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
     Public ReadOnly Property OperandType As Type
     Public ReadOnly Property Type As Type
 
-    Private Shared _operators() As BoundUnaryOperator = {
+    Private Shared ReadOnly m_operators() As BoundUnaryOperator = {
       New BoundUnaryOperator(SyntaxKind.BangToken, BoundUnaryOperatorKind.LogicalNegation, GetType(Boolean)),
       New BoundUnaryOperator(SyntaxKind.NotKeyword, BoundUnaryOperatorKind.LogicalNegation, GetType(Boolean)),
       New BoundUnaryOperator(SyntaxKind.PlusToken, BoundUnaryOperatorKind.Identity, GetType(Integer)),
@@ -32,7 +32,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
     }
 
     Public Shared Function Bind(syntaxKind As SyntaxKind, operandType As Type) As BoundUnaryOperator
-      For Each op In _operators
+      For Each op In m_operators
         If op.SyntaxKind = syntaxKind AndAlso op.OperandType = operandType Then
           Return op
         End If

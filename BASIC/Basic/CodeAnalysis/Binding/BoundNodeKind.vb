@@ -6,6 +6,8 @@ Namespace Global.Basic.CodeAnalysis.Binding
 
   Friend Enum BoundNodeKind
     LiteralExpression
+    VariableExpression
+    AssignmentExpression
     UnaryExpression
     BinaryExpression
   End Enum

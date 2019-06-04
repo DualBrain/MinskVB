@@ -16,9 +16,9 @@ Namespace Global.Basic.CodeAnalysis.Syntax
     StarToken
     SlashToken
     BangToken
+    EqualsToken
     AmpersandAmpersandToken
     EqualsEqualsToken
-    EqualsToken
     BangEqualsToken
     LessThanGreaterThanToken
     PipePipeToken
@@ -39,9 +39,11 @@ Namespace Global.Basic.CodeAnalysis.Syntax
     ' Expressions
 
     LiteralExpression
+    NameExpression
     UnaryExpression
     BinaryExpression
     ParenExpression
+    AssignmentExpression
 
   End Enum
 

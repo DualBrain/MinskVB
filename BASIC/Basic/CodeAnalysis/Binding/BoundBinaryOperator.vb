@@ -29,13 +29,15 @@ Namespace Global.Basic.CodeAnalysis.Binding
     Public ReadOnly Property RightType As Type
     Public ReadOnly Property Type As Type
 
-    Private Shared _operators() As BoundBinaryOperator = {
+    ' New BoundBinaryOperator(SyntaxKind.EqualsToken, BoundBinaryOperatorKind.Equals, GetType(Integer), GetType(Boolean)),
+    ' New BoundBinaryOperator(SyntaxKind.EqualsToken, BoundBinaryOperatorKind.Equals, GetType(Boolean)),
+
+    Private Shared ReadOnly m_operators() As BoundBinaryOperator = {
       New BoundBinaryOperator(SyntaxKind.PlusToken, BoundBinaryOperatorKind.Addition, GetType(Integer)),
       New BoundBinaryOperator(SyntaxKind.MinusToken, BoundBinaryOperatorKind.Subtraction, GetType(Integer)),
       New BoundBinaryOperator(SyntaxKind.StarToken, BoundBinaryOperatorKind.Multiplication, GetType(Integer)),
       New BoundBinaryOperator(SyntaxKind.SlashToken, BoundBinaryOperatorKind.Division, GetType(Integer)),
       New BoundBinaryOperator(SyntaxKind.EqualsEqualsToken, BoundBinaryOperatorKind.Equals, GetType(Integer), GetType(Boolean)),
-      New BoundBinaryOperator(SyntaxKind.EqualsToken, BoundBinaryOperatorKind.Equals, GetType(Integer), GetType(Boolean)),
       New BoundBinaryOperator(SyntaxKind.BangEqualsToken, BoundBinaryOperatorKind.NotEquals, GetType(Integer), GetType(Boolean)),
       New BoundBinaryOperator(SyntaxKind.LessThanGreaterThanToken, BoundBinaryOperatorKind.NotEquals, GetType(Integer), GetType(Boolean)),
       New BoundBinaryOperator(SyntaxKind.AmpersandAmpersandToken, BoundBinaryOperatorKind.LogicalAnd, GetType(Boolean)),
@@ -43,13 +45,12 @@ Namespace Global.Basic.CodeAnalysis.Binding
       New BoundBinaryOperator(SyntaxKind.AndKeyword, BoundBinaryOperatorKind.LogicalAnd, GetType(Boolean)),
       New BoundBinaryOperator(SyntaxKind.OrKeyword, BoundBinaryOperatorKind.LogicalOr, GetType(Boolean)),
       New BoundBinaryOperator(SyntaxKind.EqualsEqualsToken, BoundBinaryOperatorKind.Equals, GetType(Boolean)),
-      New BoundBinaryOperator(SyntaxKind.EqualsToken, BoundBinaryOperatorKind.Equals, GetType(Boolean)),
       New BoundBinaryOperator(SyntaxKind.BangEqualsToken, BoundBinaryOperatorKind.NotEquals, GetType(Boolean)),
       New BoundBinaryOperator(SyntaxKind.LessThanGreaterThanToken, BoundBinaryOperatorKind.NotEquals, GetType(Boolean))
     }
 
     Public Shared Function Bind(syntaxKind As SyntaxKind, leftType As Type, rightType As Type) As BoundBinaryOperator
-      For Each op In _operators
+      For Each op In m_operators
         If op.SyntaxKind = syntaxKind AndAlso op.LeftType Is leftType AndAlso op.RightType Is rightType Then
           Return op
         End If

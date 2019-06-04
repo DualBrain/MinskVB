@@ -63,13 +63,33 @@ Namespace Global.Basic.CodeAnalysis.Syntax
     '  Return Me.ParseTerm()
     'End Function
 
-    Private Function ParseExpression(Optional parentPrecedence As Integer = 0) As ExpressionSyntax
+    Private Function ParseExpression() As ExpressionSyntax
+      Return Me.ParseAssignmentExpression
+    End Function
+
+    Private Function ParseAssignmentExpression() As ExpressionSyntax
+
+      If (Me.Peek(0).Kind = SyntaxKind.IdentifierToken AndAlso
+          Me.Peek(1).Kind = SyntaxKind.EqualsToken) Then
+
+        Dim identifierToken = Me.NextToken
+        Dim operatorToken = Me.NextToken
+        Dim right = Me.ParseAssignmentExpression
+        Return New AssignmentExpressionSyntax(identifierToken, operatorToken, right)
+
+      End If
+
+      Return Me.ParseBinaryExpression
+
+    End Function
+
+    Private Function ParseBinaryExpression(Optional parentPrecedence As Integer = 0) As ExpressionSyntax
 
       Dim left As ExpressionSyntax
       Dim unaryOperatorPrecedence = Me.Current.Kind.GetUnaryOperatorPrecedence
       If unaryOperatorPrecedence <> 0 AndAlso unaryOperatorPrecedence >= parentPrecedence Then
         Dim operatorToken = Me.NextToken()
-        Dim operand = Me.ParseExpression(unaryOperatorPrecedence)
+        Dim operand = Me.ParseBinaryExpression(unaryOperatorPrecedence)
         left = New UnaryExpressionSyntax(operatorToken, operand)
       Else
         left = Me.ParsePrimaryExpression
@@ -82,7 +102,7 @@ Namespace Global.Basic.CodeAnalysis.Syntax
           Exit While
         End If
         Dim operatorToken = Me.NextToken()
-        Dim right = Me.ParseExpression(precedence)
+        Dim right = Me.ParseBinaryExpression(precedence)
         left = New BinaryExpressionSyntax(left, operatorToken, right)
 
       End While
@@ -137,6 +157,12 @@ Namespace Global.Basic.CodeAnalysis.Syntax
           Dim keywordToken = Me.NextToken()
           Dim value = keywordToken.Kind = SyntaxKind.TrueKeyword
           Return New LiteralExpressionSyntax(keywordToken, value)
+        Case SyntaxKind.IdentifierToken
+          Dim identifierToken = Me.NextToken
+          'If Me.Current.Kind = SyntaxKind.EqualsToken Then
+          'Else
+          'End If
+          Return New NameExpressionSyntax(identifierToken)
         Case Else
           Dim numberToken = Me.MatchToken(SyntaxKind.NumberToken)
           Return New LiteralExpressionSyntax(numberToken)

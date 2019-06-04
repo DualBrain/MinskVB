@@ -31,7 +31,7 @@ Namespace Global.Basic.CodeAnalysis.Syntax
         Case SyntaxKind.PlusToken, SyntaxKind.MinusToken
           Return 4
 
-        Case SyntaxKind.EqualsEqualsToken, SyntaxKind.BangEqualsToken, SyntaxKind.EqualsToken, SyntaxKind.LessThanGreaterThanToken
+        Case SyntaxKind.EqualsEqualsToken, SyntaxKind.BangEqualsToken, SyntaxKind.LessThanGreaterThanToken ', SyntaxKind.EqualsToken
           Return 3
 
         Case SyntaxKind.AmpersandAmpersandToken, SyntaxKind.AndKeyword

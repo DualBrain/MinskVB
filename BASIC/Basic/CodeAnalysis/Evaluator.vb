@@ -8,11 +8,13 @@ Namespace Global.Basic.CodeAnalysis
 
   Friend NotInheritable Class Evaluator
 
-    Sub New(root As BoundExpression)
+    Sub New(root As BoundExpression, variables As Dictionary(Of String, Object))
       Me.Root = root
+      Me.Variables = variables
     End Sub
 
     Public ReadOnly Property Root As BoundExpression
+    Public ReadOnly Property Variables As Dictionary(Of String, Object)
 
     Public Function Evaluate() As Object
       Return Me.EvaluateExpression(Me.Root)
@@ -20,12 +22,20 @@ Namespace Global.Basic.CodeAnalysis
 
     Private Function EvaluateExpression(node As BoundExpression) As Object
 
-      ' NumberExpression
-      ' BinaryExpression
-      ' ParenExpression
-
       If TypeOf node Is BoundLiteralExpression Then
         Return DirectCast(node, BoundLiteralExpression).Value
+      End If
+
+      If TypeOf node Is BoundVariableExpression Then
+        Dim v = DirectCast(node, BoundVariableExpression)
+        Return Me.Variables(v.Name)
+      End If
+
+      If TypeOf node Is BoundAssignmentExpression Then
+        Dim a = DirectCast(node, BoundAssignmentExpression)
+        Dim value = Me.EvaluateExpression(a.expression)
+        Me.Variables(a.Name) = value
+        Return value
       End If
 
       If TypeOf node Is BoundUnaryExpression Then

@@ -20,6 +20,7 @@ Friend Module Program
   Sub Main()
 
     Dim showTree = False
+    Dim variables = New Dictionary(Of String, Object)
 
     Do
 
@@ -49,11 +50,12 @@ Friend Module Program
 
       Dim tree = SyntaxTree.Parse(line)
       Dim compilation = New Compilation(tree)
-      Dim result = compilation.Evaluate
+      Dim result = compilation.Evaluate(variables)
 
       Dim diagnostics = result.Diagnostics
 
       ' Only show the parse tree if we have enabled doing so.
+
       If showTree Then
         Dim color = Console.ForegroundColor
         Console.ForegroundColor = ConsoleColor.DarkGray
@@ -62,12 +64,13 @@ Friend Module Program
       End If
 
       If Not diagnostics.Any Then
-        ' No errors detected, attemp to evaluate (execute).
+        ' No errors detected, attempt to evaluate (execute).
         WriteLine(result.Value)
       Else
         ' We have errors, so don't try to evaluate (execute).
         For Each diagnostic In diagnostics
 
+          ' An extra line before for clarity...
           WriteLine()
 
           Console.ForegroundColor = ConsoleColor.DarkRed
@@ -79,14 +82,18 @@ Friend Module Program
           Dim er = line.Substring(diagnostic.Span.Start, diagnostic.Span.Length)
           Dim suffix = line.Substring(diagnostic.Span.End)
 
+          ' Write the prefix in "normal" text...
           Write($"    {prefix}")
+          ' Write the error portion in red...
           Console.ForegroundColor = ConsoleColor.DarkRed
           Write(er)
           Console.ResetColor()
+          ' Write the rest of the line.
           WriteLine(suffix)
 
         Next
 
+        ' An extra line at the end for clarity.
         WriteLine()
 
       End If

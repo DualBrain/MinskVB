@@ -51,6 +51,10 @@ Namespace Global.Basic.CodeAnalysis
       Me.Report(span, $"Binary operator '{operatorText}' is not defined for type {leftType} and {rightType}.")
     End Sub
 
+    Public Sub ReportUndefinedName(span As TextSpan, name As String)
+      Me.Report(span, $"Variable '{name}' doesn't exist.")
+    End Sub
+
   End Class
 
 End Namespace
