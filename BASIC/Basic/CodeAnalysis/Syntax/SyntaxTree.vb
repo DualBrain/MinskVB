@@ -21,6 +21,17 @@ Namespace Global.Basic.CodeAnalysis.Syntax
       Return parser.Parse
     End Function
 
+    Public Shared Iterator Function ParseTokens(Text As String) As IEnumerable(Of SyntaxToken)
+      Dim lexer = New Lexer(Text)
+      While True
+        Dim token = lexer.Lex
+        If token.Kind = SyntaxKind.EndOfFileToken Then
+          Exit While
+        End If
+        Yield token
+      End While
+    End Function
+
   End Class
 
 End Namespace
