@@ -7,9 +7,9 @@ Namespace Global.Basic.CodeAnalysis.Binding
 
   Friend NotInheritable Class Binder
 
-    Private ReadOnly m_variables As Dictionary(Of String, Object)
+    Private ReadOnly m_variables As Dictionary(Of VariableSymbol, Object)
 
-    Public Sub New(variables As Dictionary(Of String, Object))
+    Public Sub New(variables As Dictionary(Of VariableSymbol, Object))
       Me.m_variables = variables
     End Sub
 
@@ -47,28 +47,39 @@ Namespace Global.Basic.CodeAnalysis.Binding
 
     Private Function BindNameExpression(syntax As NameExpressionSyntax) As BoundExpression
       Dim name = syntax.IdentifierToken.Text
-      Dim value As Object = Nothing
-      If Not Me.m_variables.TryGetValue(name.ToLower, value) Then
+      Dim variable = Me.m_variables.Keys.FirstOrDefault(Function(v) v.Name = name.ToLower)
+      'Dim value As Object = Nothing
+      'If Not Me.m_variables.TryGetValue(name.ToLower, value) Then
+      If variable Is Nothing Then
         Me.Diagnostics.ReportUndefinedName(syntax.IdentifierToken.Span, name)
         Return New BoundLiteralExpression(0)
       End If
-      Dim type = value.GetType()
-      Return New BoundVariableExpression(name, type)
+      'Dim type = value.GetType()
+      Return New BoundVariableExpression(variable)
     End Function
 
     Private Function BindAssignmentExpression(syntax As AssignmentExpressionSyntax) As BoundExpression
       Dim name = syntax.IdentifierToken.Text
       Dim boundExpression = Me.BindExpression(syntax.Expression)
 
-      Dim defaultValue = If(boundExpression.Type = GetType(Integer), CObj(0), If(boundExpression.Type = GetType(Boolean), False, Nothing))
+      ' We are here: 1:37:30
 
-      If defaultValue Is Nothing Then
-        Throw New Exception($"Unsupported variable type: {boundExpression.Type}")
+      Dim existingVariable = Me.m_variables.Keys.FirstOrDefault(Function(v) v.Name = name.ToLower)
+      If existingVariable IsNot Nothing Then
+        Me.m_variables.Remove(existingVariable)
       End If
+      Dim variable = New VariableSymbol(name.ToLower, boundExpression.Type)
+      Me.m_variables(variable) = Nothing
 
-      Me.m_variables(name) = defaultValue
+      'Dim defaultValue = If(boundExpression.Type = GetType(Integer), CObj(0), If(boundExpression.Type = GetType(Boolean), False, Nothing))
 
-      Return New BoundAssignmentExpression(name, boundExpression)
+      'If defaultValue Is Nothing Then
+      '  Throw New Exception($"Unsupported variable type: {boundExpression.Type}")
+      'End If
+
+      'Me.m_variables(name) = defaultValue
+
+      Return New BoundAssignmentExpression(variable, boundExpression)
     End Function
 
     Private Function BindUnaryEpression(syntax As UnaryExpressionSyntax) As BoundExpression

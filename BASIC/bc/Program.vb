@@ -20,7 +20,7 @@ Friend Module Program
   Sub Main()
 
     Dim showTree = False
-    Dim variables = New Dictionary(Of String, Object)
+    Dim variables = New Dictionary(Of VariableSymbol, Object)
 
     Do
 

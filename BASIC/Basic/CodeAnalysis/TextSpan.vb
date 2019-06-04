@@ -3,6 +3,7 @@ Option Strict On
 Option Infer On
 
 Namespace Global.Basic.CodeAnalysis
+
   Public Structure TextSpan
 
     Sub New(start As Integer, length As Integer)

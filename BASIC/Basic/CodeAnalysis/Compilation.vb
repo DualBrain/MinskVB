@@ -14,7 +14,7 @@ Namespace Global.Basic.CodeAnalysis
 
     Public ReadOnly Property Syntax As SyntaxTree
 
-    Public Function Evaluate(variables As Dictionary(Of String, Object)) As EvaluationResult
+    Public Function Evaluate(variables As Dictionary(Of VariableSymbol, Object)) As EvaluationResult
 
       Dim binder = New Binder(variables)
       Dim boundExpression = binder.BindExpression(Me.Syntax.Root)
