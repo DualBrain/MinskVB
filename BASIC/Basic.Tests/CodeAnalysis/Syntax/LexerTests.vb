@@ -4,11 +4,10 @@ Option Infer On
 
 Imports Xunit
 Imports Basic.CodeAnalysis.Syntax
-Imports System.Collections.Generic
 
 Namespace Global.Basic.Tests.CodeAnalysis.Syntax
 
-  Public Class LexerTest
+  Public Class LexerTests
 
     <Theory>
     <MemberData(NameOf(GetTokensData))>

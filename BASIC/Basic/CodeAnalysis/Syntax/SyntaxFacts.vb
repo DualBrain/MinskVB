@@ -6,7 +6,7 @@ Imports System.Runtime.CompilerServices
 
 Namespace Global.Basic.CodeAnalysis.Syntax
 
-  Friend Module SyntaxFacts
+  Public Module SyntaxFacts
 
     <Extension()>
     Public Function GetUnaryOperatorPrecedence(kind As SyntaxKind) As Integer
@@ -68,6 +68,34 @@ Namespace Global.Basic.CodeAnalysis.Syntax
 
         Case Else
           Return SyntaxKind.IdentifierToken
+      End Select
+
+    End Function
+
+    Public Function GetText(kind As SyntaxKind) As String
+      Select Case kind
+        Case SyntaxKind.PlusToken : Return "+"
+        Case SyntaxKind.MinusToken : Return "-"
+        Case SyntaxKind.StarToken : Return "*"
+        Case SyntaxKind.SlashToken : Return "/"
+        Case SyntaxKind.BangToken : Return "!"
+        Case SyntaxKind.EqualsToken : Return "="
+        Case SyntaxKind.AmpersandAmpersandToken : Return "&&"
+        Case SyntaxKind.EqualsEqualsToken : Return "=="
+        Case SyntaxKind.BangEqualsToken : Return "!="
+        Case SyntaxKind.LessThanGreaterThanToken : Return "<>"
+        Case SyntaxKind.PipePipeToken : Return "||"
+        Case SyntaxKind.OpenParenToken : Return "("
+        Case SyntaxKind.CloseParenToken : Return ")"
+        Case SyntaxKind.FalseKeyword : Return "false"
+        Case SyntaxKind.TrueKeyword : Return "true"
+        Case SyntaxKind.NotKeyword : Return "not"
+        Case SyntaxKind.AndKeyword : Return "and"
+        Case SyntaxKind.AndAlsoKeyword : Return "andalso"
+        Case SyntaxKind.OrKeyword : Return "or"
+        Case SyntaxKind.OrElseKeyword : Return "orelse"
+        Case Else
+          Return Nothing
       End Select
 
     End Function
