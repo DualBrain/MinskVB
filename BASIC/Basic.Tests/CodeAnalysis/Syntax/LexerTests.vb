@@ -9,6 +9,25 @@ Namespace Global.Basic.Tests.CodeAnalysis.Syntax
 
   Public Class LexerTests
 
+    <Fact>
+    Sub Lexer_Tests_AllTokens()
+
+      Dim tokenKinds = System.Enum.GetValues(GetType(SyntaxKind)) _
+                       .Cast(Of SyntaxKind) _
+                       .Where(Function(k) k.ToString.EndsWith("Keyword") OrElse
+                                          k.ToString.EndsWith("Token"))
+
+      Dim testedTokenKinds = GetTokens.Concat(GetSeparators).Select(Function(t) t.kind)
+
+      Dim untestedTokenKinds = New SortedSet(Of SyntaxKind)(tokenKinds)
+      untestedTokenKinds.Remove(SyntaxKind.BadToken)
+      untestedTokenKinds.Remove(SyntaxKind.EndOfFileToken)
+      untestedTokenKinds.ExceptWith(testedTokenKinds)
+
+      Assert.Empty(untestedTokenKinds)
+
+    End Sub
+
     <Theory>
     <MemberData(NameOf(GetTokensData))>
     Sub Lexer_Lexes_Token(kind As SyntaxKind, text As String)
@@ -73,32 +92,19 @@ Namespace Global.Basic.Tests.CodeAnalysis.Syntax
       Next
     End Function
 
-    Private Shared Function GetTokens() As (kind As SyntaxKind, text As String)()
+    Private Shared Function GetTokens() As IEnumerable(Of (kind As SyntaxKind, text As String))
 
-      Return {(SyntaxKind.PlusToken, "+"),
-              (SyntaxKind.MinusToken, "-"),
-              (SyntaxKind.StarToken, "*"),
-              (SyntaxKind.SlashToken, "/"),
-              (SyntaxKind.BangToken, "!"),
-              (SyntaxKind.EqualsToken, "="),
-              (SyntaxKind.AmpersandAmpersandToken, "&&"),
-              (SyntaxKind.EqualsEqualsToken, "=="),
-              (SyntaxKind.BangEqualsToken, "!="),
-              (SyntaxKind.LessThanGreaterThanToken, "<>"),
-              (SyntaxKind.PipePipeToken, "||"),
-              (SyntaxKind.OpenParenToken, "("),
-              (SyntaxKind.CloseParenToken, ")"),
-              (SyntaxKind.FalseKeyword, "false"),
-              (SyntaxKind.TrueKeyword, "true"),
-              (SyntaxKind.NotKeyword, "not"),
-              (SyntaxKind.AndKeyword, "and"),
-              (SyntaxKind.AndAlsoKeyword, "andalso"),
-              (SyntaxKind.OrKeyword, "or"),
-              (SyntaxKind.OrElseKeyword, "orelse"),
-              (SyntaxKind.NumberToken, "1"),
-              (SyntaxKind.NumberToken, "123"),
-              (SyntaxKind.IdentifierToken, "a"),
-              (SyntaxKind.IdentifierToken, "abc")}
+      Dim fixedTokens = System.Enum.GetValues(GetType(SyntaxKind)) _
+                        .Cast(Of SyntaxKind)() _
+                        .Select(Function(k) (Kind:=k, Text:=SyntaxFacts.GetText(k))) _
+                        .Where(Function(t) t.Text IsNot Nothing)
+
+      Dim dynamicTokens = {(SyntaxKind.NumberToken, "1"),
+                           (SyntaxKind.NumberToken, "123"),
+                           (SyntaxKind.IdentifierToken, "a"),
+                           (SyntaxKind.IdentifierToken, "abc")}
+
+      Return fixedTokens.Concat(dynamicTokens)
 
     End Function
 
