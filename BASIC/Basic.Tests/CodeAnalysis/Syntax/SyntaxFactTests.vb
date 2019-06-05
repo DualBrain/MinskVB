@@ -2,8 +2,8 @@
 Option Strict On
 Option Infer On
 
-Imports Basic.CodeAnalysis.Syntax
 Imports Xunit
+Imports Basic.CodeAnalysis.Syntax
 
 Namespace Global.Basic.Tests.CodeAnalysis.Syntax
 
