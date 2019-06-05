@@ -6,7 +6,9 @@ Namespace Global.Basic.CodeAnalysis.Syntax
 
   Friend NotInheritable Class Parser
 
+    Public ReadOnly Property Diagnostics As DiagnosticBag = New DiagnosticBag
     Private ReadOnly Property Tokens As SyntaxToken()
+
     Private Property Position As Integer
 
     Sub New(text As String)
@@ -23,8 +25,6 @@ Namespace Global.Basic.CodeAnalysis.Syntax
       Me.Tokens = tokens.ToArray
       Me.Diagnostics.AddRange(lexer.Diagnostics)
     End Sub
-
-    Public ReadOnly Property Diagnostics As DiagnosticBag = New DiagnosticBag
 
     Private Function Peek(offset As Integer) As SyntaxToken
       Dim index = Me.Position + offset
@@ -148,26 +148,39 @@ Namespace Global.Basic.CodeAnalysis.Syntax
     Private Function ParsePrimaryExpression() As ExpressionSyntax
 
       Select Case Me.Current.Kind
-        Case SyntaxKind.OpenParenToken
-          Dim left = Me.NextToken
-          Dim expression = Me.ParseExpression
-          Dim right = Me.MatchToken(SyntaxKind.CloseParenToken)
-          Return New ParenExpressionSyntax(left, expression, right)
-        Case SyntaxKind.FalseKeyword, SyntaxKind.TrueKeyword
-          Dim keywordToken = Me.NextToken()
-          Dim value = keywordToken.Kind = SyntaxKind.TrueKeyword
-          Return New LiteralExpressionSyntax(keywordToken, value)
-        Case SyntaxKind.IdentifierToken
-          Dim identifierToken = Me.NextToken
-          'If Me.Current.Kind = SyntaxKind.EqualsToken Then
-          'Else
-          'End If
-          Return New NameExpressionSyntax(identifierToken)
+        Case SyntaxKind.OpenParenToken : Return Me.ParseParenExpression
+        Case SyntaxKind.FalseKeyword : Return Me.ParseBooleanLiteral
+        Case SyntaxKind.TrueKeyword : Return Me.ParseBooleanLiteral
+        Case SyntaxKind.NumberToken : Return Me.ParseNumberLiteral
+        Case SyntaxKind.IdentifierToken : Return Me.ParseNameExpression
         Case Else
-          Dim numberToken = Me.MatchToken(SyntaxKind.NumberToken)
-          Return New LiteralExpressionSyntax(numberToken)
+          ' Default to parsing a name expression if we reach this far.
+          Return Me.ParseNameExpression
       End Select
 
+    End Function
+
+    Private Function ParseParenExpression() As ExpressionSyntax
+      Dim left = Me.MatchToken(SyntaxKind.OpenParenToken)
+      Dim expression = Me.ParseExpression
+      Dim right = Me.MatchToken(SyntaxKind.CloseParenToken)
+      Return New ParenExpressionSyntax(left, expression, right)
+    End Function
+
+    Private Function ParseBooleanLiteral() As ExpressionSyntax
+      Dim isTrue = (Me.Current.Kind = SyntaxKind.TrueKeyword)
+      Dim keywordToken = Me.MatchToken(If(isTrue, SyntaxKind.TrueKeyword, SyntaxKind.FalseKeyword))
+      Return New LiteralExpressionSyntax(keywordToken, isTrue)
+    End Function
+
+    Private Function ParseNameExpression() As ExpressionSyntax
+      Dim identifierToken = Me.MatchToken(SyntaxKind.IdentifierToken)
+      Return New NameExpressionSyntax(identifierToken)
+    End Function
+
+    Private Function ParseNumberLiteral() As ExpressionSyntax
+      Dim numberToken = Me.MatchToken(SyntaxKind.NumberToken)
+      Return New LiteralExpressionSyntax(numberToken)
     End Function
 
   End Class
