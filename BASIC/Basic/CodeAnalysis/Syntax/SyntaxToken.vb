@@ -24,10 +24,6 @@ Namespace Global.Basic.CodeAnalysis.Syntax
       End Get
     End Property
 
-    Public Overrides Function GetChildren() As IEnumerable(Of SyntaxNode)
-      Return Enumerable.Empty(Of SyntaxNode)
-    End Function
-
   End Class
 
 End Namespace

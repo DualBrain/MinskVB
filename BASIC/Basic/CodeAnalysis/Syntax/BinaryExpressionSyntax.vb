@@ -18,12 +18,6 @@ Namespace Global.Basic.CodeAnalysis.Syntax
     Public ReadOnly Property OperatorToken As SyntaxToken
     Public ReadOnly Property Right As ExpressionSyntax
 
-    Public Overrides Iterator Function GetChildren() As IEnumerable(Of SyntaxNode)
-      Yield Me.Left
-      Yield Me.OperatorToken
-      Yield Me.Right
-    End Function
-
   End Class
 
 End Namespace

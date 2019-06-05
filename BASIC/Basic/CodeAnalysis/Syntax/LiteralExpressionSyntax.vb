@@ -20,10 +20,6 @@ Namespace Global.Basic.CodeAnalysis.Syntax
     Public ReadOnly Property LiteralToken As SyntaxToken
     Public ReadOnly Property Value As Object
 
-    Public Overrides Iterator Function GetChildren() As IEnumerable(Of SyntaxNode)
-      Yield Me.LiteralToken
-    End Function
-
   End Class
 
 End Namespace

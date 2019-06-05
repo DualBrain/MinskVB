@@ -14,10 +14,6 @@ Namespace Global.Basic.CodeAnalysis.Syntax
     Public Overrides ReadOnly Property Kind As SyntaxKind = SyntaxKind.NameExpression
     Public ReadOnly Property IdentifierToken As SyntaxToken
 
-    Public Overrides Iterator Function GetChildren() As IEnumerable(Of SyntaxNode)
-      Yield Me.IdentifierToken
-    End Function
-
   End Class
 
 End Namespace

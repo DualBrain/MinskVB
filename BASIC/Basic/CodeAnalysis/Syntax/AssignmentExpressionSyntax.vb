@@ -18,12 +18,6 @@ Namespace Global.Basic.CodeAnalysis.Syntax
     Public ReadOnly Property EqualsToken As SyntaxToken
     Public ReadOnly Property Expression As ExpressionSyntax
 
-    Public Overrides Iterator Function GetChildren() As IEnumerable(Of SyntaxNode)
-      Yield Me.IdentifierToken
-      Yield Me.EqualsToken
-      Yield Me.Expression
-    End Function
-
   End Class
 
 End Namespace
