@@ -6,14 +6,18 @@ Namespace Global.Basic.CodeAnalysis.Syntax
 
   Friend NotInheritable Class Lexer
 
+    Public ReadOnly Property Diagnostics As DiagnosticBag = New DiagnosticBag
+
     Private ReadOnly Property Text As String
+
     Private Property Position As Integer
+    Private Property Start As Integer
+    Private Property Kind As SyntaxKind
+    Private Property Value As Object
 
     Public Sub New(text As String)
       Me.Text = text
     End Sub
-
-    Public ReadOnly Property Diagnostics As DiagnosticBag = New DiagnosticBag
 
     Private ReadOnly Property Current As Char
       Get
@@ -37,131 +41,123 @@ Namespace Global.Basic.CodeAnalysis.Syntax
       End Get
     End Property
 
-    Private Sub [Next]()
-      Me.Position += 1
-    End Sub
-
     Public Function Lex() As SyntaxToken
 
-      ' numbers
-      ' symbols
-      ' whitespace
-      ' "end of file"
-
-      If Me.Position >= Me.Text.Length Then
-        Return New SyntaxToken(SyntaxKind.EndOfFileToken, Me.PositionPlusPlus, ChrW(0), Nothing)
-      End If
-
-      Dim start = Me.Position
-
-      If Char.IsDigit(Me.Current) Then
-
-        While Char.IsDigit(Me.Current)
-          Me.Next()
-        End While
-
-        Dim length = Me.Position - start
-        Dim text = Me.Text.Substring(start, length)
-
-        Dim value As Integer
-        If Not Integer.TryParse(text, value) Then
-          Me.Diagnostics.ReportInvalidNumber(New TextSpan(start, length), Me.Text, GetType(Integer))
-        End If
-        Return New SyntaxToken(SyntaxKind.NumberToken, start, text, value)
-
-      End If
-
-      If Char.IsWhiteSpace(Me.Current) Then
-
-        While Char.IsWhiteSpace(Me.Current)
-          Me.Next()
-        End While
-
-        Dim length = Me.Position - start
-        Dim text = Me.Text.Substring(start, length)
-
-        Return New SyntaxToken(SyntaxKind.WhitespaceToken, start, text, Nothing)
-
-      End If
-
-      If Char.IsLetter(Me.Current) Then
-
-        While Char.IsLetter(Me.Current)
-          Me.Next()
-        End While
-
-        Dim length = Me.Position - start
-        Dim text = Me.Text.Substring(start, length)
-        Dim kind = SyntaxFacts.GetKeywordKind(text)
-
-        Return New SyntaxToken(kind, start, text, Nothing)
-
-      End If
-
-      ' true
-      ' false
+      Me.Start = Me.Position
+      Me.Kind = SyntaxKind.BadToken
+      Me.Value = Nothing
 
       Select Case Me.Current
-        Case "+"c : Return New SyntaxToken(SyntaxKind.PlusToken, Me.PositionPlusPlus, "+", Nothing)
-        Case "-"c : Return New SyntaxToken(SyntaxKind.MinusToken, Me.PositionPlusPlus, "-", Nothing)
-        Case "*"c : Return New SyntaxToken(SyntaxKind.StarToken, Me.PositionPlusPlus, "*", Nothing)
-        Case "/"c : Return New SyntaxToken(SyntaxKind.SlashToken, Me.PositionPlusPlus, "/", Nothing)
-        Case "("c : Return New SyntaxToken(SyntaxKind.OpenParenToken, Me.PositionPlusPlus, "(", Nothing)
-        Case ")"c : Return New SyntaxToken(SyntaxKind.CloseParenToken, Me.PositionPlusPlus, ")", Nothing)
-
-        'Case "!"c : Return New SyntaxToken(SyntaxKind.BangToken, Me.PositionPlusPlus, "!", Nothing)
+        Case ChrW(0) : Me.Kind = SyntaxKind.EndOfFileToken ': Me.Position += 1
+        Case "+"c : Me.Kind = SyntaxKind.PlusToken : Me.Position += 1
+        Case "-"c : Me.Kind = SyntaxKind.MinusToken : Me.Position += 1
+        Case "*"c : Me.Kind = SyntaxKind.StarToken : Me.Position += 1
+        Case "/"c : Me.Kind = SyntaxKind.SlashToken : Me.Position += 1
+        Case "("c : Me.Kind = SyntaxKind.OpenParenToken : Me.Position += 1
+        Case ")"c : Me.Kind = SyntaxKind.CloseParenToken : Me.Position += 1
         Case "&"c
           If Me.LookAhead = "&"c Then
-            Me.Position += 2
-            Return New SyntaxToken(SyntaxKind.AmpersandAmpersandToken, start, "&&", Nothing)
+            Me.Kind = SyntaxKind.AmpersandAmpersandToken : Me.Position += 2
           End If
         Case "|"c
           If Me.LookAhead = "|"c Then
-            Me.Position += 2
-            Return New SyntaxToken(SyntaxKind.PipePipeToken, start, "||", Nothing)
+            Me.Kind = SyntaxKind.PipePipeToken : Me.Position += 2
           End If
-
         Case "="c
           If Me.LookAhead = "="c Then
-            Me.Position += 2
-            Return New SyntaxToken(SyntaxKind.EqualsEqualsToken, start, "==", Nothing)
+            Me.Kind = SyntaxKind.EqualsEqualsToken : Me.Position += 2
           Else
-            Return New SyntaxToken(SyntaxKind.EqualsToken, Me.PositionPlusPlus, "=", Nothing)
+            Me.Kind = SyntaxKind.EqualsToken : Me.Position += 1
           End If
         Case "!"c
           If Me.LookAhead = "="c Then
-            Me.Position += 2
-            Return New SyntaxToken(SyntaxKind.BangEqualsToken, start, "!=", Nothing)
+            Me.Kind = SyntaxKind.BangEqualsToken : Me.Position += 2
           Else
-            Me.Position += 1
-            Return New SyntaxToken(SyntaxKind.BangToken, start, "!", Nothing)
+            Me.Kind = SyntaxKind.BangToken : Me.Position += 1
           End If
         Case "<"c
           If Me.LookAhead = ">"c Then
-            Me.Position += 2
-            Return New SyntaxToken(SyntaxKind.LessThanGreaterThanToken, start, "<>", Nothing)
+            Me.Kind = SyntaxKind.LessThanGreaterThanToken : Me.Position += 2
+          End If
+        Case "0"c, "1"c, "2"c, "3"c, "4"c, "5"c, "6"c, "7"c, "8"c, "9"c
+          Me.ReadNumberToken()
+        Case " "c, ChrW(10), ChrW(13), ChrW(9) ' Short-circuit whitespace checking (common).
+          Me.ReadWhiteSpace()
+        Case Else
+          If Char.IsLetter(Me.Current) Then
+            Me.ReadIdentifierOrKeyword()
+          ElseIf Char.IsWhiteSpace(Me.Current) Then
+            Me.ReadWhiteSpace()
+          Else
+            Me.Diagnostics.ReportBadCharacter(Me.Position, Me.Current)
+            Me.Position += 1
           End If
 
-        Case Else
       End Select
 
-      Me.Diagnostics.ReportBadCharacter(Me.Position, Me.Current)
-      Return New SyntaxToken(SyntaxKind.BadToken, Me.PositionPlusPlus, Me.Text.Substring(Me.Position - 1, 1), Nothing)
+      Dim length = Me.Position - Me.Start
+      Dim text = SyntaxFacts.GetText(Me.Kind)
+      If text Is Nothing Then
+        text = Me.Text.Substring(Me.Start, length)
+      End If
+
+      Return New SyntaxToken(Me.Kind, Me.Start, text, Me.Value)
 
     End Function
 
-    Private Function PositionPlusPlus() As Integer
+    Private Sub ReadNumberToken()
 
-      ' This will return the current Position as the "current" value and
-      ' increment the Position for use the next time around...
-      ' Effectively working similar to the C style post ++ addition:
-      ' ..., position++, 
+      While Char.IsDigit(Me.Current)
+        Me.Position += 1
+      End While
 
-      Dim result = Me.Position
-      Me.Position += 1
-      Return result
+      Dim length = Me.Position - Me.Start
+      Dim text = Me.Text.Substring(Me.Start, length)
+      Dim value As Integer
+      If Not Integer.TryParse(text, value) Then
+        Me.Diagnostics.ReportInvalidNumber(New TextSpan(Me.Start, length), Me.Text, GetType(Integer))
+      End If
 
-    End Function
+      Me.Value = value
+      Me.Kind = SyntaxKind.NumberToken
+
+    End Sub
+
+    Private Sub ReadWhiteSpace()
+
+      While Char.IsWhiteSpace(Me.Current)
+        Me.Position += 1
+      End While
+
+      Me.Kind = SyntaxKind.WhitespaceToken
+
+    End Sub
+
+    Private Sub ReadIdentifierOrKeyword()
+
+      While Char.IsLetter(Me.Current)
+        Me.Position += 1
+      End While
+
+      Dim length = Me.Position - Me.Start
+      Dim text = Me.Text.Substring(Me.Start, length)
+
+      Me.Kind = SyntaxFacts.GetKeywordKind(text)
+
+    End Sub
+
+    'Private Function PositionPlusPlus() As Integer
+
+    '  ' This will return the current Position as the "current" value and
+    '  ' increment the Position for use the next time around...
+    '  ' Effectively working similar to the C style post ++ addition:
+    '  ' ..., position++, 
+
+    '  Dim result = Me.Position
+    '  Me.Position += 1
+    '  Return result
+
+    'End Function
 
   End Class
 
