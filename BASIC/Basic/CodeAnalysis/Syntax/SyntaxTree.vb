@@ -2,17 +2,19 @@
 Option Strict On
 Option Infer On
 
+Imports System.Collections.Immutable
+
 Namespace Global.Basic.CodeAnalysis.Syntax
 
   Public NotInheritable Class SyntaxTree
 
-    Sub New(diagnostics As IEnumerable(Of Diagnostic), root As ExpressionSyntax, endOfFileToken As SyntaxToken)
-      Me.Diagnostics = diagnostics.ToArray
+    Sub New(diagnostics As ImmutableArray(Of Diagnostic), root As ExpressionSyntax, endOfFileToken As SyntaxToken)
+      Me.Diagnostics = diagnostics
       Me.Root = root
       Me.EndOfFileToken = endOfFileToken
     End Sub
 
-    Public ReadOnly Property Diagnostics As IReadOnlyList(Of Diagnostic)
+    Public ReadOnly Property Diagnostics As ImmutableArray(Of Diagnostic)
     Public ReadOnly Property Root As ExpressionSyntax
     Public ReadOnly Property EndOfFileToken As SyntaxToken
 

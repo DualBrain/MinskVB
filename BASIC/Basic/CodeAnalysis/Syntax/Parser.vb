@@ -2,12 +2,14 @@
 Option Strict On
 Option Infer On
 
+Imports System.Collections.Immutable
+
 Namespace Global.Basic.CodeAnalysis.Syntax
 
   Friend NotInheritable Class Parser
 
     Public ReadOnly Property Diagnostics As DiagnosticBag = New DiagnosticBag
-    Private ReadOnly Property Tokens As SyntaxToken()
+    Private ReadOnly Property Tokens As ImmutableArray(Of SyntaxToken)
 
     Private Property Position As Integer
 
@@ -18,11 +20,11 @@ Namespace Global.Basic.CodeAnalysis.Syntax
       Do
         token = lexer.Lex
         If token.Kind <> SyntaxKind.WhitespaceToken AndAlso
-           token.Kind <> SyntaxKind.BadToken Then
+                   token.Kind <> SyntaxKind.BadToken Then
           tokens.Add(token)
         End If
       Loop While token.Kind <> SyntaxKind.EndOfFileToken
-      Me.Tokens = tokens.ToArray
+      Me.Tokens = tokens.ToImmutableArray
       Me.Diagnostics.AddRange(lexer.Diagnostics)
     End Sub
 
@@ -56,7 +58,7 @@ Namespace Global.Basic.CodeAnalysis.Syntax
     Public Function Parse() As SyntaxTree
       Dim expression = Me.ParseExpression
       Dim endOfFileToken = Me.MatchToken(SyntaxKind.EndOfFileToken)
-      Return New SyntaxTree(Me.Diagnostics, expression, endOfFileToken)
+      Return New SyntaxTree(Me.Diagnostics.ToImmutableArray, expression, endOfFileToken)
     End Function
 
     'Private Function ParseExpression() As ExpressionSyntax
@@ -70,7 +72,7 @@ Namespace Global.Basic.CodeAnalysis.Syntax
     Private Function ParseAssignmentExpression() As ExpressionSyntax
 
       If (Me.Peek(0).Kind = SyntaxKind.IdentifierToken AndAlso
-          Me.Peek(1).Kind = SyntaxKind.EqualsToken) Then
+                Me.Peek(1).Kind = SyntaxKind.EqualsToken) Then
 
         Dim identifierToken = Me.NextToken
         Dim operatorToken = Me.NextToken

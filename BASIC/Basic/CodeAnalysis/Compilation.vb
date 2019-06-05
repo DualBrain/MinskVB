@@ -2,6 +2,7 @@
 Option Strict On
 Option Infer On
 
+Imports System.Collections.Immutable
 Imports Basic.CodeAnalysis.Binding
 Imports Basic.CodeAnalysis.Syntax
 
@@ -19,7 +20,7 @@ Namespace Global.Basic.CodeAnalysis
       Dim binder = New Binder(variables)
       Dim boundExpression = binder.BindExpression(Me.Syntax.Root)
 
-      Dim diagnostics = Me.Syntax.Diagnostics.Concat(binder.Diagnostics).ToArray
+      Dim diagnostics = Me.Syntax.Diagnostics.Concat(binder.Diagnostics).ToImmutableArray
 
       If diagnostics.Any Then
         Return New EvaluationResult(diagnostics, Nothing)
@@ -28,7 +29,7 @@ Namespace Global.Basic.CodeAnalysis
       Dim evaluator = New Evaluator(boundExpression, variables)
       Dim value = evaluator.Evaluate
 
-      Return New EvaluationResult(Array.Empty(Of Diagnostic), value)
+      Return New EvaluationResult(ImmutableArray(Of Diagnostic).Empty, value)
 
     End Function
 
