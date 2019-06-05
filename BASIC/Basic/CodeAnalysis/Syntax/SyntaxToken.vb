@@ -18,7 +18,8 @@ Namespace Global.Basic.CodeAnalysis.Syntax
     Public ReadOnly Property Position As Integer
     Public ReadOnly Property Text As String
     Public ReadOnly Property Value As Object
-    Public ReadOnly Property Span As TextSpan
+
+    Public Overrides ReadOnly Property Span As TextSpan
       Get
         Return New TextSpan(Me.Position, Me.Text.Length)
       End Get

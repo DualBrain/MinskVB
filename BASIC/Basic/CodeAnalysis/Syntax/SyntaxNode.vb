@@ -10,6 +10,14 @@ Namespace Global.Basic.CodeAnalysis.Syntax
 
     Public MustOverride ReadOnly Property Kind() As SyntaxKind
 
+    Public Overridable ReadOnly Property Span() As TextSpan
+      Get
+        Dim first = Me.GetChildren.First.Span
+        Dim last = Me.GetChildren.Last.Span
+        Return TextSpan.FromBounds(first.Start, last.End)
+      End Get
+    End Property
+
     Public Iterator Function GetChildren() As IEnumerable(Of SyntaxNode)
 
       Dim properties = Me.GetType.GetProperties(BindingFlags.[Public] Or BindingFlags.Instance)

@@ -20,6 +20,11 @@ Namespace Global.Basic.CodeAnalysis
       End Get
     End Property
 
+    Public Shared Function FromBounds(start As Integer, [end] As Integer) As TextSpan
+      Dim length = [end] - start
+      Return New TextSpan(start, length)
+    End Function
+
   End Structure
 
 End Namespace
