@@ -1,5 +1,7 @@
 # BASIC for .NET
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+
 Building a BASIC compiler from scratch targetting .NET Core (v3) using VB.NET.
 
 ## History
