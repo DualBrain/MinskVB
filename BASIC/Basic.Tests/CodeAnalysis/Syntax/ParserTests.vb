@@ -66,10 +66,71 @@ Namespace Global.Basic.Tests.CodeAnalysis.Syntax
 
     End Sub
 
+    <Theory>
+    <MemberData(NameOf(GetUnaryOperatorPairsData))>
+    Public Sub Parser_UnaryExpression_HonorsPrecedences(unaryKind As SyntaxKind, binaryKind As SyntaxKind)
+
+      Dim unaryPrecedence = SyntaxFacts.GetUnaryOperatorPrecedence(unaryKind)
+      Dim binaryPrecedence = SyntaxFacts.GetBinaryOperatorPrecedence(binaryKind)
+      Dim unaryText = SyntaxFacts.GetText(unaryKind)
+      Dim binaryText = SyntaxFacts.GetText(binaryKind)
+      Dim text = $"{unaryText} a {binaryText} b"
+      Dim expression = SyntaxTree.Parse(text).Root
+
+      If unaryPrecedence >= binaryPrecedence Then
+
+        '  binary
+        '   /  \
+        'unary  b
+        '  |
+        '  a
+
+        Using e = New AssertingEnumerator(expression)
+          e.AssertNode(SyntaxKind.BinaryExpression)
+          e.AssertNode(SyntaxKind.UnaryExpression)
+          e.AssertToken(unaryKind, unaryText)
+          e.AssertNode(SyntaxKind.NameExpression)
+          e.AssertToken(SyntaxKind.IdentifierToken, "a")
+          e.AssertToken(binaryKind, binaryText)
+          e.AssertNode(SyntaxKind.NameExpression)
+          e.AssertToken(SyntaxKind.IdentifierToken, "b")
+        End Using
+
+      Else
+
+        '  unary
+        '    |
+        '  binary
+        '   / \
+        '  a   b
+
+        Using e = New AssertingEnumerator(expression)
+          e.AssertNode(SyntaxKind.UnaryExpression)
+          e.AssertToken(unaryKind, unaryText)
+          e.AssertNode(SyntaxKind.BinaryExpression)
+          e.AssertNode(SyntaxKind.NameExpression)
+          e.AssertToken(SyntaxKind.IdentifierToken, "a")
+          e.AssertToken(binaryKind, binaryText)
+          e.AssertNode(SyntaxKind.NameExpression)
+          e.AssertToken(SyntaxKind.IdentifierToken, "b")
+        End Using
+
+      End If
+
+    End Sub
+
     Public Shared Iterator Function GetBinaryOperatorPairsData() As IEnumerable(Of Object())
       For Each op1 In SyntaxFacts.GetBinaryOperatorKinds
         For Each op2 In SyntaxFacts.GetBinaryOperatorKinds
           Yield New Object() {op1, op2}
+        Next
+      Next
+    End Function
+
+    Public Shared Iterator Function GetUnaryOperatorPairsData() As IEnumerable(Of Object())
+      For Each unary In SyntaxFacts.GetUnaryOperatorKinds
+        For Each binary In SyntaxFacts.GetBinaryOperatorKinds
+          Yield New Object() {unary, binary}
         Next
       Next
     End Function
