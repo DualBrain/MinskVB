@@ -72,6 +72,30 @@ Namespace Global.Basic.CodeAnalysis.Syntax
 
     End Function
 
+    Public Iterator Function GetUnaryOperatorKinds() As IEnumerable(Of SyntaxKind)
+
+      Dim kinds = DirectCast([Enum].GetValues(GetType(SyntaxKind)), SyntaxKind())
+
+      For Each kind In kinds
+        If GetUnaryOperatorPrecedence(kind) > 0 Then
+          Yield kind
+        End If
+      Next
+
+    End Function
+
+    Public Iterator Function GetBinaryOperatorKinds() As IEnumerable(Of SyntaxKind)
+
+      Dim kinds = DirectCast([Enum].GetValues(GetType(SyntaxKind)), SyntaxKind())
+
+      For Each kind In kinds
+        If GetBinaryOperatorPrecedence(kind) > 0 Then
+          Yield kind
+        End If
+      Next
+
+    End Function
+
     Public Function GetText(kind As SyntaxKind) As String
       Select Case kind
         Case SyntaxKind.PlusToken : Return "+"

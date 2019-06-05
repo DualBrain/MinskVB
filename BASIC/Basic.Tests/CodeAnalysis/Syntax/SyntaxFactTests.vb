@@ -6,6 +6,7 @@ Imports Basic.CodeAnalysis.Syntax
 Imports Xunit
 
 Namespace Global.Basic.Tests.CodeAnalysis.Syntax
+
   Public Class SyntaxFactTests
 
     <Theory>
