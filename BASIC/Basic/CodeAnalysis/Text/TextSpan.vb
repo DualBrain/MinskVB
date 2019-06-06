@@ -2,7 +2,7 @@
 Option Strict On
 Option Infer On
 
-Namespace Global.Basic.CodeAnalysis
+Namespace Global.Basic.CodeAnalysis.Text
 
   Public Structure TextSpan
 

@@ -1,7 +1,9 @@
 ﻿Option Explicit On
 Option Strict On
 Option Infer On
+
 Imports Basic.CodeAnalysis.Syntax
+Imports Basic.CodeAnalysis.Text
 
 Namespace Global.Basic.CodeAnalysis
 

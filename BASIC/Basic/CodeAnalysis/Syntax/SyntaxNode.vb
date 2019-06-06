@@ -4,6 +4,7 @@ Option Infer On
 
 Imports System.IO
 Imports System.Reflection
+Imports Basic.CodeAnalysis.Text
 
 Namespace Global.Basic.CodeAnalysis.Syntax
 

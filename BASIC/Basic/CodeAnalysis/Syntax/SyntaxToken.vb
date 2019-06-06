@@ -2,6 +2,8 @@
 Option Strict On
 Option Infer On
 
+Imports Basic.CodeAnalysis.Text
+
 Namespace Global.Basic.CodeAnalysis.Syntax
 
   Public NotInheritable Class SyntaxToken
