@@ -36,6 +36,10 @@ Namespace Global.Basic.CodeAnalysis.Syntax
     OrKeyword
     OrElseKeyword
 
+    ' 
+
+    CompilationUnit
+
     ' Expressions
 
     LiteralExpression

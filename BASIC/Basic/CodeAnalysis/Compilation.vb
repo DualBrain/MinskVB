@@ -18,7 +18,7 @@ Namespace Global.Basic.CodeAnalysis
     Public Function Evaluate(variables As Dictionary(Of VariableSymbol, Object)) As EvaluationResult
 
       Dim binder = New Binder(variables)
-      Dim boundExpression = binder.BindExpression(Me.Syntax.Root)
+      Dim boundExpression = binder.BindExpression(Me.Syntax.Root.Expression)
 
       Dim diagnostics = Me.Syntax.Diagnostics.Concat(binder.Diagnostics).ToImmutableArray
 

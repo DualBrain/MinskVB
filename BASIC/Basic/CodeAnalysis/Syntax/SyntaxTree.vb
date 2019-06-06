@@ -9,17 +9,21 @@ Namespace Global.Basic.CodeAnalysis.Syntax
 
   Public NotInheritable Class SyntaxTree
 
-    Sub New(text As SourceText, diagnostics As ImmutableArray(Of Diagnostic), root As ExpressionSyntax, endOfFileToken As SyntaxToken)
+    Private Sub New(text As SourceText)
+
+      Dim parser = New Parser(text)
+      Dim root = parser.ParseCompilationUnit()
+      Dim diagnostics = parser.Diagnostics.ToImmutableArray
+
       Me.Text = text
       Me.Diagnostics = diagnostics
       Me.Root = root
-      Me.EndOfFileToken = endOfFileToken
+
     End Sub
 
     Public ReadOnly Property Text As SourceText
     Public ReadOnly Property Diagnostics As ImmutableArray(Of Diagnostic)
-    Public ReadOnly Property Root As ExpressionSyntax
-    Public ReadOnly Property EndOfFileToken As SyntaxToken
+    Public ReadOnly Property Root As CompilationUnitSyntax
 
     Public Shared Function Parse(text As String) As SyntaxTree
       Dim source = SourceText.From(text)
@@ -27,8 +31,7 @@ Namespace Global.Basic.CodeAnalysis.Syntax
     End Function
 
     Public Shared Function Parse(text As SourceText) As SyntaxTree
-      Dim parser = New Parser(text)
-      Return parser.Parse
+      Return New SyntaxTree(text)
     End Function
 
     Public Shared Function ParseTokens(Text As String) As IEnumerable(Of SyntaxToken)

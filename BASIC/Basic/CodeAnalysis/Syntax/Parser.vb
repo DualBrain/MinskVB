@@ -58,15 +58,11 @@ Namespace Global.Basic.CodeAnalysis.Syntax
       End If
     End Function
 
-    Public Function Parse() As SyntaxTree
+    Public Function ParseCompilationUnit() As CompilationUnitSyntax
       Dim expression = Me.ParseExpression
       Dim endOfFileToken = Me.MatchToken(SyntaxKind.EndOfFileToken)
-      Return New SyntaxTree(Me.Text, Me.Diagnostics.ToImmutableArray, expression, endOfFileToken)
+      Return New CompilationUnitSyntax(expression, endOfFileToken)
     End Function
-
-    'Private Function ParseExpression() As ExpressionSyntax
-    '  Return Me.ParseTerm()
-    'End Function
 
     Private Function ParseExpression() As ExpressionSyntax
       Return Me.ParseAssignmentExpression
