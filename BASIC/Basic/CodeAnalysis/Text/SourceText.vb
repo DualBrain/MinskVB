@@ -79,7 +79,7 @@ Namespace Global.Basic.CodeAnalysis.Text
         End If
       End While
 
-      If position > lineStart Then
+      If position >= lineStart Then
         AddLine(result, sourceText, position, lineStart, 0)
       End If
 
