@@ -14,6 +14,7 @@ Imports Basic.CodeAnalysis
 Imports Basic.CodeAnalysis.Syntax
 Imports Basic.CodeAnalysis.Text
 Imports System.Console
+Imports System.ConsoleColor
 Imports System.Text
 
 Friend Module Program
@@ -26,11 +27,14 @@ Friend Module Program
 
     Do
 
+      ForegroundColor = Green
       If (textBuilder.Length = 0) Then
-        Console.Write("> ")
+        Write("» ")
       Else
-        Console.Write("| ")
+        Write("· ")
       End If
+
+      ResetColor()
 
       Dim input = ReadLine()
       Dim isBlank = String.IsNullOrWhiteSpace(input)
@@ -77,14 +81,16 @@ Friend Module Program
 
       If showTree Then
         Dim color = Console.ForegroundColor
-        Console.ForegroundColor = ConsoleColor.DarkGray
+        ForegroundColor = DarkGray
         tree.Root.WriteTo(Console.Out)
-        Console.ResetColor()
+        ResetColor()
       End If
 
       If Not diagnostics.Any Then
         ' No errors detected, attempt to evaluate (execute).
+        ForegroundColor = Magenta
         WriteLine(result.Value)
+        ResetColor()
       Else
 
         ' We have errors, so don't try to evaluate (execute).
@@ -98,10 +104,10 @@ Friend Module Program
           ' An extra line before for clarity...
           WriteLine()
 
-          Console.ForegroundColor = ConsoleColor.DarkRed
+          ForegroundColor = DarkRed
           Write($"({lineNumber}, {character}): ")
           WriteLine(diagnostic)
-          Console.ResetColor()
+          ResetColor()
 
           Dim prefixSpan = TextSpan.FromBounds(line.Start, diagnostic.Span.Start)
           Dim suffixSpan = TextSpan.FromBounds(diagnostic.Span.End, line.End)
@@ -113,7 +119,7 @@ Friend Module Program
           ' Write the prefix in "normal" text...
           Write($"    {prefix}")
           ' Write the error portion in red...
-          Console.ForegroundColor = ConsoleColor.DarkRed
+          ForegroundColor = DarkRed
           Write(er)
           Console.ResetColor()
           ' Write the rest of the line.

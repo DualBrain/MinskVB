@@ -6,6 +6,9 @@ Imports System.IO
 Imports System.Reflection
 Imports Basic.CodeAnalysis.Text
 
+Imports System.Console
+Imports System.ConsoleColor
+
 Namespace Global.Basic.CodeAnalysis.Syntax
 
   Public MustInherit Class SyntaxNode
@@ -44,16 +47,27 @@ Namespace Global.Basic.CodeAnalysis.Syntax
 
     Private Shared Sub PrettyPrint(writer As TextWriter, node As SyntaxNode, Optional indent As String = "", Optional isLast As Boolean = True)
 
+      Dim isToConsole = writer Is Console.Out
       Dim marker = If(isLast, "└──", "├──")
 
       writer.Write(indent)
+      If isToConsole Then
+        ForegroundColor = DarkGray
+      End If
       writer.Write(marker)
 
+      If isToConsole Then
+        ForegroundColor = If(TypeOf node Is SyntaxToken, Green, Cyan)
+      End If
       writer.Write($"{node.Kind}")
 
       If TryCast(node, SyntaxToken)?.Value IsNot Nothing Then
         writer.Write(" ")
         writer.Write(DirectCast(node, SyntaxToken).Value)
+      End If
+
+      If isToConsole Then
+        ResetColor()
       End If
 
       writer.WriteLine()
