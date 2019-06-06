@@ -50,10 +50,10 @@ Namespace Global.Basic.CodeAnalysis.Syntax
       Dim isToConsole = writer Is Console.Out
       Dim marker = If(isLast, "└──", "├──")
 
-      writer.Write(indent)
       If isToConsole Then
         ForegroundColor = DarkGray
       End If
+      writer.Write(indent)
       writer.Write(marker)
 
       If isToConsole Then
