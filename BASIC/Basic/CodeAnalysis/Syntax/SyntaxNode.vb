@@ -2,6 +2,7 @@
 Option Strict On
 Option Infer On
 
+Imports System.IO
 Imports System.Reflection
 
 Namespace Global.Basic.CodeAnalysis.Syntax
@@ -34,6 +35,43 @@ Namespace Global.Basic.CodeAnalysis.Syntax
         End If
       Next
 
+    End Function
+
+    Public Sub WriteTo(writer As TextWriter)
+      PrettyPrint(writer, Me)
+    End Sub
+
+    Private Shared Sub PrettyPrint(writer As TextWriter, node As SyntaxNode, Optional indent As String = "", Optional isLast As Boolean = True)
+
+      Dim marker = If(isLast, "└──", "├──")
+
+      writer.Write(indent)
+      writer.Write(marker)
+
+      writer.Write($"{node.Kind}")
+
+      If TryCast(node, SyntaxToken)?.Value IsNot Nothing Then
+        writer.Write(" ")
+        writer.Write(DirectCast(node, SyntaxToken).Value)
+      End If
+
+      writer.WriteLine()
+
+      indent += If(isLast, "   ", "│  ")
+
+      Dim lastChild = node.GetChildren.LastOrDefault
+
+      For Each child In node.GetChildren
+        PrettyPrint(writer, child, indent, child Is lastChild)
+      Next
+
+    End Sub
+
+    Public Overrides Function ToString() As String
+      Using writer = New StringWriter
+        Me.WriteTo(writer)
+        Return writer.ToString
+      End Using
     End Function
 
   End Class

@@ -11,7 +11,6 @@ Option Infer On
 ' https://gotbasic.com
 
 Imports Basic.CodeAnalysis
-Imports Basic.CodeAnalysis.Binding
 Imports Basic.CodeAnalysis.Syntax
 Imports System.Console
 
@@ -59,7 +58,7 @@ Friend Module Program
       If showTree Then
         Dim color = Console.ForegroundColor
         Console.ForegroundColor = ConsoleColor.DarkGray
-        PrettyPrint(tree.Root)
+        tree.Root.WriteTo(Console.Out)
         Console.ResetColor()
       End If
 
@@ -99,32 +98,6 @@ Friend Module Program
       End If
 
     Loop
-
-  End Sub
-
-  Sub PrettyPrint(node As SyntaxNode, Optional indent As String = "", Optional isLast As Boolean = True)
-
-    Dim marker = If(isLast, "└──", "├──")
-
-    Write(indent)
-    Write(marker)
-
-    Write($"{node.Kind}")
-
-    If TryCast(node, SyntaxToken)?.Value IsNot Nothing Then
-      Write(" ")
-      Write(DirectCast(node, SyntaxToken).Value)
-    End If
-
-    WriteLine()
-
-    indent += If(isLast, "   ", "│  ")
-
-    Dim lastChild = node.GetChildren.LastOrDefault
-
-    For Each child In node.GetChildren
-      PrettyPrint(child, indent, child Is lastChild)
-    Next
 
   End Sub
 
