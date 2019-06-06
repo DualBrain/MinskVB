@@ -10,14 +10,14 @@ Namespace Global.Basic.CodeAnalysis.Syntax
 
     Public ReadOnly Property Diagnostics As DiagnosticBag = New DiagnosticBag
 
-    Private ReadOnly Property Text As String
+    Private ReadOnly Property Text As SourceText
 
     Private Property Position As Integer
     Private Property Start As Integer
     Private Property Kind As SyntaxKind
     Private Property Value As Object
 
-    Public Sub New(text As String)
+    Public Sub New(text As SourceText)
       Me.Text = text
     End Sub
 
@@ -100,7 +100,7 @@ Namespace Global.Basic.CodeAnalysis.Syntax
       Dim length = Me.Position - Me.Start
       Dim text = SyntaxFacts.GetText(Me.Kind)
       If text Is Nothing Then
-        text = Me.Text.Substring(Me.Start, length)
+        text = Me.Text.ToString(Me.Start, length)
       End If
 
       Return New SyntaxToken(Me.Kind, Me.Start, text, Me.Value)
@@ -114,10 +114,10 @@ Namespace Global.Basic.CodeAnalysis.Syntax
       End While
 
       Dim length = Me.Position - Me.Start
-      Dim text = Me.Text.Substring(Me.Start, length)
+      Dim text = Me.Text.ToString(Me.Start, length)
       Dim value As Integer
       If Not Integer.TryParse(text, value) Then
-        Me.Diagnostics.ReportInvalidNumber(New TextSpan(Me.Start, length), Me.Text, GetType(Integer))
+        Me.Diagnostics.ReportInvalidNumber(New TextSpan(Me.Start, length), text, GetType(Integer))
       End If
 
       Me.Value = value
@@ -142,7 +142,7 @@ Namespace Global.Basic.CodeAnalysis.Syntax
       End While
 
       Dim length = Me.Position - Me.Start
-      Dim text = Me.Text.Substring(Me.Start, length)
+      Dim text = Me.Text.ToString(Me.Start, length)
 
       Me.Kind = SyntaxFacts.GetKeywordKind(text)
 

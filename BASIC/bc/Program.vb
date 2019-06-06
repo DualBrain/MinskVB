@@ -66,13 +66,21 @@ Friend Module Program
         ' No errors detected, attempt to evaluate (execute).
         WriteLine(result.Value)
       Else
+
+        Dim text = tree.Text
+
         ' We have errors, so don't try to evaluate (execute).
         For Each diagnostic In diagnostics
+
+          Dim lineIndex = text.GetLineIndex(diagnostic.Span.Start)
+          Dim lineNumber = lineIndex + 1
+          Dim character = diagnostic.Span.Start - text.Lines(lineIndex).Span.Start + 1
 
           ' An extra line before for clarity...
           WriteLine()
 
           Console.ForegroundColor = ConsoleColor.DarkRed
+          Write($"({lineNumber}, {character}): ")
           WriteLine(diagnostic)
           Console.ResetColor()
 
