@@ -12,7 +12,9 @@ Option Infer On
 
 Imports Basic.CodeAnalysis
 Imports Basic.CodeAnalysis.Syntax
+Imports Basic.CodeAnalysis.Text
 Imports System.Console
+Imports System.Text
 
 Friend Module Program
 
@@ -20,34 +22,52 @@ Friend Module Program
 
     Dim showTree = False
     Dim variables = New Dictionary(Of VariableSymbol, Object)
+    Dim textBuilder = New StringBuilder
 
     Do
 
-      Write("> ")
+      If (textBuilder.Length = 0) Then
+        Console.Write("> ")
+      Else
+        Console.Write("| ")
+      End If
 
-      Dim line = ReadLine()
+      Dim input = ReadLine()
+      Dim isBlank = String.IsNullOrWhiteSpace(input)
 
       ' Handle "special commands / circumstances" within the "REPL".
 
-      If String.IsNullOrWhiteSpace(line) Then
-        Continue Do
-      End If
+      If textBuilder.Length = 0 Then
 
-      Select Case line.ToLower
-        Case "option tree on"
-          showTree = True : Continue Do
-        Case "option tree off"
-          showTree = False : Continue Do
-        Case "cls"
-          Clear() : Continue Do
-        Case "exit"
+        If isBlank Then
           Exit Do
-        Case Else
-      End Select
+        End If
+
+        Select Case input.ToLower
+          Case "option tree on"
+            showTree = True : Continue Do
+          Case "option tree off"
+            showTree = False : Continue Do
+          Case "cls"
+            Clear() : Continue Do
+          Case "exit"
+            Exit Do
+          Case Else
+        End Select
+
+      End If
 
       ' Otherwise, attempt to parse what was entered...
 
-      Dim tree = SyntaxTree.Parse(line)
+      textBuilder.AppendLine(input)
+      Dim text = textBuilder.ToString
+
+      Dim tree = SyntaxTree.Parse(text)
+
+      If Not isBlank AndAlso tree.Diagnostics.Any Then
+        Continue Do
+      End If
+
       Dim compilation = New Compilation(tree)
       Dim result = compilation.Evaluate(variables)
 
@@ -67,14 +87,13 @@ Friend Module Program
         WriteLine(result.Value)
       Else
 
-        Dim text = tree.Text
-
         ' We have errors, so don't try to evaluate (execute).
         For Each diagnostic In diagnostics
 
-          Dim lineIndex = text.GetLineIndex(diagnostic.Span.Start)
+          Dim lineIndex = tree.Text.GetLineIndex(diagnostic.Span.Start)
           Dim lineNumber = lineIndex + 1
-          Dim character = diagnostic.Span.Start - text.Lines(lineIndex).Span.Start + 1
+          Dim line = tree.Text.Lines(lineIndex)
+          Dim character = diagnostic.Span.Start - line.Start + 1
 
           ' An extra line before for clarity...
           WriteLine()
@@ -84,10 +103,12 @@ Friend Module Program
           WriteLine(diagnostic)
           Console.ResetColor()
 
-          'TODO: (1+2  <--- crashes
-          Dim prefix = line.Substring(0, diagnostic.Span.Start)
-          Dim er = line.Substring(diagnostic.Span.Start, diagnostic.Span.Length)
-          Dim suffix = line.Substring(diagnostic.Span.End)
+          Dim prefixSpan = TextSpan.FromBounds(line.Start, diagnostic.Span.Start)
+          Dim suffixSpan = TextSpan.FromBounds(diagnostic.Span.End, line.End)
+
+          Dim prefix = tree.Text.ToString(prefixSpan)
+          Dim er = tree.Text.ToString(diagnostic.Span)
+          Dim suffix = tree.Text.ToString(suffixSpan)
 
           ' Write the prefix in "normal" text...
           Write($"    {prefix}")
@@ -104,6 +125,8 @@ Friend Module Program
         WriteLine()
 
       End If
+
+      textBuilder.Clear()
 
     Loop
 
