@@ -2,9 +2,9 @@
 Option Strict On
 Option Infer On
 
+Imports Xunit
 Imports Basic.CodeAnalysis
 Imports Basic.CodeAnalysis.Syntax
-Imports Xunit
 
 Namespace Global.Basic.Tests.CodeAnalysis
   Public Class EvaluationTests
