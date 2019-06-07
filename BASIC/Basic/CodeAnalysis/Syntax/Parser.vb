@@ -59,9 +59,38 @@ Namespace Global.Basic.CodeAnalysis.Syntax
     End Function
 
     Public Function ParseCompilationUnit() As CompilationUnitSyntax
-      Dim expression = Me.ParseExpression
+      Dim statement = Me.ParseStatement
       Dim endOfFileToken = Me.MatchToken(SyntaxKind.EndOfFileToken)
-      Return New CompilationUnitSyntax(expression, endOfFileToken)
+      Return New CompilationUnitSyntax(statement, endOfFileToken)
+    End Function
+
+    Private Function ParseStatement() As StatementSyntax
+      If Me.Current.Kind = SyntaxKind.OpenBraceToken Then
+        Return Me.ParseBlockStatement
+      Else
+        Return Me.ParseExpressionStatement
+      End If
+    End Function
+
+    Private Function ParseBlockStatement() As StatementSyntax
+
+      Dim statements = ImmutableArray.CreateBuilder(Of StatementSyntax)
+
+      Dim openBraceToken = Me.MatchToken(SyntaxKind.OpenBraceToken)
+      While Me.Current.Kind <> SyntaxKind.EndOfFileToken AndAlso
+            Me.Current.Kind <> SyntaxKind.CloseBraceToken
+        Dim statement = Me.ParseStatement()
+        statements.Add(statement)
+      End While
+      Dim closeBraceToken = Me.MatchToken(SyntaxKind.CloseBraceToken)
+
+      Return New BlockStatementSyntax(openBraceToken, statements.ToImmutable, closeBraceToken)
+
+    End Function
+
+    Private Function ParseExpressionStatement() As ExpressionStatementSyntax
+      Dim expression = Me.ParseExpression()
+      Return New ExpressionStatementSyntax(expression)
     End Function
 
     Private Function ParseExpression() As ExpressionSyntax

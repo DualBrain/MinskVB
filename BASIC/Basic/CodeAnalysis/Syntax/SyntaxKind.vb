@@ -24,6 +24,8 @@ Namespace Global.Basic.CodeAnalysis.Syntax
     PipePipeToken
     OpenParenToken
     CloseParenToken
+    OpenBraceToken
+    CloseBraceToken
     IdentifierToken
 
     ' Keywords
@@ -36,9 +38,14 @@ Namespace Global.Basic.CodeAnalysis.Syntax
     OrKeyword
     OrElseKeyword
 
-    ' 
+    ' Nodes
 
     CompilationUnit
+
+    ' Statements
+
+    BlockStatement
+    ExpressionStatement
 
     ' Expressions
 

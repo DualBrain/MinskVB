@@ -57,6 +57,8 @@ Namespace Global.Basic.CodeAnalysis.Syntax
         Case "/"c : Me.Kind = SyntaxKind.SlashToken : Me.Position += 1
         Case "("c : Me.Kind = SyntaxKind.OpenParenToken : Me.Position += 1
         Case ")"c : Me.Kind = SyntaxKind.CloseParenToken : Me.Position += 1
+        Case "{"c : Me.Kind = SyntaxKind.OpenBraceToken : Me.Position += 1
+        Case "}"c : Me.Kind = SyntaxKind.CloseBraceToken : Me.Position += 1
         Case "&"c
           If Me.LookAhead = "&"c Then
             Me.Kind = SyntaxKind.AmpersandAmpersandToken : Me.Position += 2

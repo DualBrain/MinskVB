@@ -9,17 +9,17 @@ Namespace Global.Basic.CodeAnalysis.Binding
 
   Friend NotInheritable Class BoundGlobalScope
 
-    Sub New(previous As BoundGlobalScope, diagnostics As ImmutableArray(Of Diagnostic), variables As ImmutableArray(Of VariableSymbol), expression As BoundExpression)
+    Sub New(previous As BoundGlobalScope, diagnostics As ImmutableArray(Of Diagnostic), variables As ImmutableArray(Of VariableSymbol), statement As BoundStatement)
       Me.Previous = previous
       Me.Diagnostics = diagnostics
       Me.Variables = variables
-      Me.Expression = expression
+      Me.Statement = statement
     End Sub
 
     Public ReadOnly Property Previous As BoundGlobalScope
     Public ReadOnly Property Diagnostics As ImmutableArray(Of Diagnostic)
     Public ReadOnly Property Variables As ImmutableArray(Of VariableSymbol)
-    Public ReadOnly Property Expression As BoundExpression
+    Public ReadOnly Property Statement As BoundStatement
 
   End Class
 
@@ -35,7 +35,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
 
       Dim parentScope = CreateParentScopes(previous)
       Dim binder = New Binder(parentScope)
-      Dim expression = binder.BindExpression(syntax.Expression)
+      Dim expression = binder.BindStatement(syntax.Statement)
       Dim variables = binder.m_scope.GetDeclaredVariables
       Dim diagnostics = binder.Diagnostics.ToImmutableArray
 
@@ -81,7 +81,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
         Case SyntaxKind.ParenExpression
           Return Me.BindParenExpression(DirectCast(syntax, ParenExpressionSyntax))
         Case SyntaxKind.LiteralExpression
-          Return Me.BindLiteralEpression(DirectCast(syntax, LiteralExpressionSyntax))
+          Return Me.BindLiteralExpression(DirectCast(syntax, LiteralExpressionSyntax))
         Case SyntaxKind.NameExpression
           Return Me.BindNameExpression(DirectCast(syntax, NameExpressionSyntax))
         Case SyntaxKind.AssignmentExpression
@@ -96,11 +96,38 @@ Namespace Global.Basic.CodeAnalysis.Binding
 
     End Function
 
+    Private Function BindStatement(syntax As StatementSyntax) As BoundStatement
+
+      Select Case syntax.Kind
+        Case SyntaxKind.BlockStatement
+          Return Me.BindBlockStatement(DirectCast(syntax, BlockStatementSyntax))
+        Case SyntaxKind.ExpressionStatement
+          Return Me.BindExpressionStatement(DirectCast(syntax, ExpressionStatementSyntax))
+        Case Else
+          Throw New Exception($"Unexpected syntax {syntax.Kind}")
+      End Select
+
+    End Function
+
+    Private Function BindBlockStatement(syntax As BlockStatementSyntax) As BoundStatement
+      Dim statements = ImmutableArray.CreateBuilder(Of BoundStatement)
+      For Each statementSyntax In syntax.Statements
+        Dim statement = Me.BindStatement(statementSyntax)
+        statements.Add(statement)
+      Next
+      Return New BoundBlockStatement(statements.ToImmutable)
+    End Function
+
+    Private Function BindExpressionStatement(syntax As ExpressionStatementSyntax) As BoundStatement
+      Dim expression = Me.BindExpression(syntax.Expression)
+      Return New BoundExpressionStatement(expression)
+    End Function
+
     Private Function BindParenExpression(syntax As ParenExpressionSyntax) As BoundExpression
       Return Me.BindExpression(syntax.Expression)
     End Function
 
-    Private Function BindLiteralEpression(syntax As LiteralExpressionSyntax) As BoundExpression
+    Private Function BindLiteralExpression(syntax As LiteralExpressionSyntax) As BoundExpression
       Dim value = If(syntax.Value, 0)
       Return New BoundLiteralExpression(value)
     End Function

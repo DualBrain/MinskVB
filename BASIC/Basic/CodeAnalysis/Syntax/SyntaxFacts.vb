@@ -111,6 +111,8 @@ Namespace Global.Basic.CodeAnalysis.Syntax
         Case SyntaxKind.PipePipeToken : Return "||"
         Case SyntaxKind.OpenParenToken : Return "("
         Case SyntaxKind.CloseParenToken : Return ")"
+        Case SyntaxKind.OpenBraceToken : Return "{"
+        Case SyntaxKind.CloseBraceToken : Return "}"
         Case SyntaxKind.FalseKeyword : Return "false"
         Case SyntaxKind.TrueKeyword : Return "true"
         Case SyntaxKind.NotKeyword : Return "not"

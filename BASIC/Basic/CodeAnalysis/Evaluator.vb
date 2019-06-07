@@ -8,17 +8,41 @@ Namespace Global.Basic.CodeAnalysis
 
   Friend NotInheritable Class Evaluator
 
-    Sub New(root As BoundExpression, variables As Dictionary(Of VariableSymbol, Object))
+    Private m_lastValue As Object
+
+    Sub New(root As BoundStatement, variables As Dictionary(Of VariableSymbol, Object))
       Me.Root = root
       Me.Variables = variables
     End Sub
 
-    Public ReadOnly Property Root As BoundExpression
+    Public ReadOnly Property Root As BoundStatement
     Public ReadOnly Property Variables As Dictionary(Of VariableSymbol, Object)
 
     Public Function Evaluate() As Object
-      Return Me.EvaluateExpression(Me.Root)
+      Me.EvaluateStatement(Me.Root)
+      Return Me.m_lastValue
     End Function
+
+    Private Sub EvaluateStatement(node As BoundStatement)
+
+      Select Case node.Kind
+        Case BoundNodeKind.BlockStatement : Me.EvaluateBlockStatement(node)
+        Case BoundNodeKind.ExpressionStatement : Me.EvaluateExpressionStatement(node)
+        Case Else
+          Throw New Exception($"Unexpected statement {node.Kind}")
+      End Select
+
+    End Sub
+
+    Private Sub EvaluateBlockStatement(node As BoundStatement)
+      For Each statement In DirectCast(node, BoundBlockStatement).Statements
+        Me.EvaluateStatement(statement)
+      Next
+    End Sub
+
+    Private Sub EvaluateExpressionStatement(node As BoundStatement)
+      Me.m_lastValue = Me.EvaluateExpression(DirectCast(node, BoundExpressionStatement).Expression)
+    End Sub
 
     Private Function EvaluateExpression(node As BoundExpression) As Object
 

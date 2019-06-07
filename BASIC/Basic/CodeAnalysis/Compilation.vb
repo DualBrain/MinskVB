@@ -47,7 +47,7 @@ Namespace Global.Basic.CodeAnalysis
         Return New EvaluationResult(diagnostics, Nothing)
       End If
 
-      Dim evaluator = New Evaluator(Me.GlobalScope.Expression, variables)
+      Dim evaluator = New Evaluator(Me.GlobalScope.Statement, variables)
       Dim value = evaluator.Evaluate
 
       Return New EvaluationResult(ImmutableArray(Of Diagnostic).Empty, value)

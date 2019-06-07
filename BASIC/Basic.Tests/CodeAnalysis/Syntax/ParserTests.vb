@@ -122,7 +122,8 @@ Namespace Global.Basic.Tests.CodeAnalysis.Syntax
     Private Shared Function ParseExpression(text As String) As ExpressionSyntax
       Dim tree = SyntaxTree.Parse(text)
       Dim root = tree.Root
-      Return root.Expression
+      Dim statement = root.Statement
+      Return Assert.IsType(Of ExpressionStatementSyntax)(statement).Expression
     End Function
 
     Public Shared Iterator Function GetBinaryOperatorPairsData() As IEnumerable(Of Object())
