@@ -24,6 +24,7 @@ Friend Module Program
     Dim showTree = False
     Dim variables = New Dictionary(Of VariableSymbol, Object)
     Dim textBuilder = New StringBuilder
+    Dim previous As Compilation = Nothing
 
     Do
 
@@ -48,6 +49,8 @@ Friend Module Program
         End If
 
         Select Case input.ToLower
+          Case "new"
+            previous = Nothing : Continue Do
           Case "option tree on"
             showTree = True : Continue Do
           Case "option tree off"
@@ -72,7 +75,8 @@ Friend Module Program
         Continue Do
       End If
 
-      Dim compilation = New Compilation(tree)
+      Dim compilation = If(previous Is Nothing, New Compilation(tree), previous.ContinueWith(tree))
+
       Dim result = compilation.Evaluate(variables)
 
       Dim diagnostics = result.Diagnostics
@@ -87,10 +91,15 @@ Friend Module Program
       End If
 
       If Not diagnostics.Any Then
+
         ' No errors detected, attempt to evaluate (execute).
+
         ForegroundColor = Magenta
         WriteLine(result.Value)
         ResetColor()
+
+        previous = compilation
+
       Else
 
         ' We have errors, so don't try to evaluate (execute).

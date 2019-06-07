@@ -1,17 +1,77 @@
 ﻿Option Explicit On
 Option Strict On
 Option Infer On
+
+Imports System.Collections.Immutable
 Imports Basic.CodeAnalysis.Syntax
 
 Namespace Global.Basic.CodeAnalysis.Binding
 
+  Friend NotInheritable Class BoundGlobalScope
+
+    Sub New(previous As BoundGlobalScope, diagnostics As ImmutableArray(Of Diagnostic), variables As ImmutableArray(Of VariableSymbol), expression As BoundExpression)
+      Me.Previous = previous
+      Me.Diagnostics = diagnostics
+      Me.Variables = variables
+      Me.Expression = expression
+    End Sub
+
+    Public ReadOnly Property Previous As BoundGlobalScope
+    Public ReadOnly Property Diagnostics As ImmutableArray(Of Diagnostic)
+    Public ReadOnly Property Variables As ImmutableArray(Of VariableSymbol)
+    Public ReadOnly Property Expression As BoundExpression
+
+  End Class
+
   Friend NotInheritable Class Binder
 
-    Private ReadOnly m_variables As Dictionary(Of VariableSymbol, Object)
+    Private m_scope As BoundScope
 
-    Public Sub New(variables As Dictionary(Of VariableSymbol, Object))
-      Me.m_variables = variables
+    Public Sub New(parent As BoundScope)
+      Me.m_scope = New BoundScope(parent)
     End Sub
+
+    Public Shared Function BindGlobalScope(previous As BoundGlobalScope, syntax As CompilationUnitSyntax) As BoundGlobalScope
+
+      Dim parentScope = CreateParentScopes(previous)
+      Dim binder = New Binder(parentScope)
+      Dim expression = binder.BindExpression(syntax.Expression)
+      Dim variables = binder.m_scope.GetDeclaredVariables
+      Dim diagnostics = binder.Diagnostics.ToImmutableArray
+
+      If previous IsNot Nothing Then
+        diagnostics = diagnostics.InsertRange(0, previous.Diagnostics)
+      End If
+
+      Return New BoundGlobalScope(previous, diagnostics, variables, expression)
+
+    End Function
+
+    Private Shared Function CreateParentScopes(previous As BoundGlobalScope) As BoundScope
+
+      Dim stack = New Stack(Of BoundGlobalScope)
+
+      While previous IsNot Nothing
+        stack.Push(previous)
+        previous = previous.Previous
+      End While
+
+      ' submission 3 -> submission 2 -> submission 1
+
+      Dim parent As BoundScope = Nothing
+
+      While stack.Count > 0
+        previous = stack.Pop
+        Dim scope = New BoundScope(parent)
+        For Each v In previous.Variables
+          scope.TryDeclare(v)
+        Next
+        parent = scope
+      End While
+
+      Return parent
+
+    End Function
 
     Public ReadOnly Property Diagnostics As DiagnosticBag = New DiagnosticBag
 
@@ -47,39 +107,36 @@ Namespace Global.Basic.CodeAnalysis.Binding
 
     Private Function BindNameExpression(syntax As NameExpressionSyntax) As BoundExpression
       Dim name = syntax.IdentifierToken.Text
-      Dim variable = Me.m_variables.Keys.FirstOrDefault(Function(v) v.Name = name.ToLower)
-      'Dim value As Object = Nothing
-      'If Not Me.m_variables.TryGetValue(name.ToLower, value) Then
-      If variable Is Nothing Then
+      Dim variable As VariableSymbol = Nothing
+      If Not Me.m_scope.TryLookup(name, variable) Then
         Me.Diagnostics.ReportUndefinedName(syntax.IdentifierToken.Span, name)
         Return New BoundLiteralExpression(0)
       End If
-      'Dim type = value.GetType()
       Return New BoundVariableExpression(variable)
     End Function
 
     Private Function BindAssignmentExpression(syntax As AssignmentExpressionSyntax) As BoundExpression
+
       Dim name = syntax.IdentifierToken.Text
       Dim boundExpression = Me.BindExpression(syntax.Expression)
 
-      ' We are here: 1:37:30
-
-      Dim existingVariable = Me.m_variables.Keys.FirstOrDefault(Function(v) v.Name = name.ToLower)
-      If existingVariable IsNot Nothing Then
-        Me.m_variables.Remove(existingVariable)
+      Dim variable As VariableSymbol = Nothing
+      If Not Me.m_scope.TryLookup(name.ToLower, variable) Then
+        variable = New VariableSymbol(name.ToLower, boundExpression.Type)
+        Me.m_scope.TryDeclare(variable)
       End If
-      Dim variable = New VariableSymbol(name.ToLower, boundExpression.Type)
-      Me.m_variables(variable) = Nothing
 
-      'Dim defaultValue = If(boundExpression.Type = GetType(Integer), CObj(0), If(boundExpression.Type = GetType(Boolean), False, Nothing))
-
-      'If defaultValue Is Nothing Then
-      '  Throw New Exception($"Unsupported variable type: {boundExpression.Type}")
+      'If Not Me.m_scope.TryDeclare(variable) Then
+      '  Me.Diagnostics.ReportVariableAlreadyDeclared(syntax.IdentifierToken.Span, name)
       'End If
 
-      'Me.m_variables(name) = defaultValue
+      If boundExpression.Type IsNot variable.Type Then
+        Me.Diagnostics.ReportCannotConvert(syntax.Expression.Span, boundExpression.Type, variable.Type)
+        Return boundExpression
+      End If
 
       Return New BoundAssignmentExpression(variable, boundExpression)
+
     End Function
 
     Private Function BindUnaryEpression(syntax As UnaryExpressionSyntax) As BoundExpression

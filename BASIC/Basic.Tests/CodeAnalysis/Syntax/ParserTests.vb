@@ -29,6 +29,7 @@ Namespace Global.Basic.Tests.CodeAnalysis.Syntax
         '  a   b
 
         Using e = New AssertingEnumerator(expression)
+          e.AssertNode(SyntaxKind.CompilationUnit)
           e.AssertNode(SyntaxKind.BinaryExpression)
           e.AssertNode(SyntaxKind.BinaryExpression)
           e.AssertNode(SyntaxKind.NameExpression)
@@ -39,6 +40,7 @@ Namespace Global.Basic.Tests.CodeAnalysis.Syntax
           e.AssertToken(op2, op2Text)
           e.AssertNode(SyntaxKind.NameExpression)
           e.AssertToken(SyntaxKind.IdentifierToken, "c")
+          e.AssertToken(SyntaxKind.EndOfFileToken, "")
         End Using
 
       Else
@@ -50,6 +52,7 @@ Namespace Global.Basic.Tests.CodeAnalysis.Syntax
         '    b   c
 
         Using e = New AssertingEnumerator(expression)
+          e.AssertNode(SyntaxKind.CompilationUnit)
           e.AssertNode(SyntaxKind.BinaryExpression)
           e.AssertNode(SyntaxKind.NameExpression)
           e.AssertToken(SyntaxKind.IdentifierToken, "a")
@@ -60,6 +63,7 @@ Namespace Global.Basic.Tests.CodeAnalysis.Syntax
           e.AssertToken(op2, op2Text)
           e.AssertNode(SyntaxKind.NameExpression)
           e.AssertToken(SyntaxKind.IdentifierToken, "c")
+          e.AssertToken(SyntaxKind.EndOfFileToken, "")
         End Using
 
       End If
@@ -86,6 +90,7 @@ Namespace Global.Basic.Tests.CodeAnalysis.Syntax
         '  a
 
         Using e = New AssertingEnumerator(expression)
+          e.AssertNode(SyntaxKind.CompilationUnit)
           e.AssertNode(SyntaxKind.BinaryExpression)
           e.AssertNode(SyntaxKind.UnaryExpression)
           e.AssertToken(unaryKind, unaryText)
@@ -94,6 +99,7 @@ Namespace Global.Basic.Tests.CodeAnalysis.Syntax
           e.AssertToken(binaryKind, binaryText)
           e.AssertNode(SyntaxKind.NameExpression)
           e.AssertToken(SyntaxKind.IdentifierToken, "b")
+          e.AssertToken(SyntaxKind.EndOfFileToken, "")
         End Using
 
       Else
@@ -105,6 +111,7 @@ Namespace Global.Basic.Tests.CodeAnalysis.Syntax
         '  a   b
 
         Using e = New AssertingEnumerator(expression)
+          e.AssertNode(SyntaxKind.CompilationUnit)
           e.AssertNode(SyntaxKind.UnaryExpression)
           e.AssertToken(unaryKind, unaryText)
           e.AssertNode(SyntaxKind.BinaryExpression)
@@ -113,6 +120,7 @@ Namespace Global.Basic.Tests.CodeAnalysis.Syntax
           e.AssertToken(binaryKind, binaryText)
           e.AssertNode(SyntaxKind.NameExpression)
           e.AssertToken(SyntaxKind.IdentifierToken, "b")
+          e.AssertToken(SyntaxKind.EndOfFileToken, "")
         End Using
 
       End If

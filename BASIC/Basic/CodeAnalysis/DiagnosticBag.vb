@@ -57,6 +57,14 @@ Namespace Global.Basic.CodeAnalysis
       Me.Report(span, $"Variable '{name}' doesn't exist.")
     End Sub
 
+    'Public Sub ReportVariableAlreadyDeclared(span As TextSpan, name As String)
+    '  Me.Report(span, $"Variable '{name}' is already declared.")
+    'End Sub
+
+    Public Sub ReportCannotConvert(span As TextSpan, fromType As Type, toType As Type)
+      Me.Report(span, $"Cannot convert type '{fromType}' to '{toType}'.")
+    End Sub
+
   End Class
 
 End Namespace

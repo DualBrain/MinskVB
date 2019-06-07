@@ -3,30 +3,51 @@ Option Strict On
 Option Infer On
 
 Imports System.Collections.Immutable
+Imports System.Threading
+
 Imports Basic.CodeAnalysis.Binding
 Imports Basic.CodeAnalysis.Syntax
 
 Namespace Global.Basic.CodeAnalysis
   Public NotInheritable Class Compilation
 
-    Sub New(syntax As SyntaxTree)
+    Private m_globalScope As BoundGlobalScope = Nothing
+
+    Public Sub New(syntax As SyntaxTree)
+      Me.New(Nothing, syntax)
+    End Sub
+
+    Private Sub New(previous As Compilation, syntax As SyntaxTree)
+      Me.Previous = previous
       Me.Syntax = syntax
     End Sub
 
+    Public ReadOnly Property Previous As Compilation
     Public ReadOnly Property Syntax As SyntaxTree
+
+    Friend ReadOnly Property GlobalScope As BoundGlobalScope
+      Get
+        If Me.m_globalScope Is Nothing Then
+          Dim g = Binder.BindGlobalScope(Me.Previous?.GlobalScope, Me.Syntax.Root)
+          Interlocked.CompareExchange(Me.m_globalScope, g, Nothing)
+        End If
+        Return Me.m_globalScope
+      End Get
+    End Property
+
+    Public Function ContinueWith(syntax As SyntaxTree) As Compilation
+      Return New Compilation(Me, syntax)
+    End Function
 
     Public Function Evaluate(variables As Dictionary(Of VariableSymbol, Object)) As EvaluationResult
 
-      Dim binder = New Binder(variables)
-      Dim boundExpression = binder.BindExpression(Me.Syntax.Root.Expression)
-
-      Dim diagnostics = Me.Syntax.Diagnostics.Concat(binder.Diagnostics).ToImmutableArray
+      Dim diagnostics = Me.Syntax.Diagnostics.Concat(Me.GlobalScope.Diagnostics).ToImmutableArray
 
       If diagnostics.Any Then
         Return New EvaluationResult(diagnostics, Nothing)
       End If
 
-      Dim evaluator = New Evaluator(boundExpression, variables)
+      Dim evaluator = New Evaluator(Me.GlobalScope.Expression, variables)
       Dim value = evaluator.Evaluate
 
       Return New EvaluationResult(ImmutableArray(Of Diagnostic).Empty, value)
