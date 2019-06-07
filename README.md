@@ -29,7 +29,11 @@ Why not?
 
 ## Progress...
 
-So far I've worked through the first two episodes of the video series (see below)... only 12 more to go (as of 6/2/2019).
+So far I've worked through the first six episodes of the video series (see below)... only 8 more to go (as of 6/7/2019).
+
+## Additional Info
+
+- [Roslyn Primer – Part I: Anatomy of a Compiler by Anthony D. Green](https://devblogs.microsoft.com/vbteam/roslyn-primer-part-i-anatomy-of-a-compiler/)
 
 ## Credits
 
