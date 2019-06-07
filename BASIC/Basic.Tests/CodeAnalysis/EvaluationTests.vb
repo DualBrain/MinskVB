@@ -46,7 +46,7 @@ Namespace Global.Basic.Tests.CodeAnalysis
     <InlineData("false and false", False)>
     <InlineData("true && true", True)>
     <InlineData("true and true", True)>
-    <InlineData("(a = 10) * a", 100)>
+    <InlineData("{ var a = 0 (a = 10) * a }", 100)>
     Public Sub SyntaxFact_GetText_RoundTrips(text As String, expectedValue As Object)
 
       Dim tree = SyntaxTree.Parse(text)
