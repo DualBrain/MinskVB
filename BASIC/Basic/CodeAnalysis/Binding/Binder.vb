@@ -101,6 +101,8 @@ Namespace Global.Basic.CodeAnalysis.Binding
       Select Case syntax.Kind
         Case SyntaxKind.BlockStatement
           Return Me.BindBlockStatement(DirectCast(syntax, BlockStatementSyntax))
+        Case SyntaxKind.VariableDeclaration
+          Return Me.BindVariableDeclaration(DirectCast(syntax, VariableDeclarationSyntax))
         Case SyntaxKind.ExpressionStatement
           Return Me.BindExpressionStatement(DirectCast(syntax, ExpressionStatementSyntax))
         Case Else
@@ -111,11 +113,24 @@ Namespace Global.Basic.CodeAnalysis.Binding
 
     Private Function BindBlockStatement(syntax As BlockStatementSyntax) As BoundStatement
       Dim statements = ImmutableArray.CreateBuilder(Of BoundStatement)
+      Me.m_scope = New BoundScope(Me.m_scope)
       For Each statementSyntax In syntax.Statements
         Dim statement = Me.BindStatement(statementSyntax)
         statements.Add(statement)
       Next
+      Me.m_scope = Me.m_scope.Parent
       Return New BoundBlockStatement(statements.ToImmutable)
+    End Function
+
+    Private Function BindVariableDeclaration(syntax As VariableDeclarationSyntax) As BoundStatement
+      Dim name = syntax.Identifier.Text.ToLower
+      Dim isReadOnly = syntax.Keyword.Kind = SyntaxKind.LetKeyword
+      Dim initializer = Me.BindExpression(syntax.Initializer)
+      Dim variable = New VariableSymbol(name, isReadOnly, initializer.Type)
+      If Not Me.m_scope.TryDeclare(variable) Then
+        Me.Diagnostics.ReportVariableAlreadyDeclared(syntax.Identifier.Span, name)
+      End If
+      Return New BoundVariableDeclaration(variable, initializer)
     End Function
 
     Private Function BindExpressionStatement(syntax As ExpressionStatementSyntax) As BoundStatement
@@ -149,13 +164,13 @@ Namespace Global.Basic.CodeAnalysis.Binding
 
       Dim variable As VariableSymbol = Nothing
       If Not Me.m_scope.TryLookup(name.ToLower, variable) Then
-        variable = New VariableSymbol(name.ToLower, boundExpression.Type)
-        Me.m_scope.TryDeclare(variable)
+        Me.Diagnostics.ReportUndefinedName(syntax.IdentifierToken.Span, name)
+        Return boundExpression
       End If
 
-      'If Not Me.m_scope.TryDeclare(variable) Then
-      '  Me.Diagnostics.ReportVariableAlreadyDeclared(syntax.IdentifierToken.Span, name)
-      'End If
+      If variable.IsReadOnly Then
+        Me.Diagnostics.ReportCannotAssign(syntax.EqualsToken.Span, name)
+      End If
 
       If boundExpression.Type IsNot variable.Type Then
         Me.Diagnostics.ReportCannotConvert(syntax.Expression.Span, boundExpression.Type, variable.Type)

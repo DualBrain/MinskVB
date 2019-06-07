@@ -65,11 +65,16 @@ Namespace Global.Basic.CodeAnalysis.Syntax
     End Function
 
     Private Function ParseStatement() As StatementSyntax
-      If Me.Current.Kind = SyntaxKind.OpenBraceToken Then
-        Return Me.ParseBlockStatement
-      Else
-        Return Me.ParseExpressionStatement
-      End If
+      Select Case Me.Current.Kind
+        Case SyntaxKind.OpenBraceToken
+          Return Me.ParseBlockStatement
+        Case SyntaxKind.LetKeyword,
+             SyntaxKind.VarKeyword,
+             SyntaxKind.LetKeyword
+          Return Me.ParseVariableDeclaration
+        Case Else
+          Return Me.ParseExpressionStatement
+      End Select
     End Function
 
     Private Function ParseBlockStatement() As StatementSyntax
@@ -85,6 +90,28 @@ Namespace Global.Basic.CodeAnalysis.Syntax
       Dim closeBraceToken = Me.MatchToken(SyntaxKind.CloseBraceToken)
 
       Return New BlockStatementSyntax(openBraceToken, statements.ToImmutable, closeBraceToken)
+
+    End Function
+
+    Private Function ParseVariableDeclaration() As StatementSyntax
+
+      ' The following line is modified from the original in order to
+      ' allow the addition of the DIM keyword (in addition to LET and VAR).
+      'Dim expected = If(Me.Current.Kind = SyntaxKind.LetKeyword, SyntaxKind.LetKeyword, SyntaxKind.VarKeyword)
+      Dim expected = SyntaxKind.VarKeyword
+      ' If LET or DIM, set... otherwise, default to VAR (whether it's VAR or not).
+      Select Case Me.Current.Kind
+        Case SyntaxKind.LetKeyword : expected = SyntaxKind.LetKeyword
+        Case SyntaxKind.DimKeyword : expected = SyntaxKind.DimKeyword
+        Case Else
+      End Select
+
+      Dim keyword = Me.MatchToken(expected)
+      Dim identifier = Me.MatchToken(SyntaxKind.IdentifierToken)
+      Dim equals = Me.MatchToken(SyntaxKind.EqualsToken)
+      Dim initializer = Me.ParseExpression()
+
+      Return New VariableDeclarationSyntax(keyword, identifier, equals, initializer)
 
     End Function
 

@@ -8,6 +8,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
 
     ' Statements
     BlockStatement
+    VariableDeclaration
     ExpressionStatement
 
     ' Expressions

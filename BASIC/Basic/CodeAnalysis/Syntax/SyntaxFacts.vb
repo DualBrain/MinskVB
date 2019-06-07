@@ -55,6 +55,13 @@ Namespace Global.Basic.CodeAnalysis.Syntax
         Case "false"
           Return SyntaxKind.FalseKeyword
 
+        Case "let"
+          Return SyntaxKind.LetKeyword
+        Case "var"
+          Return SyntaxKind.VarKeyword
+        Case "dim"
+          Return SyntaxKind.DimKeyword
+
         Case "not"
           Return SyntaxKind.NotKeyword
         Case "and"
@@ -120,6 +127,9 @@ Namespace Global.Basic.CodeAnalysis.Syntax
         Case SyntaxKind.AndAlsoKeyword : Return "andalso"
         Case SyntaxKind.OrKeyword : Return "or"
         Case SyntaxKind.OrElseKeyword : Return "orelse"
+        Case SyntaxKind.LetKeyword : Return "let"
+        Case SyntaxKind.VarKeyword : Return "var"
+        Case SyntaxKind.DimKeyword : Return "dim"
         Case Else
           Return Nothing
       End Select

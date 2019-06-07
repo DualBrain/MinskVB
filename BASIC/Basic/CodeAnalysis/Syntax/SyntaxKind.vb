@@ -37,6 +37,9 @@ Namespace Global.Basic.CodeAnalysis.Syntax
     AndAlsoKeyword
     OrKeyword
     OrElseKeyword
+    LetKeyword 'TODO: LET has a different behavior in BASIC.
+    VarKeyword
+    DimKeyword
 
     ' Nodes
 
@@ -45,6 +48,7 @@ Namespace Global.Basic.CodeAnalysis.Syntax
     ' Statements
 
     BlockStatement
+    VariableDeclaration
     ExpressionStatement
 
     ' Expressions
