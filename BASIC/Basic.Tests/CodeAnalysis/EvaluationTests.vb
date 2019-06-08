@@ -7,6 +7,7 @@ Imports Basic.CodeAnalysis
 Imports Basic.CodeAnalysis.Syntax
 
 Namespace Global.Basic.Tests.CodeAnalysis
+
   Public Class EvaluationTests
 
     <Theory>
@@ -48,6 +49,106 @@ Namespace Global.Basic.Tests.CodeAnalysis
     <InlineData("true and true", True)>
     <InlineData("{ var a = 0 (a = 10) * a }", 100)>
     Public Sub SyntaxFact_GetText_RoundTrips(text As String, expectedValue As Object)
+      AssertValue(text, expectedValue)
+    End Sub
+
+    <Fact>
+    Public Sub Evaluator_VariableDeclaration_Reports_Redeclaration()
+
+      Dim text = "
+        {
+          var x = 10
+          var y = 100
+          {
+            var x = 10
+          }
+          var [x] = 5
+        }"
+
+      Dim diagnostics = "
+        Variable 'x' is already declared."
+
+      Me.AssertDiagnostics(text, diagnostics)
+
+    End Sub
+
+    <Fact>
+    Public Sub Evaluator_Name_Reports_Undefined()
+
+      Dim text = "[x] * 10"
+
+      Dim diagnostics = "Variable 'x' doesn't exist."
+
+      Me.AssertDiagnostics(text, diagnostics)
+
+    End Sub
+
+    <Fact>
+    Public Sub Evaluator_Assigned_Reports_Undefined()
+
+      Dim text = "[x] = 10"
+
+      Dim diagnostics = "Variable 'x' doesn't exist."
+
+      Me.AssertDiagnostics(text, diagnostics)
+
+    End Sub
+
+    <Fact>
+    Public Sub Evaluator_Assigned_Reports_CannotAssign()
+
+      Dim text = "
+        {
+          let x = 10
+          x [=] 0
+        }"
+
+      Dim diagnostics = "Variable 'x' is read-only and cannot be assigned to."
+
+      Me.AssertDiagnostics(text, diagnostics)
+
+    End Sub
+
+    <Fact>
+    Public Sub Evaluator_Assigned_Reports_CannotConvert()
+
+      Dim text = "
+        {
+          let x = 10
+          x [=] [true]
+        }"
+
+      Dim diagnostics = "
+        Variable 'x' is read-only and cannot be assigned to.
+        Cannot convert type 'System.Boolean' to 'System.Int32'."
+
+      Me.AssertDiagnostics(text, diagnostics)
+
+    End Sub
+
+    <Fact>
+    Public Sub Evaluator_Unary_Reports_Undefined()
+
+      Dim text = "[+]true"
+
+      Dim diagnostics = "Unary operator '+' is not defined for type 'System.Boolean'."
+
+      Me.AssertDiagnostics(text, diagnostics)
+
+    End Sub
+
+    <Fact>
+    Public Sub Evaluator_Binary_Reports_Undefined()
+
+      Dim text = "10 [+] false"
+
+      Dim diagnostics = "Binary operator '+' is not defined for type 'System.Int32' and 'System.Boolean'."
+
+      Me.AssertDiagnostics(text, diagnostics)
+
+    End Sub
+
+    Private Shared Sub AssertValue(text As String, expectedValue As Object)
 
       Dim tree = SyntaxTree.Parse(text)
       Dim compilation = New Compilation(tree)
@@ -57,6 +158,35 @@ Namespace Global.Basic.Tests.CodeAnalysis
       Assert.Empty(result.Diagnostics)
 
       Assert.Equal(expectedValue, result.Value)
+
+    End Sub
+
+    Private Sub AssertDiagnostics(text As String, diagnosticText As String)
+
+      Dim at = AnnotatedText.Parse(text)
+      Dim tree = SyntaxTree.Parse(at.Text)
+      Dim compilation = New Compilation(tree)
+      Dim result = compilation.Evaluate(New Dictionary(Of VariableSymbol, Object))
+
+      Dim expectedDiagnostics = AnnotatedText.UnindentLines(diagnosticText)
+
+      If at.Spans.Length <> expectedDiagnostics.Length Then
+        Throw New Exception("ERROR: Must mark as many spans as there are expected diagnostics.")
+      End If
+
+      Assert.Equal(expectedDiagnostics.Length, result.Diagnostics.Length)
+
+      For i = 0 To expectedDiagnostics.Length - 1
+
+        Dim expectedMessage = expectedDiagnostics(i)
+        Dim actualMessage = result.Diagnostics(i).Message
+        Assert.Equal(expectedMessage, actualMessage)
+
+        Dim expectedSpan = at.Spans(i)
+        Dim actualSpan = result.Diagnostics(i).Span
+        Assert.Equal(expectedSpan, actualSpan)
+
+      Next
 
     End Sub
 

@@ -46,11 +46,11 @@ Namespace Global.Basic.CodeAnalysis
     End Sub
 
     Public Sub ReportUndefinedUnaryOperator(span As TextSpan, operatorText As String, operandType As Type)
-      Me.Report(span, $"Unary operator '{operatorText}' is not defined for type {operandType}.")
+      Me.Report(span, $"Unary operator '{operatorText}' is not defined for type '{operandType}'.")
     End Sub
 
     Public Sub ReportUndefinedBinaryOperator(span As TextSpan, operatorText As String, leftType As Type, rightType As Type)
-      Me.Report(span, $"Binary operator '{operatorText}' is not defined for type {leftType} and {rightType}.")
+      Me.Report(span, $"Binary operator '{operatorText}' is not defined for type '{leftType}' and '{rightType}'.")
     End Sub
 
     Public Sub ReportUndefinedName(span As TextSpan, name As String)

@@ -25,6 +25,10 @@ Namespace Global.Basic.CodeAnalysis.Text
       Return New TextSpan(start, length)
     End Function
 
+    Public Overrides Function ToString() As String
+      Return $"{Me.Start}...{Me.End}"
+    End Function
+
   End Structure
 
 End Namespace

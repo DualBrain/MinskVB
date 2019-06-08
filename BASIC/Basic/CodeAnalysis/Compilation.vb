@@ -13,6 +13,10 @@ Namespace Global.Basic.CodeAnalysis
 
     Private m_globalScope As BoundGlobalScope = Nothing
 
+    Public Sub New(syntax As SyntaxTree)
+      Me.New(Nothing, syntax)
+    End Sub
+
     Private Sub New(previous As Compilation, syntax As SyntaxTree)
       Me.Previous = previous
       Me.Syntax = syntax
