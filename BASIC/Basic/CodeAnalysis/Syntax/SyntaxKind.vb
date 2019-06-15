@@ -53,6 +53,8 @@ Namespace Global.Basic.CodeAnalysis.Syntax
     'ElseIfKeyword
     'EndIfKeyword
 
+    WhileKeyword
+
     ' Nodes
 
     CompilationUnit
@@ -63,6 +65,7 @@ Namespace Global.Basic.CodeAnalysis.Syntax
     BlockStatement
     VariableDeclaration
     IfStatement
+    WhileStatement
     ExpressionStatement
 
     ' Expressions

@@ -26,40 +26,46 @@ Namespace Global.Basic.CodeAnalysis
     Private Sub EvaluateStatement(node As BoundStatement)
 
       Select Case node.Kind
-        Case BoundNodeKind.BlockStatement : Me.EvaluateBlockStatement(node)
-        Case BoundNodeKind.VariableDeclaration : Me.EvaluateVariableDeclaration(node)
-        Case BoundNodeKind.IfStatement : Me.EvaluateIfStatement(node)
-        Case BoundNodeKind.ExpressionStatement : Me.EvaluateExpressionStatement(node)
+        Case BoundNodeKind.BlockStatement : Me.EvaluateBlockStatement(DirectCast(node, BoundBlockStatement))
+        Case BoundNodeKind.VariableDeclaration : Me.EvaluateVariableDeclaration(DirectCast(node, BoundVariableDeclaration))
+        Case BoundNodeKind.IfStatement : Me.EvaluateIfStatement(DirectCast(node, BoundIfStatement))
+        Case BoundNodeKind.WhileStatement : Me.EvaluateWhileStatement(DirectCast(node, BoundWhileStatement))
+        Case BoundNodeKind.ExpressionStatement : Me.EvaluateExpressionStatement(DirectCast(node, BoundExpressionStatement))
         Case Else
           Throw New Exception($"Unexpected statement {node.Kind}")
       End Select
 
     End Sub
 
-    Private Sub EvaluateBlockStatement(node As BoundStatement)
-      For Each statement In DirectCast(node, BoundBlockStatement).Statements
+    Private Sub EvaluateBlockStatement(node As BoundBlockStatement)
+      For Each statement In node.Statements
         Me.EvaluateStatement(statement)
       Next
     End Sub
 
-    Private Sub EvaluateVariableDeclaration(node As BoundStatement)
-      Dim value = Me.EvaluateExpression(DirectCast(node, BoundVariableDeclaration).Initializer)
-      Me.Variables(DirectCast(node, BoundVariableDeclaration).Variable) = value
+    Private Sub EvaluateVariableDeclaration(node As BoundVariableDeclaration)
+      Dim value = Me.EvaluateExpression(node.Initializer)
+      Me.Variables(node.Variable) = value
       Me.m_lastValue = value
     End Sub
 
-    Private Sub EvaluateIfStatement(node As BoundStatement)
-      Dim n = DirectCast(node, BoundIfStatement)
-      Dim condition = CBool(Me.EvaluateExpression(n.Condition))
+    Private Sub EvaluateIfStatement(node As BoundIfStatement)
+      Dim condition = CBool(Me.EvaluateExpression(node.Condition))
       If condition Then
-        Me.EvaluateStatement(n.ThenStatement)
-      ElseIf n.ElseStatement IsNot Nothing Then
-        Me.EvaluateStatement(n.ElseStatement)
+        Me.EvaluateStatement(node.ThenStatement)
+      ElseIf node.ElseStatement IsNot Nothing Then
+        Me.EvaluateStatement(node.ElseStatement)
       End If
     End Sub
 
-    Private Sub EvaluateExpressionStatement(node As BoundStatement)
-      Me.m_lastValue = Me.EvaluateExpression(DirectCast(node, BoundExpressionStatement).Expression)
+    Private Sub EvaluateWhileStatement(node As BoundWhileStatement)
+      While CBool(Me.EvaluateExpression(node.Condition))
+        Me.EvaluateStatement(node.Body)
+      End While
+    End Sub
+
+    Private Sub EvaluateExpressionStatement(node As BoundExpressionStatement)
+      Me.m_lastValue = Me.EvaluateExpression(node.Expression)
     End Sub
 
     Private Function EvaluateExpression(node As BoundExpression) As Object

@@ -113,6 +113,8 @@ Namespace Global.Basic.CodeAnalysis.Binding
           Return Me.BindVariableDeclaration(DirectCast(syntax, VariableDeclarationSyntax))
         Case SyntaxKind.IfStatement
           Return Me.BindIfStatement(DirectCast(syntax, IfStatementSyntax))
+        Case SyntaxKind.WhileStatement
+          Return Me.BindWhileStatement(DirectCast(syntax, WhileStatementSyntax))
         Case SyntaxKind.ExpressionStatement
           Return Me.BindExpressionStatement(DirectCast(syntax, ExpressionStatementSyntax))
         Case Else
@@ -148,6 +150,12 @@ Namespace Global.Basic.CodeAnalysis.Binding
       Dim thenStatement = Me.BindStatement(syntax.ThenStatement)
       Dim elseStatement = If(syntax.ElseClause IsNot Nothing, Me.BindStatement(syntax.ElseClause.ElseStatement), Nothing)
       Return New BoundIfStatement(condition, thenStatement, elseStatement)
+    End Function
+
+    Private Function BindWhileStatement(syntax As WhileStatementSyntax) As BoundStatement
+      Dim condition = Me.BindExpression(syntax.Condition, GetType(Boolean))
+      Dim body = Me.BindStatement(syntax.Body)
+      Return New BoundWhileStatement(condition, body)
     End Function
 
     Private Function BindExpressionStatement(syntax As ExpressionStatementSyntax) As BoundStatement

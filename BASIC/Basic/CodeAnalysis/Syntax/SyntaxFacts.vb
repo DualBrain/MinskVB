@@ -79,6 +79,9 @@ Namespace Global.Basic.CodeAnalysis.Syntax
         'Case "endif"
         '  Return SyntaxKind.ElseIfKeyword
 
+        Case "while"
+          Return SyntaxKind.WhileKeyword
+
         Case "not"
           Return SyntaxKind.NotKeyword
         Case "and"
@@ -157,6 +160,8 @@ Namespace Global.Basic.CodeAnalysis.Syntax
         Case SyntaxKind.ElseKeyword : Return "else"
           'Case SyntaxKind.ElseIfKeyword : Return "elseif"
           'Case SyntaxKind.EndIfKeyword : Return "endif"
+
+        Case SyntaxKind.WhileKeyword : Return "while"
 
         Case Else
           Return Nothing
