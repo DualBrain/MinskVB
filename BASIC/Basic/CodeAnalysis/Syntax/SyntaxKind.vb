@@ -20,7 +20,11 @@ Namespace Global.Basic.CodeAnalysis.Syntax
     AmpersandAmpersandToken
     EqualsEqualsToken
     BangEqualsToken
+    LessThanToken
+    LessThanEqualsToken
     LessThanGreaterThanToken
+    GreaterThanEqualsToken
+    GreaterThanToken
     PipePipeToken
     OpenParenToken
     CloseParenToken

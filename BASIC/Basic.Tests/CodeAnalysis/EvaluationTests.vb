@@ -25,6 +25,19 @@ Namespace Global.Basic.Tests.CodeAnalysis
     <InlineData("3 != 3", False)>
     <InlineData("12 <> 3", True)>
     <InlineData("3 <> 3", False)>
+ _
+    <InlineData("3 < 4", True)>
+    <InlineData("5 < 4", False)>
+    <InlineData("4 <= 4", True)>
+    <InlineData("4 <= 5", True)>
+    <InlineData("5 <= 4", False)>
+ _
+    <InlineData("4 > 3", True)>
+    <InlineData("4 > 5", False)>
+    <InlineData("4 >= 4", True)>
+    <InlineData("5 >= 4", True)>
+    <InlineData("4 >= 5", False)>
+ _
     <InlineData("false == false", True)>
     <InlineData("true == false", False)>
     <InlineData("false != false", False)>

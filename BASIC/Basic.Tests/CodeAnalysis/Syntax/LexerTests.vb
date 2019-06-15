@@ -157,6 +157,36 @@ Namespace Global.Basic.Tests.CodeAnalysis.Syntax
         Return True
       End If
 
+      If kind1 = SyntaxKind.LessThanToken AndAlso
+         kind2 = SyntaxKind.EqualsToken Then
+        Return True
+      End If
+
+      If kind1 = SyntaxKind.LessThanToken AndAlso
+         kind2 = SyntaxKind.EqualsEqualsToken Then
+        Return True
+      End If
+
+      If kind1 = SyntaxKind.LessThanToken AndAlso
+         kind2 = SyntaxKind.GreaterThanEqualsToken Then
+        Return True
+      End If
+
+      If kind1 = SyntaxKind.LessThanToken AndAlso
+         kind2 = SyntaxKind.GreaterThanToken Then
+        Return True
+      End If
+
+      If kind1 = SyntaxKind.GreaterThanToken AndAlso
+         kind2 = SyntaxKind.EqualsToken Then
+        Return True
+      End If
+
+      If kind1 = SyntaxKind.GreaterThanToken AndAlso
+         kind2 = SyntaxKind.EqualsEqualsToken Then
+        Return True
+      End If
+
       'TODO: More cases...
 
       Return False

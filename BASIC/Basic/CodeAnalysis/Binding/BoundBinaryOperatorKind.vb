@@ -13,6 +13,10 @@ Namespace Global.Basic.CodeAnalysis.Binding
     LogicalOr
     Equals
     NotEquals
+    Less
+    LessOrEquals
+    GreaterOrEquals
+    Greater
   End Enum
 
 End Namespace

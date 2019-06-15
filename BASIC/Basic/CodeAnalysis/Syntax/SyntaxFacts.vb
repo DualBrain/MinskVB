@@ -31,7 +31,13 @@ Namespace Global.Basic.CodeAnalysis.Syntax
         Case SyntaxKind.PlusToken, SyntaxKind.MinusToken
           Return 4
 
-        Case SyntaxKind.EqualsEqualsToken, SyntaxKind.BangEqualsToken, SyntaxKind.LessThanGreaterThanToken ', SyntaxKind.EqualsToken
+        Case SyntaxKind.EqualsEqualsToken,
+             SyntaxKind.BangEqualsToken,
+             SyntaxKind.LessThanToken,
+             SyntaxKind.LessThanEqualsToken,
+             SyntaxKind.LessThanGreaterThanToken,
+             SyntaxKind.GreaterThanEqualsToken,
+             SyntaxKind.GreaterThanToken
           Return 3
 
         Case SyntaxKind.AmpersandAmpersandToken, SyntaxKind.AndKeyword
@@ -114,7 +120,11 @@ Namespace Global.Basic.CodeAnalysis.Syntax
         Case SyntaxKind.AmpersandAmpersandToken : Return "&&"
         Case SyntaxKind.EqualsEqualsToken : Return "=="
         Case SyntaxKind.BangEqualsToken : Return "!="
+        Case SyntaxKind.LessThanToken : Return "<"
+        Case SyntaxKind.LessThanEqualsToken : Return "<="
         Case SyntaxKind.LessThanGreaterThanToken : Return "<>"
+        Case SyntaxKind.GreaterThanEqualsToken : Return ">="
+        Case SyntaxKind.GreaterThanToken : Return ">"
         Case SyntaxKind.PipePipeToken : Return "||"
         Case SyntaxKind.OpenParenToken : Return "("
         Case SyntaxKind.CloseParenToken : Return ")"
