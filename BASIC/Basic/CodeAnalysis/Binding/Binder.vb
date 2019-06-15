@@ -75,6 +75,14 @@ Namespace Global.Basic.CodeAnalysis.Binding
 
     Public ReadOnly Property Diagnostics As DiagnosticBag = New DiagnosticBag
 
+    Private Function BindExpression(syntax As ExpressionSyntax, targetType As Type) As BoundExpression
+      Dim result = Me.BindExpression(syntax)
+      If result.Type <> targetType Then
+        Me.Diagnostics.ReportCannotConvert(syntax.Span, result.Type, targetType)
+      End If
+      Return result
+    End Function
+
     Public Function BindExpression(syntax As ExpressionSyntax) As BoundExpression
 
       Select Case syntax.Kind
@@ -103,6 +111,8 @@ Namespace Global.Basic.CodeAnalysis.Binding
           Return Me.BindBlockStatement(DirectCast(syntax, BlockStatementSyntax))
         Case SyntaxKind.VariableDeclaration
           Return Me.BindVariableDeclaration(DirectCast(syntax, VariableDeclarationSyntax))
+        Case SyntaxKind.IfStatement
+          Return Me.BindIfStatement(DirectCast(syntax, IfStatementSyntax))
         Case SyntaxKind.ExpressionStatement
           Return Me.BindExpressionStatement(DirectCast(syntax, ExpressionStatementSyntax))
         Case Else
@@ -131,6 +141,13 @@ Namespace Global.Basic.CodeAnalysis.Binding
         Me.Diagnostics.ReportVariableAlreadyDeclared(syntax.Identifier.Span, name)
       End If
       Return New BoundVariableDeclaration(variable, initializer)
+    End Function
+
+    Private Function BindIfStatement(syntax As IfStatementSyntax) As BoundStatement
+      Dim condition = Me.BindExpression(syntax.Condition, GetType(Boolean))
+      Dim thenStatement = Me.BindStatement(syntax.ThenStatement)
+      Dim elseStatement = If(syntax.ElseClause IsNot Nothing, Me.BindStatement(syntax.ElseClause.ElseStatement), Nothing)
+      Return New BoundIfStatement(condition, thenStatement, elseStatement)
     End Function
 
     Private Function BindExpressionStatement(syntax As ExpressionStatementSyntax) As BoundStatement

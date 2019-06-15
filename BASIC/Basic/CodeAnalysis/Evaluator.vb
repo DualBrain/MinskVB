@@ -28,6 +28,7 @@ Namespace Global.Basic.CodeAnalysis
       Select Case node.Kind
         Case BoundNodeKind.BlockStatement : Me.EvaluateBlockStatement(node)
         Case BoundNodeKind.VariableDeclaration : Me.EvaluateVariableDeclaration(node)
+        Case BoundNodeKind.IfStatement : Me.EvaluateIfStatement(node)
         Case BoundNodeKind.ExpressionStatement : Me.EvaluateExpressionStatement(node)
         Case Else
           Throw New Exception($"Unexpected statement {node.Kind}")
@@ -45,6 +46,16 @@ Namespace Global.Basic.CodeAnalysis
       Dim value = Me.EvaluateExpression(DirectCast(node, BoundVariableDeclaration).Initializer)
       Me.Variables(DirectCast(node, BoundVariableDeclaration).Variable) = value
       Me.m_lastValue = value
+    End Sub
+
+    Private Sub EvaluateIfStatement(node As BoundStatement)
+      Dim n = DirectCast(node, BoundIfStatement)
+      Dim condition = CBool(Me.EvaluateExpression(n.Condition))
+      If condition Then
+        Me.EvaluateStatement(n.ThenStatement)
+      ElseIf n.ElseStatement IsNot Nothing Then
+        Me.EvaluateStatement(n.ElseStatement)
+      End If
     End Sub
 
     Private Sub EvaluateExpressionStatement(node As BoundStatement)

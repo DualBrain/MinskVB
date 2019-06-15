@@ -72,6 +72,8 @@ Namespace Global.Basic.CodeAnalysis.Syntax
              SyntaxKind.VarKeyword,
              SyntaxKind.LetKeyword
           Return Me.ParseVariableDeclaration
+        Case SyntaxKind.IfKeyword
+          Return Me.ParseIfStatement
         Case Else
           Return Me.ParseExpressionStatement
       End Select
@@ -115,6 +117,23 @@ Namespace Global.Basic.CodeAnalysis.Syntax
 
     End Function
 
+    Private Function ParseIfStatement() As StatementSyntax
+      Dim keyword = Me.MatchToken(SyntaxKind.IfKeyword)
+      Dim condition = Me.ParseExpression
+      Dim statement = Me.ParseStatement()
+      Dim elseClause = Me.ParseElseClause()
+      Return New IfStatementSyntax(keyword, condition, statement, elseClause)
+    End Function
+
+    Private Function ParseElseClause() As ElseClauseSyntax
+      If Me.Current.Kind <> SyntaxKind.ElseKeyword Then
+        Return Nothing
+      End If
+      Dim keyword = Me.NextToken
+      Dim statement = Me.ParseStatement
+      Return New ElseClauseSyntax(keyword, statement)
+    End Function
+
     Private Function ParseExpressionStatement() As ExpressionStatementSyntax
       Dim expression = Me.ParseExpression()
       Return New ExpressionStatementSyntax(expression)
@@ -127,7 +146,7 @@ Namespace Global.Basic.CodeAnalysis.Syntax
     Private Function ParseAssignmentExpression() As ExpressionSyntax
 
       If (Me.Peek(0).Kind = SyntaxKind.IdentifierToken AndAlso
-                      Me.Peek(1).Kind = SyntaxKind.EqualsToken) Then
+          Me.Peek(1).Kind = SyntaxKind.EqualsToken) Then
 
         Dim identifierToken = Me.NextToken
         Dim operatorToken = Me.NextToken

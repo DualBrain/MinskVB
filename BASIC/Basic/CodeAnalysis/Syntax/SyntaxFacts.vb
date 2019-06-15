@@ -68,6 +68,17 @@ Namespace Global.Basic.CodeAnalysis.Syntax
         Case "dim"
           Return SyntaxKind.DimKeyword
 
+        Case "if"
+          Return SyntaxKind.IfKeyword
+        'Case "then"
+        '  Return SyntaxKind.ThenKeyword
+        Case "else"
+          Return SyntaxKind.ElseKeyword
+        'Case "elseif"
+        '  Return SyntaxKind.ElseIfKeyword
+        'Case "endif"
+        '  Return SyntaxKind.ElseIfKeyword
+
         Case "not"
           Return SyntaxKind.NotKeyword
         Case "and"
@@ -140,6 +151,13 @@ Namespace Global.Basic.CodeAnalysis.Syntax
         Case SyntaxKind.LetKeyword : Return "let"
         Case SyntaxKind.VarKeyword : Return "var"
         Case SyntaxKind.DimKeyword : Return "dim"
+
+        Case SyntaxKind.IfKeyword : Return "if"
+        'Case SyntaxKind.ThenKeyword : Return "then"
+        Case SyntaxKind.ElseKeyword : Return "else"
+          'Case SyntaxKind.ElseIfKeyword : Return "elseif"
+          'Case SyntaxKind.EndIfKeyword : Return "endif"
+
         Case Else
           Return Nothing
       End Select

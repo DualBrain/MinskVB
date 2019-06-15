@@ -30,11 +30,15 @@ Namespace Global.Basic.CodeAnalysis.Syntax
       For Each p In properties
         If GetType(SyntaxNode).IsAssignableFrom(p.PropertyType) Then
           Dim child = DirectCast(p.GetValue(Me), SyntaxNode)
-          Yield child
+          If child IsNot Nothing Then
+            Yield child
+          End If
         ElseIf GetType(IEnumerable(Of SyntaxNode)).IsAssignableFrom(p.PropertyType) Then
           Dim children = DirectCast(p.GetValue(Me), IEnumerable(Of SyntaxNode))
           For Each child In children
-            Yield child
+            If child IsNot Nothing Then
+              Yield child
+            End If
           Next
         End If
       Next

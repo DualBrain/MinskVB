@@ -61,6 +61,10 @@ Namespace Global.Basic.Tests.CodeAnalysis
     <InlineData("true && true", True)>
     <InlineData("true and true", True)>
     <InlineData("{ var a = 0 (a = 10) * a }", 100)>
+    <InlineData("{ var a = 0 if a == 0 a = 10 a}", 10)>
+    <InlineData("{ var a = 0 if a == 4 a = 10 a}", 0)>
+    <InlineData("{ var a = 0 if a == 0 a = 10 else a=5 a}", 10)>
+    <InlineData("{ var a = 0 if a == 4 a = 10 else a=5 a}", 5)>
     Public Sub SyntaxFact_GetText_RoundTrips(text As String, expectedValue As Object)
       AssertValue(text, expectedValue)
     End Sub

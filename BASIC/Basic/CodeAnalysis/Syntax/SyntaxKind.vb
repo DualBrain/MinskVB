@@ -36,23 +36,33 @@ Namespace Global.Basic.CodeAnalysis.Syntax
 
     FalseKeyword
     TrueKeyword
+
     NotKeyword
     AndKeyword
     AndAlsoKeyword
     OrKeyword
     OrElseKeyword
+
     LetKeyword 'TODO: LET has a different behavior in BASIC.
     VarKeyword
     DimKeyword
 
+    IfKeyword
+    'ThenKeyword
+    ElseKeyword
+    'ElseIfKeyword
+    'EndIfKeyword
+
     ' Nodes
 
     CompilationUnit
+    ElseClause
 
     ' Statements
 
     BlockStatement
     VariableDeclaration
+    IfStatement
     ExpressionStatement
 
     ' Expressions
