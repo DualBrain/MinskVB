@@ -55,6 +55,9 @@ Namespace Global.Basic.CodeAnalysis.Syntax
 
     WhileKeyword
 
+    ForKeyword
+    ToKeyword
+
     ' Nodes
 
     CompilationUnit
@@ -66,6 +69,7 @@ Namespace Global.Basic.CodeAnalysis.Syntax
     VariableDeclaration
     IfStatement
     WhileStatement
+    ForStatement
     ExpressionStatement
 
     ' Expressions

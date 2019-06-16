@@ -76,6 +76,8 @@ Namespace Global.Basic.CodeAnalysis.Syntax
           Return Me.ParseIfStatement
         Case SyntaxKind.WhileKeyword
           Return Me.ParseWhileStatement
+        Case SyntaxKind.ForKeyword
+          Return Me.ParseForStatement
         Case Else
           Return Me.ParseExpressionStatement
       End Select
@@ -141,6 +143,17 @@ Namespace Global.Basic.CodeAnalysis.Syntax
       Dim condition = Me.ParseExpression
       Dim body = Me.ParseStatement
       Return New WhileStatementSyntax(keyword, condition, body)
+    End Function
+
+    Private Function ParseForStatement() As StatementSyntax
+      Dim keyword = Me.MatchToken(SyntaxKind.ForKeyword)
+      Dim identifier = Me.MatchToken(SyntaxKind.IdentifierToken)
+      Dim equalsToken = Me.MatchToken(SyntaxKind.EqualsToken)
+      Dim lowerBound = Me.ParseExpression
+      Dim toKeyword = Me.MatchToken(SyntaxKind.ToKeyword)
+      Dim upperBound = Me.ParseExpression
+      Dim body = Me.ParseStatement
+      Return New ForStatementSyntax(keyword, identifier, equalsToken, lowerBound, toKeyword, upperBound, body)
     End Function
 
     Private Function ParseExpressionStatement() As ExpressionStatementSyntax

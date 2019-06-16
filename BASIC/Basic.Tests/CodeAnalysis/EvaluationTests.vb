@@ -66,6 +66,7 @@ Namespace Global.Basic.Tests.CodeAnalysis
     <InlineData("{ var a = 0 if a == 0 a = 10 else a=5 a}", 10)>
     <InlineData("{ var a = 0 if a == 4 a = 10 else a=5 a}", 5)>
     <InlineData("{ var i = 10 var result = 0 while i > 0 { result = result + i i = i - 1} result }", 55)>
+    <InlineData("{ var result = 0 for i = 1 to 10 { result = result + i} result }", 55)>
     Public Sub SyntaxFact_GetText_RoundTrips(text As String, expectedValue As Object)
       AssertValue(text, expectedValue)
     End Sub
@@ -138,6 +139,74 @@ Namespace Global.Basic.Tests.CodeAnalysis
 
       Dim diagnostics = "
         Variable 'x' is read-only and cannot be assigned to.
+        Cannot convert type 'System.Boolean' to 'System.Int32'."
+
+      Me.AssertDiagnostics(text, diagnostics)
+
+    End Sub
+
+    <Fact>
+    Public Sub Evaluator_IfStatement_Reports_CannotConvert()
+
+      Dim text = "
+        {
+          var x = 0
+          if [10]
+            x = 10
+        }"
+
+      Dim diagnostics = "
+        Cannot convert type 'System.Int32' to 'System.Boolean'."
+
+      Me.AssertDiagnostics(text, diagnostics)
+
+    End Sub
+
+    <Fact>
+    Public Sub Evaluator_WhileStatement_Reports_CannotConvert()
+
+      Dim text = "
+        {
+          var x = 0
+          while [10]
+            x = 10
+        }"
+
+      Dim diagnostics = "
+        Cannot convert type 'System.Int32' to 'System.Boolean'."
+
+      Me.AssertDiagnostics(text, diagnostics)
+
+    End Sub
+
+    <Fact>
+    Public Sub Evaluator_ForStatement_Reports_CannotConvert_LowerBound()
+
+      Dim text = "
+        {
+          var result = 0
+          for i = [false] to 10
+            result = result + i
+        }"
+
+      Dim diagnostics = "
+        Cannot convert type 'System.Boolean' to 'System.Int32'."
+
+      Me.AssertDiagnostics(text, diagnostics)
+
+    End Sub
+
+    <Fact>
+    Public Sub Evaluator_ForStatement_Reports_CannotConvert_UpperBound()
+
+      Dim text = "
+        {
+          var result = 0
+          for i = 1 to [true]
+            result = result + i
+        }"
+
+      Dim diagnostics = "
         Cannot convert type 'System.Boolean' to 'System.Int32'."
 
       Me.AssertDiagnostics(text, diagnostics)

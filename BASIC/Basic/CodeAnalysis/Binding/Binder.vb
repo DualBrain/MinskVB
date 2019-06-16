@@ -115,6 +115,8 @@ Namespace Global.Basic.CodeAnalysis.Binding
           Return Me.BindIfStatement(DirectCast(syntax, IfStatementSyntax))
         Case SyntaxKind.WhileStatement
           Return Me.BindWhileStatement(DirectCast(syntax, WhileStatementSyntax))
+        Case SyntaxKind.ForStatement
+          Return Me.BindForStatement(DirectCast(syntax, ForStatementSyntax))
         Case SyntaxKind.ExpressionStatement
           Return Me.BindExpressionStatement(DirectCast(syntax, ExpressionStatementSyntax))
         Case Else
@@ -156,6 +158,27 @@ Namespace Global.Basic.CodeAnalysis.Binding
       Dim condition = Me.BindExpression(syntax.Condition, GetType(Boolean))
       Dim body = Me.BindStatement(syntax.Body)
       Return New BoundWhileStatement(condition, body)
+    End Function
+
+    Private Function BindForStatement(syntax As ForStatementSyntax) As BoundStatement
+
+      Dim lowerBound = Me.BindExpression(syntax.LowerBound, GetType(Integer))
+      Dim upperBound = Me.BindExpression(syntax.UpperBound, GetType(Integer))
+
+      Me.m_scope = New BoundScope(Me.m_scope)
+
+      Dim name = syntax.Identifier.Text
+      Dim variable = New VariableSymbol(name.ToLower, True, GetType(Integer))
+      If Not Me.m_scope.TryDeclare(variable) Then
+        Me.Diagnostics.ReportVariableAlreadyDeclared(syntax.Identifier.Span, name)
+      End If
+
+      Dim body = Me.BindStatement(syntax.Body)
+
+      Me.m_scope = Me.m_scope.Parent
+
+      Return New BoundForStatement(variable, lowerBound, upperBound, body)
+
     End Function
 
     Private Function BindExpressionStatement(syntax As ExpressionStatementSyntax) As BoundStatement

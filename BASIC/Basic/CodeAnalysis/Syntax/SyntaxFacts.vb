@@ -82,6 +82,11 @@ Namespace Global.Basic.CodeAnalysis.Syntax
         Case "while"
           Return SyntaxKind.WhileKeyword
 
+        Case "for"
+          Return SyntaxKind.ForKeyword
+        Case "to"
+          Return SyntaxKind.ToKeyword
+
         Case "not"
           Return SyntaxKind.NotKeyword
         Case "and"
@@ -162,6 +167,9 @@ Namespace Global.Basic.CodeAnalysis.Syntax
           'Case SyntaxKind.EndIfKeyword : Return "endif"
 
         Case SyntaxKind.WhileKeyword : Return "while"
+
+        Case SyntaxKind.ForKeyword : Return "for"
+        Case SyntaxKind.ToKeyword : Return "to"
 
         Case Else
           Return Nothing

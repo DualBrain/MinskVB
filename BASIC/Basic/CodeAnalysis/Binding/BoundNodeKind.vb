@@ -11,6 +11,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
     VariableDeclaration
     IfStatement
     WhileStatement
+    ForStatement
     ExpressionStatement
 
     ' Expressions
