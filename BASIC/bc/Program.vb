@@ -22,6 +22,7 @@ Friend Module Program
   Sub Main()
 
     Dim showTree = False
+    Dim showProgram = False
     Dim variables = New Dictionary(Of VariableSymbol, Object)
     Dim textBuilder = New StringBuilder
     Dim previous As Compilation = Nothing
@@ -55,6 +56,10 @@ Friend Module Program
             showTree = True : Continue Do
           Case "option tree off"
             showTree = False : Continue Do
+          Case "option program on"
+            showProgram = True : Continue Do
+          Case "option program off"
+            showProgram = False : Continue Do
           Case "cls"
             Clear() : Continue Do
           Case "exit"
@@ -87,6 +92,11 @@ Friend Module Program
         Dim color = Console.ForegroundColor
         ForegroundColor = DarkGray
         tree.Root.WriteTo(Console.Out)
+        ResetColor()
+      End If
+
+      If showProgram Then
+        compilation.EmitTree(Console.Out)
         ResetColor()
       End If
 

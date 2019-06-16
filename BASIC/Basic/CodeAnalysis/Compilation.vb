@@ -3,6 +3,7 @@ Option Strict On
 Option Infer On
 
 Imports System.Collections.Immutable
+Imports System.IO
 Imports System.Threading
 
 Imports Basic.CodeAnalysis.Binding
@@ -54,6 +55,9 @@ Namespace Global.Basic.CodeAnalysis
 
     End Function
 
+    Public Sub EmitTree(writer As TextWriter)
+      Me.GlobalScope.Statement.WriteTo(writer)
+    End Sub
   End Class
 
 End Namespace
