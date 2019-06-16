@@ -14,6 +14,7 @@ Namespace Global.Basic.Tests.CodeAnalysis
     <InlineData("1", 1)>
     <InlineData("+1", 1)>
     <InlineData("-1", -1)>
+    <InlineData("~1", -2)>
     <InlineData("14 + 12", 26)>
     <InlineData("12 - 3", 9)>
     <InlineData("4 * 2", 8)>
@@ -25,25 +26,41 @@ Namespace Global.Basic.Tests.CodeAnalysis
     <InlineData("3 != 3", False)>
     <InlineData("12 <> 3", True)>
     <InlineData("3 <> 3", False)>
- _
     <InlineData("3 < 4", True)>
     <InlineData("5 < 4", False)>
     <InlineData("4 <= 4", True)>
     <InlineData("4 <= 5", True)>
     <InlineData("5 <= 4", False)>
- _
     <InlineData("4 > 3", True)>
     <InlineData("4 > 5", False)>
     <InlineData("4 >= 4", True)>
     <InlineData("5 >= 4", True)>
     <InlineData("4 >= 5", False)>
- _
+    <InlineData("1 | 2", 3)>
+    <InlineData("1 | 0", 1)>
+    <InlineData("1 & 3", 1)>
+    <InlineData("1 & 0", 0)>
+    <InlineData("1 ^ 0", 1)>
+    <InlineData("0 ^ 1", 1)>
+    <InlineData("1 ^ 3", 2)>
     <InlineData("false == false", True)>
     <InlineData("true == false", False)>
     <InlineData("false != false", False)>
     <InlineData("true != false", True)>
     <InlineData("true && true", True)>
     <InlineData("false or false", False)>
+    <InlineData("false | false", False)>
+    <InlineData("false | true", True)>
+    <InlineData("true | false", True)>
+    <InlineData("true | true", True)>
+    <InlineData("false & false", False)>
+    <InlineData("false & true", False)>
+    <InlineData("true & false", False)>
+    <InlineData("true & true", True)>
+    <InlineData("false ^ false", False)>
+    <InlineData("true ^ false", True)>
+    <InlineData("false ^ true", True)>
+    <InlineData("true ^ true", False)>
     <InlineData("true", True)>
     <InlineData("false", False)>
     <InlineData("!true", False)>

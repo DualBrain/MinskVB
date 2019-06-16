@@ -8,6 +8,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
     Identity
     Negation
     LogicalNegation
+    Onescomplement
   End Enum
 
 End Namespace

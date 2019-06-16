@@ -59,13 +59,19 @@ Namespace Global.Basic.CodeAnalysis.Syntax
         Case ")"c : Me.Kind = SyntaxKind.CloseParenToken : Me.Position += 1
         Case "{"c : Me.Kind = SyntaxKind.OpenBraceToken : Me.Position += 1
         Case "}"c : Me.Kind = SyntaxKind.CloseBraceToken : Me.Position += 1
+        Case "~"c : Me.Kind = SyntaxKind.TildeToken : Me.Position += 1
+        Case "^"c : Me.Kind = SyntaxKind.HatToken : Me.Position += 1
         Case "&"c
           If Me.LookAhead = "&"c Then
             Me.Kind = SyntaxKind.AmpersandAmpersandToken : Me.Position += 2
+          Else
+            Me.Kind = SyntaxKind.AmpersandToken : Me.Position += 1
           End If
         Case "|"c
           If Me.LookAhead = "|"c Then
             Me.Kind = SyntaxKind.PipePipeToken : Me.Position += 2
+          Else
+            Me.Kind = SyntaxKind.PipeToken : Me.Position += 1
           End If
         Case "="c
           If Me.LookAhead = "="c Then

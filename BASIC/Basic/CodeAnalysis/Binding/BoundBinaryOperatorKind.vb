@@ -11,6 +11,9 @@ Namespace Global.Basic.CodeAnalysis.Binding
     Division
     LogicalAnd
     LogicalOr
+    BitwiseAnd
+    BitwiseOr
+    BitwiseXor
     Equals
     NotEquals
     Less

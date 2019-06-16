@@ -28,7 +28,8 @@ Namespace Global.Basic.CodeAnalysis.Binding
       New BoundUnaryOperator(SyntaxKind.BangToken, BoundUnaryOperatorKind.LogicalNegation, GetType(Boolean)),
       New BoundUnaryOperator(SyntaxKind.NotKeyword, BoundUnaryOperatorKind.LogicalNegation, GetType(Boolean)),
       New BoundUnaryOperator(SyntaxKind.PlusToken, BoundUnaryOperatorKind.Identity, GetType(Integer)),
-      New BoundUnaryOperator(SyntaxKind.MinusToken, BoundUnaryOperatorKind.Negation, GetType(Integer))
+      New BoundUnaryOperator(SyntaxKind.MinusToken, BoundUnaryOperatorKind.Negation, GetType(Integer)),
+      New BoundUnaryOperator(SyntaxKind.TildeToken, BoundUnaryOperatorKind.Onescomplement, GetType(Integer))
     }
 
     Public Shared Function Bind(syntaxKind As SyntaxKind, operandType As Type) As BoundUnaryOperator

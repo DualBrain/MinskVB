@@ -118,6 +118,8 @@ Namespace Global.Basic.CodeAnalysis
           Return -CInt(operand)
         Case BoundUnaryOperatorKind.LogicalNegation
           Return Not CBool(operand)
+        Case BoundUnaryOperatorKind.Onescomplement
+          Return Not CInt(operand)
         Case Else
           Throw New Exception($"Unexpected unary operator {u.Op}")
       End Select
@@ -132,6 +134,24 @@ Namespace Global.Basic.CodeAnalysis
         Case BoundBinaryOperatorKind.Subtraction : Return CInt(left) - CInt(right)
         Case BoundBinaryOperatorKind.Multiplication : Return CInt(left) * CInt(right)
         Case BoundBinaryOperatorKind.Division : Return CInt(left) \ CInt(right)
+        Case BoundBinaryOperatorKind.BitwiseAnd
+          If b.Type = GetType(Integer) Then
+            Return CInt(left) And CInt(right)
+          Else
+            Return CBool(left) And CBool(right)
+          End If
+        Case BoundBinaryOperatorKind.BitwiseOr
+          If b.Type = GetType(Integer) Then
+            Return CInt(left) Or CInt(right)
+          Else
+            Return CBool(left) Or CBool(right)
+          End If
+        Case BoundBinaryOperatorKind.BitwiseXor
+          If b.Type = GetType(Integer) Then
+            Return CInt(left) Xor CInt(right)
+          Else
+            Return CBool(left) Xor CBool(right)
+          End If
         Case BoundBinaryOperatorKind.LogicalAnd : Return CBool(left) And CBool(right)
         Case BoundBinaryOperatorKind.LogicalOr : Return CBool(left) Or CBool(right)
         Case BoundBinaryOperatorKind.Equals : Return Equals(left, right)

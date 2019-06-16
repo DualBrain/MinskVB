@@ -12,7 +12,11 @@ Namespace Global.Basic.CodeAnalysis.Syntax
     Public Function GetUnaryOperatorPrecedence(kind As SyntaxKind) As Integer
 
       Select Case kind
-        Case SyntaxKind.PlusToken, SyntaxKind.MinusToken, SyntaxKind.BangToken, SyntaxKind.NotKeyword
+        Case SyntaxKind.PlusToken,
+             SyntaxKind.MinusToken,
+             SyntaxKind.BangToken,
+             SyntaxKind.NotKeyword,
+             SyntaxKind.TildeToken
           Return 6
 
         Case Else
@@ -40,10 +44,15 @@ Namespace Global.Basic.CodeAnalysis.Syntax
              SyntaxKind.GreaterThanToken
           Return 3
 
-        Case SyntaxKind.AmpersandAmpersandToken, SyntaxKind.AndKeyword
+        Case SyntaxKind.AmpersandToken,
+             SyntaxKind.AmpersandAmpersandToken,
+             SyntaxKind.AndKeyword
           Return 2
 
-        Case SyntaxKind.PipePipeToken, SyntaxKind.OrKeyword
+        Case SyntaxKind.PipeToken,
+             SyntaxKind.PipePipeToken,
+             SyntaxKind.OrKeyword,
+             SyntaxKind.HatToken
           Return 1
 
         Case Else
@@ -136,7 +145,10 @@ Namespace Global.Basic.CodeAnalysis.Syntax
         Case SyntaxKind.SlashToken : Return "/"
         Case SyntaxKind.BangToken : Return "!"
         Case SyntaxKind.EqualsToken : Return "="
+        Case SyntaxKind.AmpersandToken : Return "&"
         Case SyntaxKind.AmpersandAmpersandToken : Return "&&"
+        Case SyntaxKind.HatToken : Return "^"
+        Case SyntaxKind.TildeToken : Return "~"
         Case SyntaxKind.EqualsEqualsToken : Return "=="
         Case SyntaxKind.BangEqualsToken : Return "!="
         Case SyntaxKind.LessThanToken : Return "<"
@@ -144,6 +156,7 @@ Namespace Global.Basic.CodeAnalysis.Syntax
         Case SyntaxKind.LessThanGreaterThanToken : Return "<>"
         Case SyntaxKind.GreaterThanEqualsToken : Return ">="
         Case SyntaxKind.GreaterThanToken : Return ">"
+        Case SyntaxKind.PipeToken : Return "|"
         Case SyntaxKind.PipePipeToken : Return "||"
         Case SyntaxKind.OpenParenToken : Return "("
         Case SyntaxKind.CloseParenToken : Return ")"

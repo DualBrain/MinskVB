@@ -187,6 +187,26 @@ Namespace Global.Basic.Tests.CodeAnalysis.Syntax
         Return True
       End If
 
+      If kind1 = SyntaxKind.PipeToken AndAlso
+         kind2 = SyntaxKind.PipePipeToken Then
+        Return True
+      End If
+
+      If kind1 = SyntaxKind.PipeToken AndAlso
+         kind2 = SyntaxKind.PipeToken Then
+        Return True
+      End If
+
+      If kind1 = SyntaxKind.AmpersandToken AndAlso
+         kind2 = SyntaxKind.AmpersandAmpersandToken Then
+        Return True
+      End If
+
+      If kind1 = SyntaxKind.AmpersandToken AndAlso
+         kind2 = SyntaxKind.AmpersandToken Then
+        Return True
+      End If
+
       'TODO: More cases...
 
       Return False
