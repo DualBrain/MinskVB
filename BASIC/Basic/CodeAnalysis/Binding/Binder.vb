@@ -197,6 +197,11 @@ Namespace Global.Basic.CodeAnalysis.Binding
 
     Private Function BindNameExpression(syntax As NameExpressionSyntax) As BoundExpression
       Dim name = syntax.IdentifierToken.Text
+      If String.IsNullOrEmpty(name) Then
+        ' This means the token was inserted by the parser.  We already
+        ' reported error so we can just return an error expression.
+        Return New BoundLiteralExpression(0)
+      End If
       Dim variable As VariableSymbol = Nothing
       If Not Me.m_scope.TryLookup(name, variable) Then
         Me.Diagnostics.ReportUndefinedName(syntax.IdentifierToken.Span, name)

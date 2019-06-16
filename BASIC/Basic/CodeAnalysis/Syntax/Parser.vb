@@ -88,10 +88,25 @@ Namespace Global.Basic.CodeAnalysis.Syntax
       Dim statements = ImmutableArray.CreateBuilder(Of StatementSyntax)
 
       Dim openBraceToken = Me.MatchToken(SyntaxKind.OpenBraceToken)
+
       While Me.Current.Kind <> SyntaxKind.EndOfFileToken AndAlso
             Me.Current.Kind <> SyntaxKind.CloseBraceToken
+
+        Dim startToken = Me.Current
+
         Dim statement = Me.ParseStatement()
         statements.Add(statement)
+
+        ' If ParseStatement() did not consume any tokens,
+        ' we need to skip the current token and continue
+        ' in order to avoid an infinite loop.
+        ' We don't need to report an error because we'll
+        ' already tried to parse an expression statement
+        ' and reported one.
+        If (Me.Current Is startToken) Then
+          Me.NextToken()
+        End If
+
       End While
       Dim closeBraceToken = Me.MatchToken(SyntaxKind.CloseBraceToken)
 

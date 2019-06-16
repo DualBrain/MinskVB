@@ -92,6 +92,23 @@ Namespace Global.Basic.Tests.CodeAnalysis
     End Sub
 
     <Fact>
+    Public Sub Evaluator_BlockStatement_NoInfiniteLoop()
+
+      Dim text = "
+        {
+         [)]
+[]
+"
+
+      Dim diagnostics = "
+        Unexpected token <CloseParenToken>, expected <IdentifierToken>.
+        Unexpected token <EndOfFileToken>, expected <CloseBraceToken>."
+
+      Me.AssertDiagnostics(text, diagnostics)
+
+    End Sub
+
+    <Fact>
     Public Sub Evaluator_IfStatement_Reports_CannotConvert()
 
       Dim text = "
@@ -165,6 +182,17 @@ Namespace Global.Basic.Tests.CodeAnalysis
       Dim text = "[x] * 10"
 
       Dim diagnostics = "Variable 'x' doesn't exist."
+
+      Me.AssertDiagnostics(text, diagnostics)
+
+    End Sub
+
+    <Fact>
+    Public Sub Evaluator_NameExpression_Reports_NoErrorForInsertedToken()
+
+      Dim text = "[]"
+
+      Dim diagnostics = "Unexpected token <EndOfFileToken>, expected <IdentifierToken>."
 
       Me.AssertDiagnostics(text, diagnostics)
 
