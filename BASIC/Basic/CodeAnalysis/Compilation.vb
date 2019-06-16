@@ -48,7 +48,8 @@ Namespace Global.Basic.CodeAnalysis
         Return New EvaluationResult(diagnostics, Nothing)
       End If
 
-      Dim evaluator = New Evaluator(Me.GlobalScope.Statement, variables)
+      Dim statement = Me.GetStatement()
+      Dim evaluator = New Evaluator(statement, variables)
       Dim value = evaluator.Evaluate
 
       Return New EvaluationResult(ImmutableArray(Of Diagnostic).Empty, value)
@@ -56,8 +57,15 @@ Namespace Global.Basic.CodeAnalysis
     End Function
 
     Public Sub EmitTree(writer As TextWriter)
-      Me.GlobalScope.Statement.WriteTo(writer)
+      Dim statement = Me.GetStatement()
+      statement.WriteTo(writer)
     End Sub
+
+    Private Function GetStatement() As BoundStatement
+      Dim result = Me.GlobalScope.Statement
+      Return Lowering.Lowerer.Lower(result)
+    End Function
+
   End Class
 
 End Namespace
