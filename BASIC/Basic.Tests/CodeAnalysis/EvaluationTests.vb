@@ -42,11 +42,14 @@ Namespace Global.Basic.Tests.CodeAnalysis
     <InlineData("true == false", False)>
     <InlineData("false != false", False)>
     <InlineData("true != false", True)>
+    <InlineData("true && true", True)>
+    <InlineData("false or false", False)>
     <InlineData("true", True)>
     <InlineData("false", False)>
     <InlineData("!true", False)>
     <InlineData("not true", False)>
     <InlineData("!false", True)>
+    <InlineData("var a = 10", 10)>
     <InlineData("not false", True)>
     <InlineData("false || true", True)>
     <InlineData("false or true", True)>
@@ -60,6 +63,7 @@ Namespace Global.Basic.Tests.CodeAnalysis
     <InlineData("false and false", False)>
     <InlineData("true && true", True)>
     <InlineData("true and true", True)>
+    <InlineData("{ var a = 10 (a * a) }", 100)>
     <InlineData("{ var a = 0 (a = 10) * a }", 100)>
     <InlineData("{ var a = 0 if a == 0 a = 10 a}", 10)>
     <InlineData("{ var a = 0 if a == 4 a = 10 a}", 0)>
