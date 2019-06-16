@@ -92,60 +92,6 @@ Namespace Global.Basic.Tests.CodeAnalysis
     End Sub
 
     <Fact>
-    Public Sub Evaluator_Name_Reports_Undefined()
-
-      Dim text = "[x] * 10"
-
-      Dim diagnostics = "Variable 'x' doesn't exist."
-
-      Me.AssertDiagnostics(text, diagnostics)
-
-    End Sub
-
-    <Fact>
-    Public Sub Evaluator_Assigned_Reports_Undefined()
-
-      Dim text = "[x] = 10"
-
-      Dim diagnostics = "Variable 'x' doesn't exist."
-
-      Me.AssertDiagnostics(text, diagnostics)
-
-    End Sub
-
-    <Fact>
-    Public Sub Evaluator_Assigned_Reports_CannotAssign()
-
-      Dim text = "
-        {
-          let x = 10
-          x [=] 0
-        }"
-
-      Dim diagnostics = "Variable 'x' is read-only and cannot be assigned to."
-
-      Me.AssertDiagnostics(text, diagnostics)
-
-    End Sub
-
-    <Fact>
-    Public Sub Evaluator_Assigned_Reports_CannotConvert()
-
-      Dim text = "
-        {
-          let x = 10
-          x [=] [true]
-        }"
-
-      Dim diagnostics = "
-        Variable 'x' is read-only and cannot be assigned to.
-        Cannot convert type 'System.Boolean' to 'System.Int32'."
-
-      Me.AssertDiagnostics(text, diagnostics)
-
-    End Sub
-
-    <Fact>
     Public Sub Evaluator_IfStatement_Reports_CannotConvert()
 
       Dim text = "
@@ -214,7 +160,18 @@ Namespace Global.Basic.Tests.CodeAnalysis
     End Sub
 
     <Fact>
-    Public Sub Evaluator_Unary_Reports_Undefined()
+    Public Sub Evaluator_NameExpression_Reports_Undefined()
+
+      Dim text = "[x] * 10"
+
+      Dim diagnostics = "Variable 'x' doesn't exist."
+
+      Me.AssertDiagnostics(text, diagnostics)
+
+    End Sub
+
+    <Fact>
+    Public Sub Evaluator_UnaryExpression_Reports_Undefined()
 
       Dim text = "[+]true"
 
@@ -225,11 +182,54 @@ Namespace Global.Basic.Tests.CodeAnalysis
     End Sub
 
     <Fact>
-    Public Sub Evaluator_Binary_Reports_Undefined()
+    Public Sub Evaluator_BinaryExpression_Reports_Undefined()
 
       Dim text = "10 [+] false"
 
       Dim diagnostics = "Binary operator '+' is not defined for type 'System.Int32' and 'System.Boolean'."
+
+      Me.AssertDiagnostics(text, diagnostics)
+
+    End Sub
+
+    <Fact>
+    Public Sub Evaluator_AssignmentExpression_Reports_Undefined()
+
+      Dim text = "[x] = 10"
+
+      Dim diagnostics = "Variable 'x' doesn't exist."
+
+      Me.AssertDiagnostics(text, diagnostics)
+
+    End Sub
+
+    <Fact>
+    Public Sub Evaluator_AssignmentExpression_Reports_CannotAssign()
+
+      Dim text = "
+        {
+          let x = 10
+          x [=] 0
+        }"
+
+      Dim diagnostics = "Variable 'x' is read-only and cannot be assigned to."
+
+      Me.AssertDiagnostics(text, diagnostics)
+
+    End Sub
+
+    <Fact>
+    Public Sub Evaluator_AssignmentExpression_Reports_CannotConvert()
+
+      Dim text = "
+        {
+          let x = 10
+          x [=] [true]
+        }"
+
+      Dim diagnostics = "
+        Variable 'x' is read-only and cannot be assigned to.
+        Cannot convert type 'System.Boolean' to 'System.Int32'."
 
       Me.AssertDiagnostics(text, diagnostics)
 
