@@ -33,7 +33,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
       End Select
     End Function
 
-    Private Function RewriteBlockStatement(node As BoundBlockStatement) As BoundStatement
+    Protected Overridable Function RewriteBlockStatement(node As BoundBlockStatement) As BoundStatement
       Dim builder As ImmutableArray(Of BoundStatement).Builder = Nothing
       For i = 0 To node.Statements.Length - 1
         Dim oldStatement = node.Statements(i)
@@ -56,7 +56,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
       Return New BoundBlockStatement(builder.MoveToImmutable)
     End Function
 
-    Private Function RewriteVariableDeclaration(node As BoundVariableDeclaration) As BoundStatement
+    Protected Overridable Function RewriteVariableDeclaration(node As BoundVariableDeclaration) As BoundStatement
       Dim initializer = Me.RewriteExpression(node.Initializer)
       If initializer Is node.Initializer Then
         Return node
@@ -64,7 +64,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
       Return New BoundVariableDeclaration(node.Variable, initializer)
     End Function
 
-    Private Function RewriteIfStatement(node As BoundIfStatement) As BoundStatement
+    Protected Overridable Function RewriteIfStatement(node As BoundIfStatement) As BoundStatement
       Dim condition = Me.RewriteExpression(node.Condition)
       Dim thenStatement = Me.RewriteStatement(node.ThenStatement)
       Dim elseStatement = If(node.ElseStatement Is Nothing, Nothing, Me.RewriteStatement(node.ElseStatement))
@@ -76,7 +76,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
       Return New BoundIfStatement(condition, thenStatement, elseStatement)
     End Function
 
-    Private Function RewriteWhileStatement(node As BoundWhileStatement) As BoundStatement
+    Protected Overridable Function RewriteWhileStatement(node As BoundWhileStatement) As BoundStatement
       Dim condition = Me.RewriteExpression(node.Condition)
       Dim body = Me.RewriteStatement(node.Body)
       If condition Is node.Condition AndAlso body Is node.Body Then
@@ -85,7 +85,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
       Return New BoundWhileStatement(condition, body)
     End Function
 
-    Private Function RewriteForStatement(node As BoundForStatement) As BoundStatement
+    Protected Overridable Function RewriteForStatement(node As BoundForStatement) As BoundStatement
       Dim lowerBound = Me.RewriteExpression(node.LowerBound)
       Dim upperBound = Me.RewriteExpression(node.UpperBound)
       Dim body = Me.RewriteStatement(node.Body)
@@ -97,7 +97,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
       Return New BoundForStatement(node.Variable, lowerBound, upperBound, body)
     End Function
 
-    Private Function RewriteExpressionStatement(node As BoundExpressionStatement) As BoundStatement
+    Protected Overridable Function RewriteExpressionStatement(node As BoundExpressionStatement) As BoundStatement
       Dim expression = Me.RewriteExpression(node.Expression)
       If expression Is node.Expression Then
         Return node
