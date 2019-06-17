@@ -21,9 +21,15 @@ Friend NotInheritable Class BasicRepl
     For Each token In tokens
       Dim isKeyword = token.Kind.ToString.EndsWith("Keyword")
       Dim isNumber = token.Kind = SyntaxKind.NumberToken
+      Dim isIdentifier = token.Kind = SyntaxKind.IdentifierToken
+
       If isKeyword Then
+        ForegroundColor = Blue
+      ElseIf isIdentifier Then
+        ForegroundColor = DarkYellow
+      ElseIf isNumber Then
         ForegroundColor = Cyan
-      ElseIf Not isNumber Then
+      Else
         ForegroundColor = DarkGray
       End If
       Write(token.Text)
