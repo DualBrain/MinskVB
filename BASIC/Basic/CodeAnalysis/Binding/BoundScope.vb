@@ -9,7 +9,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
 
   Friend NotInheritable Class BoundScope
 
-    Private m_variables As Dictionary(Of String, VariableSymbol) = New Dictionary(Of String, VariableSymbol)
+    Private ReadOnly m_variables As Dictionary(Of String, VariableSymbol) = New Dictionary(Of String, VariableSymbol)
 
     Public Sub New(parent As BoundScope)
       Me.Parent = parent
