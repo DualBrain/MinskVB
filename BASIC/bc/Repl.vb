@@ -248,7 +248,15 @@ Friend MustInherit Class Repl
     Dim lineIndex = view.CurrentLine
     Dim line = document(lineIndex)
     Dim start = view.CurrentCharacter
-    If start >= line.Length Then Return
+    If start >= line.Length Then
+      If view.CurrentLine = document.Count - 1 Then
+        Return
+      End If
+      Dim nextLine = document(view.CurrentLine + 1)
+      document(view.CurrentLine) &= nextLine
+      document.RemoveAt(view.CurrentLine + 1)
+      Return
+    End If
     Dim before = line.Substring(0, start)
     Dim after = line.Substring(start + 1)
     document(lineIndex) = before & after
@@ -271,6 +279,7 @@ Friend MustInherit Class Repl
   End Sub
 
   Private Sub HandlePageDown(document As ObservableCollection(Of String), view As SubmissionView)
+    If Me.m_submissionHistory.Count = 0 Then Return
     Me.m_submissionHistoryIndex += 1
     If Me.m_submissionHistoryIndex > Me.m_submissionHistory.Count - 1 Then
       Me.m_submissionHistoryIndex = 0
@@ -279,6 +288,7 @@ Friend MustInherit Class Repl
   End Sub
 
   Private Sub UpdateDocumentFromHistory(document As ObservableCollection(Of String), view As SubmissionView)
+    If Me.m_submissionHistory.Count = 0 Then Return
     document.Clear()
     Dim historyItem = Me.m_submissionHistory(Me.m_submissionHistoryIndex)
     Dim lines = historyItem.Split(Environment.NewLine)

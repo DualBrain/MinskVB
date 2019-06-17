@@ -27,6 +27,12 @@ Namespace Global.Basic.CodeAnalysis.Syntax
       End Get
     End Property
 
+    Public ReadOnly Property IsMissing As Boolean
+      Get
+        Return Me.Text Is Nothing
+      End Get
+    End Property
+
   End Class
 
 End Namespace
