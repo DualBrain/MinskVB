@@ -59,7 +59,7 @@ Namespace Global.Basic.CodeAnalysis.Lowering
         ' end:
 
         Dim endLabel = Me.GenerateLabel()
-        Dim gotoFalse = New BoundConditionalGotoStatement(endLabel, node.Condition, True)
+        Dim gotoFalse = New BoundConditionalGotoStatement(endLabel, node.Condition, False)
         Dim endLabelStatement = New BoundLabelStatement(endLabel)
         Dim result = New BoundBlockStatement(ImmutableArray.Create(Of BoundStatement)(gotoFalse, node.ThenStatement, endLabelStatement))
         Return Me.RewriteStatement(result)
@@ -84,7 +84,7 @@ Namespace Global.Basic.CodeAnalysis.Lowering
         Dim elseLabel = Me.GenerateLabel
         Dim endLabel = Me.GenerateLabel
 
-        Dim gotoFalse = New BoundConditionalGotoStatement(elseLabel, node.Condition, True)
+        Dim gotoFalse = New BoundConditionalGotoStatement(elseLabel, node.Condition, False)
         Dim gotoEndStatement = New BoundGotoStatement(endLabel)
 
         Dim elseLabelStatement = New BoundLabelStatement(elseLabel)
@@ -123,7 +123,7 @@ Namespace Global.Basic.CodeAnalysis.Lowering
       Dim gotoCheck = New BoundGotoStatement(checkLabel)
       Dim continueLabelStatement = New BoundLabelStatement(continueLabel)
       Dim checkLabelStatement = New BoundLabelStatement(checkLabel)
-      Dim gotoTrue = New BoundConditionalGotoStatement(continueLabel, node.Condition, False)
+      Dim gotoTrue = New BoundConditionalGotoStatement(continueLabel, node.Condition)
       Dim endLabelStatement = New BoundLabelStatement(endLabel)
 
       Dim result = New BoundBlockStatement(ImmutableArray.Create(Of BoundStatement)(gotoCheck,
@@ -148,6 +148,8 @@ Namespace Global.Basic.CodeAnalysis.Lowering
       ' {
       '   var <var> = <lower>
       '   while (<var> <= <upper>)
+      '   let upperBound = <upper>
+      '   while (<var> <= upperBound)
       '   {
       '     <body>
       '     <var> = <var> + 1
@@ -156,10 +158,12 @@ Namespace Global.Basic.CodeAnalysis.Lowering
 
       Dim variableDeclaration = New BoundVariableDeclaration(node.Variable, node.LowerBound)
       Dim variableExpression = New BoundVariableExpression(node.Variable)
+      Dim upperBoundSymbol = New VariableSymbol("upperBound", True, GetType(Integer))
+      Dim upperBoundDeclaration = New BoundVariableDeclaration(upperBoundSymbol, node.UpperBound)
       Dim condition = New BoundBinaryExpression(
         variableExpression,
         BoundBinaryOperator.Bind(SyntaxKind.LessThanEqualsToken, GetType(Integer), GetType(Integer)),
-        node.UpperBound)
+        New BoundVariableExpression(upperBoundSymbol))
       Dim increment = New BoundExpressionStatement(
         New BoundAssignmentExpression(
           node.Variable,
@@ -169,7 +173,11 @@ Namespace Global.Basic.CodeAnalysis.Lowering
             New BoundLiteralExpression(1))))
       Dim whileBody = New BoundBlockStatement(ImmutableArray.Create(Of BoundStatement)(node.Body, increment))
       Dim whileStatement = New BoundWhileStatement(condition, whileBody)
-      Dim result = New BoundBlockStatement(ImmutableArray.Create(Of BoundStatement)(variableDeclaration, whileStatement))
+      'Dim result = New BoundBlockStatement(ImmutableArray.Create(Of BoundStatement)(variableDeclaration, whileStatement))
+      Dim result = New BoundBlockStatement(ImmutableArray.Create(Of BoundStatement)(
+        variableDeclaration,
+        upperBoundDeclaration,
+        whileStatement))
 
       Return Me.RewriteStatement(result)
 

@@ -8,18 +8,6 @@ Namespace Global.Basic.CodeAnalysis.Binding
 
   Friend MustInherit Class BoundTreeRewriter
 
-    'Public Overridable Function RewriteNode(node As BoundNode) As BoundNode
-
-    '  If TypeOf node Is BoundStatement Then
-    '    Return RewriteStatement(DirectCast(node, BoundStatement))
-    '  ElseIf TypeOf node Is BoundExpression Then
-    '    Return RewriteExpression(DirectCast(node, BoundExpression))
-    '  Else
-    '    Throw New Exception($"Unexpected node: {node.Kind}")
-    '  End If
-
-    'End Function
-
     Public Overridable Function RewriteStatement(node As BoundStatement) As BoundStatement
       Select Case node.Kind
         Case BoundNodeKind.BlockStatement : Return Me.RewriteBlockStatement(DirectCast(node, BoundBlockStatement))
@@ -113,7 +101,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
       If condition Is node.Condition Then
         Return node
       End If
-      Return New BoundConditionalGotoStatement(node.Label, condition, node.JumpIfFalse)
+      Return New BoundConditionalGotoStatement(node.Label, condition, node.JumpIfTrue)
     End Function
 
     Protected Overridable Function RewriteExpressionStatement(node As BoundExpressionStatement) As BoundStatement

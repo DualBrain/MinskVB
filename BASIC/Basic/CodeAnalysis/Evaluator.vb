@@ -39,8 +39,9 @@ Namespace Global.Basic.CodeAnalysis
           Case BoundNodeKind.ConditionalGotoStatement
             Dim cgs = DirectCast(s, BoundConditionalGotoStatement)
             Dim condition = CBool(Me.EvaluateExpression(cgs.Condition))
-            If (condition AndAlso Not cgs.JumpIfFalse) OrElse
-               (Not condition AndAlso cgs.JumpIfFalse) Then
+            'If (condition AndAlso Not cgs.JumpIfFalse) OrElse
+            '   (Not condition AndAlso cgs.JumpIfFalse) Then
+            If condition = cgs.JumpIfTrue Then
               index = labelToIndex(cgs.Label)
             Else
               index += 1

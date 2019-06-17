@@ -88,6 +88,7 @@ Namespace Global.Basic.Tests.CodeAnalysis
     <InlineData("{ var a = 0 if a == 4 a = 10 else a=5 a}", 5)>
     <InlineData("{ var i = 10 var result = 0 while i > 0 { result = result + i i = i - 1} result }", 55)>
     <InlineData("{ var result = 0 for i = 1 to 10 { result = result + i} result }", 55)>
+    <InlineData("{ var a = 10 for i = 1 to (a = a - 1) { } a }", 9)>
     Public Sub SyntaxFact_GetText_RoundTrips(text As String, expectedValue As Object)
       AssertValue(text, expectedValue)
     End Sub
