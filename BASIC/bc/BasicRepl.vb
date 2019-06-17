@@ -16,6 +16,21 @@ Friend NotInheritable Class BasicRepl
   Private m_showProgram As Boolean = False
   Private ReadOnly m_variables As New Dictionary(Of VariableSymbol, Object)
 
+  Protected Overrides Sub RenderLine(line As String)
+    Dim tokens = SyntaxTree.ParseTokens(line)
+    For Each token In tokens
+      Dim isKeyword = token.Kind.ToString.EndsWith("Keyword")
+      Dim isNumber = token.Kind = SyntaxKind.NumberToken
+      If isKeyword Then
+        ForegroundColor = Cyan
+      ElseIf Not isNumber Then
+        ForegroundColor = DarkGray
+      End If
+      Write(token.Text)
+      ResetColor()
+    Next
+  End Sub
+
   Protected Overrides Sub EvaluateMetaCommand(input As String)
     Select Case input.ToLower
       Case "#new"
@@ -32,7 +47,7 @@ Friend NotInheritable Class BasicRepl
   End Sub
 
   Protected Overrides Function IsCompleteSubmission(text As String) As Boolean
-    If String.IsNullOrEmpty(text) Then Return False
+    If String.IsNullOrEmpty(text) Then Return True
     Dim tree = SyntaxTree.Parse(text)
     If tree.Diagnostics.Any Then Return False
     Return True
