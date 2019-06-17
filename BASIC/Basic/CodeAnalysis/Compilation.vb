@@ -61,7 +61,7 @@ Namespace Global.Basic.CodeAnalysis
       statement.WriteTo(writer)
     End Sub
 
-    Private Function GetStatement() As BoundStatement
+    Private Function GetStatement() As BoundBlockStatement
       Dim result = Me.GlobalScope.Statement
       Return Lowering.Lowerer.Lower(result)
     End Function

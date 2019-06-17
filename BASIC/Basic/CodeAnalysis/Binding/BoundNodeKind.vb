@@ -12,6 +12,9 @@ Namespace Global.Basic.CodeAnalysis.Binding
     IfStatement
     WhileStatement
     ForStatement
+    LabelStatement
+    GotoStatement
+    ConditionalGotoStatement
     ExpressionStatement
 
     ' Expressions

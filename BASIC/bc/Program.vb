@@ -82,12 +82,6 @@ Friend Module Program
 
       Dim compilation = If(previous Is Nothing, New Compilation(tree), previous.ContinueWith(tree))
 
-      Dim result = compilation.Evaluate(variables)
-
-      Dim diagnostics = result.Diagnostics
-
-      ' Only show the parse tree if we have enabled doing so.
-
       If showTree Then
         Dim color = Console.ForegroundColor
         ForegroundColor = DarkGray
@@ -100,7 +94,9 @@ Friend Module Program
         ResetColor()
       End If
 
-      If Not diagnostics.Any Then
+      Dim result = compilation.Evaluate(variables)
+
+      If Not result.Diagnostics.Any Then
 
         ' No errors detected, attempt to evaluate (execute).
 
@@ -113,7 +109,7 @@ Friend Module Program
       Else
 
         ' We have errors, so don't try to evaluate (execute).
-        For Each diagnostic In diagnostics
+        For Each diagnostic In result.Diagnostics
 
           Dim lineIndex = tree.Text.GetLineIndex(diagnostic.Span.Start)
           Dim lineNumber = lineIndex + 1

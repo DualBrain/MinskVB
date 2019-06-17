@@ -92,7 +92,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
           writer.Write(",")
         End If
         writer.Write(" ")
-        If isToConsole Then ForegroundColor = Yellow
+        If isToConsole Then ForegroundColor = White
         writer.Write(p.name)
         If isToConsole Then ForegroundColor = DarkGray
         writer.Write(" = ")
