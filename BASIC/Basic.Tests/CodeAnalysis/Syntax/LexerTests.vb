@@ -4,18 +4,34 @@ Option Infer On
 
 Imports Xunit
 Imports Basic.CodeAnalysis.Syntax
+Imports System.Collections.Immutable
+Imports Basic.CodeAnalysis
+Imports Basic.CodeAnalysis.Text
 
 Namespace Global.Basic.Tests.CodeAnalysis.Syntax
 
   Public Class LexerTests
 
     <Fact>
-    Sub Lexer_Tests_AllTokens()
+    Public Sub Lexer_Lexes_UnterminatedString()
+      Dim text As String = $"{ChrW(34)}text"
+      Dim diagnostics As ImmutableArray(Of Diagnostic) = Nothing
+      Dim tokens = SyntaxTree.ParseTokens(text, diagnostics)
+      Dim token = Assert.Single(tokens)
+      Assert.Equal(SyntaxKind.StringToken, token.Kind)
+      Assert.Equal(text, token.Text)
+      Dim diagnostic = Assert.Single(diagnostics)
+      Assert.Equal(New TextSpan(0, 1), diagnostic.Span)
+      Assert.Equal("Unterminated string literal.", diagnostic.Message)
+    End Sub
+
+    <Fact>
+    Sub Lexer_Covers_AllTokens()
 
       Dim tokenKinds = System.Enum.GetValues(GetType(SyntaxKind)) _
-                       .Cast(Of SyntaxKind) _
-                       .Where(Function(k) k.ToString.EndsWith("Keyword") OrElse
-                                          k.ToString.EndsWith("Token"))
+                                         .Cast(Of SyntaxKind) _
+                                         .Where(Function(k) k.ToString.EndsWith("Keyword") OrElse
+                                                            k.ToString.EndsWith("Token"))
 
       Dim testedTokenKinds = GetTokens.Concat(GetSeparators).Select(Function(t) t.kind)
 
@@ -58,8 +74,8 @@ Namespace Global.Basic.Tests.CodeAnalysis.Syntax
     <Theory>
     <MemberData(NameOf(GetTokenPairsWithSeparatorData))>
     Sub Lexer_Lexes_TokenPairWithSeparator(kind1 As SyntaxKind, text1 As String,
-                                           separatorKind As SyntaxKind, separatorText As String,
-                                           kind2 As SyntaxKind, text2 As String)
+                                                       separatorKind As SyntaxKind, separatorText As String,
+                                                       kind2 As SyntaxKind, text2 As String)
 
       Dim text = text1 & separatorText & text2
       Dim tokens = SyntaxTree.ParseTokens(text).ToArray
@@ -95,14 +111,16 @@ Namespace Global.Basic.Tests.CodeAnalysis.Syntax
     Private Shared Function GetTokens() As IEnumerable(Of (kind As SyntaxKind, text As String))
 
       Dim fixedTokens = System.Enum.GetValues(GetType(SyntaxKind)) _
-                        .Cast(Of SyntaxKind)() _
-                        .Select(Function(k) (Kind:=k, Text:=SyntaxFacts.GetText(k))) _
-                        .Where(Function(t) t.Text IsNot Nothing)
+                                          .Cast(Of SyntaxKind)() _
+                                          .Select(Function(k) (Kind:=k, Text:=SyntaxFacts.GetText(k))) _
+                                          .Where(Function(t) t.Text IsNot Nothing)
 
       Dim dynamicTokens = {(SyntaxKind.NumberToken, "1"),
-                           (SyntaxKind.NumberToken, "123"),
-                           (SyntaxKind.IdentifierToken, "a"),
-                           (SyntaxKind.IdentifierToken, "abc")}
+                                             (SyntaxKind.NumberToken, "123"),
+                                             (SyntaxKind.IdentifierToken, "a"),
+                                             (SyntaxKind.IdentifierToken, "abc"),
+                                             (SyntaxKind.StringToken, $"{ChrW(34)}Test{ChrW(34)}"),
+                                             (SyntaxKind.StringToken, $"{ChrW(34)}Te{ChrW(34)}{ChrW(34)}st{ChrW(34)}")}
 
       Return fixedTokens.Concat(dynamicTokens)
 
@@ -111,10 +129,10 @@ Namespace Global.Basic.Tests.CodeAnalysis.Syntax
     Private Shared Function GetSeparators() As (kind As SyntaxKind, text As String)()
 
       Return {(SyntaxKind.WhitespaceToken, " "),
-              (SyntaxKind.WhitespaceToken, "  "),
-              (SyntaxKind.WhitespaceToken, vbCr),
-              (SyntaxKind.WhitespaceToken, vbLf),
-              (SyntaxKind.WhitespaceToken, vbCrLf)}
+                                (SyntaxKind.WhitespaceToken, "  "),
+                                (SyntaxKind.WhitespaceToken, vbCr),
+                                (SyntaxKind.WhitespaceToken, vbLf),
+                                (SyntaxKind.WhitespaceToken, vbCrLf)}
 
     End Function
 
@@ -128,82 +146,87 @@ Namespace Global.Basic.Tests.CodeAnalysis.Syntax
       If kind1 = SyntaxKind.IdentifierToken AndAlso isKeyword2 Then Return True
 
       If kind1 = SyntaxKind.IdentifierToken AndAlso
-         kind2 = SyntaxKind.IdentifierToken Then
+                           kind2 = SyntaxKind.IdentifierToken Then
         Return True
       End If
 
       If kind1 = SyntaxKind.NumberToken AndAlso
-         kind2 = SyntaxKind.NumberToken Then
+                           kind2 = SyntaxKind.NumberToken Then
+        Return True
+      End If
+
+      If kind1 = SyntaxKind.StringToken AndAlso
+                           kind2 = SyntaxKind.StringToken Then
         Return True
       End If
 
       If kind1 = SyntaxKind.BangToken AndAlso
-         kind2 = SyntaxKind.EqualsToken Then
+                           kind2 = SyntaxKind.EqualsToken Then
         Return True
       End If
 
       If kind1 = SyntaxKind.BangToken AndAlso
-         kind2 = SyntaxKind.EqualsEqualsToken Then
+                           kind2 = SyntaxKind.EqualsEqualsToken Then
         Return True
       End If
 
       If kind1 = SyntaxKind.EqualsToken AndAlso
-         kind2 = SyntaxKind.EqualsToken Then
+                           kind2 = SyntaxKind.EqualsToken Then
         Return True
       End If
 
       If kind1 = SyntaxKind.EqualsToken AndAlso
-         kind2 = SyntaxKind.EqualsEqualsToken Then
+                           kind2 = SyntaxKind.EqualsEqualsToken Then
         Return True
       End If
 
       If kind1 = SyntaxKind.LessThanToken AndAlso
-         kind2 = SyntaxKind.EqualsToken Then
+                           kind2 = SyntaxKind.EqualsToken Then
         Return True
       End If
 
       If kind1 = SyntaxKind.LessThanToken AndAlso
-         kind2 = SyntaxKind.EqualsEqualsToken Then
+                           kind2 = SyntaxKind.EqualsEqualsToken Then
         Return True
       End If
 
       If kind1 = SyntaxKind.LessThanToken AndAlso
-         kind2 = SyntaxKind.GreaterThanEqualsToken Then
+                           kind2 = SyntaxKind.GreaterThanEqualsToken Then
         Return True
       End If
 
       If kind1 = SyntaxKind.LessThanToken AndAlso
-         kind2 = SyntaxKind.GreaterThanToken Then
+                           kind2 = SyntaxKind.GreaterThanToken Then
         Return True
       End If
 
       If kind1 = SyntaxKind.GreaterThanToken AndAlso
-         kind2 = SyntaxKind.EqualsToken Then
+                           kind2 = SyntaxKind.EqualsToken Then
         Return True
       End If
 
       If kind1 = SyntaxKind.GreaterThanToken AndAlso
-         kind2 = SyntaxKind.EqualsEqualsToken Then
+                           kind2 = SyntaxKind.EqualsEqualsToken Then
         Return True
       End If
 
       If kind1 = SyntaxKind.PipeToken AndAlso
-         kind2 = SyntaxKind.PipePipeToken Then
+                           kind2 = SyntaxKind.PipePipeToken Then
         Return True
       End If
 
       If kind1 = SyntaxKind.PipeToken AndAlso
-         kind2 = SyntaxKind.PipeToken Then
+                           kind2 = SyntaxKind.PipeToken Then
         Return True
       End If
 
       If kind1 = SyntaxKind.AmpersandToken AndAlso
-         kind2 = SyntaxKind.AmpersandAmpersandToken Then
+                           kind2 = SyntaxKind.AmpersandAmpersandToken Then
         Return True
       End If
 
       If kind1 = SyntaxKind.AmpersandToken AndAlso
-         kind2 = SyntaxKind.AmpersandToken Then
+                           kind2 = SyntaxKind.AmpersandToken Then
         Return True
       End If
 
@@ -226,16 +249,16 @@ Namespace Global.Basic.Tests.CodeAnalysis.Syntax
     End Function
 
     Private Shared Iterator Function GetTokenPairsWithSeparator() As IEnumerable(Of (kind1 As SyntaxKind, text1 As String,
-                                                                                     separatorKind As SyntaxKind, separatorText As String,
-                                                                                     kind2 As SyntaxKind, text2 As String))
+                                                                                                 separatorKind As SyntaxKind, separatorText As String,
+                                                                                                 kind2 As SyntaxKind, text2 As String))
 
       For Each t1 In GetTokens()
         For Each t2 In GetTokens()
           If RequiresSeparator(t1.kind, t2.kind) Then
             For Each s In GetSeparators()
               Yield (t1.kind, t1.text,
-                     s.kind, s.text,
-                     t2.kind, t2.text)
+                                                               s.kind, s.text,
+                                                               t2.kind, t2.text)
             Next
           End If
         Next

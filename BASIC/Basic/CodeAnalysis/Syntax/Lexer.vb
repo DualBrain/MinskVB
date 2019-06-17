@@ -2,6 +2,7 @@
 Option Strict On
 Option Infer On
 
+Imports System.Text
 Imports Basic.CodeAnalysis.Text
 
 Namespace Global.Basic.CodeAnalysis.Syntax
@@ -99,6 +100,8 @@ Namespace Global.Basic.CodeAnalysis.Syntax
           Else
             Me.Kind = SyntaxKind.GreaterThanToken : Me.Position += 1
           End If
+        Case ChrW(34)
+          Me.ReadString()
         Case "0"c, "1"c, "2"c, "3"c, "4"c, "5"c, "6"c, "7"c, "8"c, "9"c
           Me.ReadNumberToken()
         Case " "c, ChrW(10), ChrW(13), ChrW(9) ' Short-circuit whitespace checking (common).
@@ -140,6 +143,42 @@ Namespace Global.Basic.CodeAnalysis.Syntax
 
       Me.Value = value
       Me.Kind = SyntaxKind.NumberToken
+
+    End Sub
+
+    Private Sub ReadString()
+
+      ' "Test \" dddd"
+      ' "Test "" dddd"
+
+      ' skip the current quote
+      Me.Position += 1
+
+      Dim sb = New StringBuilder
+      Dim done = False
+
+      While Not done
+        Select Case Me.Current
+          Case ChrW(0), ChrW(13), ChrW(10)
+            Dim span = New TextSpan(Me.Start, 1)
+            Me.Diagnostics.ReportUnterminatedString(span)
+            done = True
+          Case """"c
+            If Me.LookAhead = """"c Then
+              sb.Append(Me.Current)
+              Me.Position += 2
+            Else
+              Me.Position += 1
+              done = True
+            End If
+          Case Else
+            sb.Append(Me.Current)
+            Me.Position += 1
+        End Select
+      End While
+
+      Me.Kind = SyntaxKind.StringToken
+      Me.Value = sb.ToString
 
     End Sub
 

@@ -53,13 +53,28 @@ Friend NotInheritable Class BasicRepl
   End Sub
 
   Protected Overrides Function IsCompleteSubmission(text As String) As Boolean
+
     If String.IsNullOrEmpty(text) Then Return True
+
+    Dim lastTwoLinesAreBlank = text.Split(Environment.NewLine).
+                                    Reverse().
+                                    TakeWhile(Function(s) String.IsNullOrEmpty(s)).
+                                    Take(2).
+                                    Count() = 2
+
+    If lastTwoLinesAreBlank Then
+      Return True
+    End If
+
     Dim tree = SyntaxTree.Parse(text)
+
     ' Use Statement because we need to exclude the EndOfFileToken.
     If tree.Root.Statement.GetLastToken.IsMissing Then
       Return False
     End If
+
     Return True
+
   End Function
 
   Protected Overrides Sub EvaluateSubmission(text As String)

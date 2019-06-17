@@ -265,6 +265,7 @@ Namespace Global.Basic.CodeAnalysis.Syntax
         Case SyntaxKind.FalseKeyword : Return Me.ParseBooleanLiteral
         Case SyntaxKind.TrueKeyword : Return Me.ParseBooleanLiteral
         Case SyntaxKind.NumberToken : Return Me.ParseNumberLiteral
+        Case SyntaxKind.StringToken : Return Me.ParseStringLiteral
         Case SyntaxKind.IdentifierToken : Return Me.ParseNameExpression
         Case Else
           ' Default to parsing a name expression if we reach this far.
@@ -286,14 +287,19 @@ Namespace Global.Basic.CodeAnalysis.Syntax
       Return New LiteralExpressionSyntax(keywordToken, isTrue)
     End Function
 
-    Private Function ParseNameExpression() As ExpressionSyntax
-      Dim identifierToken = Me.MatchToken(SyntaxKind.IdentifierToken)
-      Return New NameExpressionSyntax(identifierToken)
-    End Function
-
     Private Function ParseNumberLiteral() As ExpressionSyntax
       Dim numberToken = Me.MatchToken(SyntaxKind.NumberToken)
       Return New LiteralExpressionSyntax(numberToken)
+    End Function
+
+    Private Function ParseStringLiteral() As ExpressionSyntax
+      Dim stringToken = Me.MatchToken(SyntaxKind.StringToken)
+      Return New LiteralExpressionSyntax(stringToken)
+    End Function
+
+    Private Function ParseNameExpression() As ExpressionSyntax
+      Dim identifierToken = Me.MatchToken(SyntaxKind.IdentifierToken)
+      Return New NameExpressionSyntax(identifierToken)
     End Function
 
   End Class

@@ -41,6 +41,10 @@ Namespace Global.Basic.CodeAnalysis
       Me.Report(New TextSpan(position, 1), $"Bad character input: '{character}'.")
     End Sub
 
+    Public Sub ReportUnterminatedString(span As TextSpan)
+      Me.Report(span, $"Unterminated string literal.")
+    End Sub
+
     Public Sub ReportUnexpectedToken(span As TextSpan, actualKind As SyntaxKind, expectedKind As SyntaxKind)
       Me.Report(span, $"Unexpected token <{actualKind}>, expected <{expectedKind}>.")
     End Sub

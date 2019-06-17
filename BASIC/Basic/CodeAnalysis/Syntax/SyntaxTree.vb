@@ -33,20 +33,36 @@ Namespace Global.Basic.CodeAnalysis.Syntax
       Return New SyntaxTree(text)
     End Function
 
-    Public Shared Function ParseTokens(Text As String) As IEnumerable(Of SyntaxToken)
-      Dim source = SourceText.From(Text)
+    Public Shared Function ParseTokens(text As String) As ImmutableArray(Of SyntaxToken)
+      Dim source = SourceText.From(text)
       Return ParseTokens(source)
     End Function
 
-    Public Shared Iterator Function ParseTokens(Text As SourceText) As IEnumerable(Of SyntaxToken)
-      Dim lexer = New Lexer(Text)
-      While True
+    Public Shared Function ParseTokens(text As String, ByRef diagnostics As ImmutableArray(Of Diagnostic)) As ImmutableArray(Of SyntaxToken)
+      Dim source = SourceText.From(text)
+      Return ParseTokens(source, diagnostics)
+    End Function
+
+    Public Shared Function ParseTokens(text As SourceText) As ImmutableArray(Of SyntaxToken)
+      Return ParseTokens(text, Nothing)
+    End Function
+
+    Public Shared Function ParseTokens(text As SourceText, ByRef diagnostics As ImmutableArray(Of Diagnostic)) As ImmutableArray(Of SyntaxToken)
+      Dim lexer = New Lexer(text)
+      Dim l = New Lexer(text)
+      Dim result = LexTokens(l).ToImmutableArray
+      diagnostics = l.Diagnostics.ToImmutableArray
+      Return result
+    End Function
+
+    Private Shared Iterator Function LexTokens(lexer As Lexer) As IEnumerable(Of SyntaxToken)
+      Do
         Dim token = lexer.Lex
         If token.Kind = SyntaxKind.EndOfFileToken Then
-          Exit While
+          Exit Do
         End If
         Yield token
-      End While
+      Loop
     End Function
 
   End Class
