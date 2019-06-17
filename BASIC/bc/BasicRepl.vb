@@ -49,20 +49,11 @@ Friend NotInheritable Class BasicRepl
   Protected Overrides Function IsCompleteSubmission(text As String) As Boolean
     If String.IsNullOrEmpty(text) Then Return True
     Dim tree = SyntaxTree.Parse(text)
-    'If tree.Diagnostics.Any Then Return False
     ' Use Statement because we need to exclude the EndOfFileToken.
-    If GetLastToken(tree.Root.Statement).IsMissing Then
+    If tree.Root.Statement.GetLastToken.IsMissing Then
       Return False
     End If
     Return True
-  End Function
-
-  Private Shared Function GetLastToken(node As SyntaxNode) As SyntaxToken
-    If TypeOf node Is SyntaxToken Then
-      Return DirectCast(node, SyntaxToken)
-    End If
-    ' A syntax node should always contain at least one token.
-    Return GetLastToken(node.GetChildren.Last)
   End Function
 
   Protected Overrides Sub EvaluateSubmission(text As String)

@@ -45,6 +45,14 @@ Namespace Global.Basic.CodeAnalysis.Syntax
 
     End Function
 
+    Public Function GetLastToken() As SyntaxToken
+      If TypeOf Me Is SyntaxToken Then
+        Return DirectCast(Me, SyntaxToken)
+      End If
+      ' A syntax node should always contain at least one token.
+      Return Me.GetChildren.Last.GetLastToken
+    End Function
+
     Public Sub WriteTo(writer As TextWriter)
       PrettyPrint(writer, Me)
     End Sub
