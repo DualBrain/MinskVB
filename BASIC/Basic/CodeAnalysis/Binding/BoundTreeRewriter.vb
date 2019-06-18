@@ -115,6 +115,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
 
     Public Overridable Function RewriteExpression(node As BoundExpression) As BoundExpression
       Select Case node.Kind
+        Case BoundNodeKind.ErrorExpression : Return Me.RewriteErrorExpression(DirectCast(node, BoundErrorExpression))
         Case BoundNodeKind.LiteralExpression : Return Me.RewriteLiteralExpression(DirectCast(node, BoundLiteralExpression))
         Case BoundNodeKind.VariableExpression : Return Me.RewriteVariableExpression(DirectCast(node, BoundVariableExpression))
         Case BoundNodeKind.AssignmentExpression : Return Me.RewriteAssignmentExpression(DirectCast(node, BoundAssignmentExpression))
@@ -123,6 +124,10 @@ Namespace Global.Basic.CodeAnalysis.Binding
         Case Else
           Throw New Exception($"Unexpected node: {node.Kind}")
       End Select
+    End Function
+
+    Private Function RewriteErrorExpression(node As BoundErrorExpression) As BoundExpression
+      Return node
     End Function
 
     Protected Overridable Function RewriteLiteralExpression(node As BoundLiteralExpression) As BoundExpression

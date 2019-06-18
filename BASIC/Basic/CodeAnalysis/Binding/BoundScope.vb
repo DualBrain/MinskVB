@@ -25,11 +25,11 @@ Namespace Global.Basic.CodeAnalysis.Binding
       '   var x = false
       ' }
 
-      If Me.m_variables.ContainsKey(variable.Name.ToLower) Then
+      If Me.m_variables.ContainsKey(variable?.Name?.ToLower) Then
         Return False
       End If
 
-      Me.m_variables.Add(variable.Name.ToLower, variable)
+      Me.m_variables.Add(variable?.Name?.ToLower, variable)
       Return True
 
     End Function

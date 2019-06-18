@@ -78,7 +78,9 @@ Namespace Global.Basic.CodeAnalysis.Binding
 
     Private Function BindExpression(syntax As ExpressionSyntax, targetType As TypeSymbol) As BoundExpression
       Dim result = Me.BindExpression(syntax)
-      If result.Type IsNot targetType Then
+      If targetType IsNot TypeSymbol.Error AndAlso
+         result.Type IsNot TypeSymbol.Error AndAlso
+         result.Type IsNot targetType Then
         Me.Diagnostics.ReportCannotConvert(syntax.Span, result.Type, targetType)
       End If
       Return result
@@ -138,13 +140,9 @@ Namespace Global.Basic.CodeAnalysis.Binding
     End Function
 
     Private Function BindVariableDeclaration(syntax As VariableDeclarationSyntax) As BoundStatement
-      Dim name = syntax.Identifier.Text.ToLower
       Dim isReadOnly = syntax.Keyword.Kind = SyntaxKind.LetKeyword
       Dim initializer = Me.BindExpression(syntax.Initializer)
-      Dim variable = New VariableSymbol(name, isReadOnly, initializer.Type)
-      If Not Me.m_scope.TryDeclare(variable) Then
-        Me.Diagnostics.ReportVariableAlreadyDeclared(syntax.Identifier.Span, name)
-      End If
+      Dim variable = Me.BindVariable(syntax.Identifier, isReadOnly, initializer.Type)
       Return New BoundVariableDeclaration(variable, initializer)
     End Function
 
@@ -168,12 +166,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
 
       Me.m_scope = New BoundScope(Me.m_scope)
 
-      Dim name = syntax.Identifier.Text
-      Dim variable = New VariableSymbol(name.ToLower, True, TypeSymbol.Int)
-      If Not Me.m_scope.TryDeclare(variable) Then
-        Me.Diagnostics.ReportVariableAlreadyDeclared(syntax.Identifier.Span, name)
-      End If
-
+      Dim variable = Me.BindVariable(syntax.Identifier, True, TypeSymbol.Int)
       Dim body = Me.BindStatement(syntax.Body)
 
       Me.m_scope = Me.m_scope.Parent
@@ -260,6 +253,16 @@ Namespace Global.Basic.CodeAnalysis.Binding
         Return New BoundErrorExpression
       End If
       Return New BoundBinaryExpression(boundLeft, boundOperator, boundRight)
+    End Function
+
+    Private Function BindVariable(identifier As SyntaxToken, isReadOnly As Boolean, type As TypeSymbol) As VariableSymbol
+      Dim name = If(identifier.Text, "?")
+      Dim [declare] = Not identifier.IsMissing
+      Dim variable = New VariableSymbol(name, isReadOnly, type)
+      If [declare] AndAlso Not Me.m_scope.TryDeclare(variable) Then
+        Me.Diagnostics.ReportVariableAlreadyDeclared(identifier.Span, name)
+      End If
+      Return variable
     End Function
 
   End Class
