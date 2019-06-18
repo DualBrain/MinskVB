@@ -8,22 +8,6 @@ Imports Basic.CodeAnalysis.Syntax
 
 Namespace Global.Basic.CodeAnalysis.Binding
 
-  Friend NotInheritable Class BoundGlobalScope
-
-    Sub New(previous As BoundGlobalScope, diagnostics As ImmutableArray(Of Diagnostic), variables As ImmutableArray(Of VariableSymbol), statement As BoundStatement)
-      Me.Previous = previous
-      Me.Diagnostics = diagnostics
-      Me.Variables = variables
-      Me.Statement = statement
-    End Sub
-
-    Public ReadOnly Property Previous As BoundGlobalScope
-    Public ReadOnly Property Diagnostics As ImmutableArray(Of Diagnostic)
-    Public ReadOnly Property Variables As ImmutableArray(Of VariableSymbol)
-    Public ReadOnly Property Statement As BoundStatement
-
-  End Class
-
   Friend NotInheritable Class Binder
 
     Private m_scope As BoundScope
@@ -274,6 +258,11 @@ Namespace Global.Basic.CodeAnalysis.Binding
 
     Private Function BindCallEpression(syntax As CallExpressionSyntax) As BoundExpression
 
+      Dim t = Me.LookupType(syntax.Identifier.Text)
+      If syntax.Arguments.Count = 1 AndAlso TypeOf t Is TypeSymbol Then
+        Return Me.BindConversion(t, syntax.Arguments(0))
+      End If
+
       Dim boundArguments = ImmutableArray.CreateBuilder(Of BoundExpression)
 
       For Each argument In syntax.Arguments
@@ -305,6 +294,16 @@ Namespace Global.Basic.CodeAnalysis.Binding
 
     End Function
 
+    Private Function BindConversion([type] As TypeSymbol, syntax As ExpressionSyntax) As BoundExpression
+      Dim expression = Me.BindExpression(syntax)
+      Dim c = Conversion.Classify(expression.Type, [type])
+      If Not c.Exists Then
+        Me.Diagnostics.ReportCannotConvert(syntax.Span, expression.Type, [type])
+        Return New BoundErrorExpression
+      End If
+      Return New BoundConversionExpression([type], expression)
+    End Function
+
     Private Function BindVariable(identifier As SyntaxToken, isReadOnly As Boolean, type As TypeSymbol) As VariableSymbol
       Dim name = If(identifier.Text, "?")
       Dim [declare] = Not identifier.IsMissing
@@ -313,6 +312,16 @@ Namespace Global.Basic.CodeAnalysis.Binding
         Me.Diagnostics.ReportVariableAlreadyDeclared(identifier.Span, name)
       End If
       Return variable
+    End Function
+
+    Private Function LookupType(name As String) As TypeSymbol
+      Select Case name
+        Case "bool" : Return TypeSymbol.Bool
+        Case "int" : Return TypeSymbol.Int
+        Case "string" : Return TypeSymbol.String
+        Case Else
+          Return Nothing
+      End Select
     End Function
 
   End Class

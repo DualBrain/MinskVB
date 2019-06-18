@@ -122,6 +122,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
         Case BoundNodeKind.UnaryExpression : Return Me.RewriteUnaryExpression(DirectCast(node, BoundUnaryExpression))
         Case BoundNodeKind.BinaryExpression : Return Me.RewriteBinaryExpression(DirectCast(node, BoundBinaryExpression))
         Case BoundNodeKind.CallExpression : Return Me.RewriteCallExpression(DirectCast(node, BoundCallExpression))
+        Case BoundNodeKind.ConversionExpression : Return Me.RewriteConversionExpression(DirectCast(node, BoundConversionExpression))
         Case Else
           Throw New Exception($"Unexpected node: {node.Kind}")
       End Select
@@ -189,6 +190,15 @@ Namespace Global.Basic.CodeAnalysis.Binding
         Return node
       End If
       Return New BoundCallExpression(node.Function, builder.MoveToImmutable)
+    End Function
+
+    Protected Overridable Function RewriteConversionExpression(node As BoundConversionExpression) As BoundExpression
+      Dim expression = Me.RewriteExpression(node.Expression)
+      If expression Is node.Expression Then
+        Return node
+      Else
+        Return New BoundConversionExpression(node.Type, expression)
+      End If
     End Function
 
   End Class

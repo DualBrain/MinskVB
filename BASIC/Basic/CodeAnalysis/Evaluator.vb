@@ -78,6 +78,7 @@ Namespace Global.Basic.CodeAnalysis
         Case BoundNodeKind.UnaryExpression : Return Me.EvaluateUnaryExpression(node)
         Case BoundNodeKind.BinaryExpression : Return Me.EvaluateBinaryExpression(node)
         Case BoundNodeKind.CallExpression : Return Me.EvaluateCallExpression(DirectCast(node, BoundCallExpression))
+        Case BoundNodeKind.ConversionExpression : Return Me.EvaluateConversionExpression(DirectCast(node, BoundConversionExpression))
         Case Else
           Throw New Exception($"Unexpected node {node.Kind}")
       End Select
@@ -175,10 +176,24 @@ Namespace Global.Basic.CodeAnalysis
         If Me.m_random Is Nothing Then Me.m_random = New Random
         Return Me.m_random.Next(max)
       Else
-        Throw New Exception($"Unexpectd function {node.Function}.")
+        Throw New Exception($"Unexpected function {node.Function}.")
       End If
 
     End Function
+
+    Private Function EvaluateConversionExpression(node As BoundConversionExpression) As Object
+      Dim value = Me.EvaluateExpression(node.Expression)
+      If node.Type Is TypeSymbol.Bool Then
+        Return Convert.ToBoolean(value)
+      ElseIf node.Type Is TypeSymbol.Int Then
+        Return Convert.ToInt32(value)
+      ElseIf node.Type Is TypeSymbol.String Then
+        Return Convert.ToString(value)
+      Else
+        Throw New Exception($"Unexpected type {node.Type}.")
+      End If
+    End Function
+
 
   End Class
 

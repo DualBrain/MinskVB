@@ -25,6 +25,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
     UnaryExpression
     BinaryExpression
     CallExpression
+    ConversionExpression
 
   End Enum
 
