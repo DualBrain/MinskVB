@@ -109,7 +109,7 @@ Namespace Global.Basic.Tests.CodeAnalysis
         }"
 
       Dim diagnostics = "
-        Variable 'x' is already declared."
+        'x' is already declared."
 
       Me.AssertDiagnostics(text, diagnostics)
 
