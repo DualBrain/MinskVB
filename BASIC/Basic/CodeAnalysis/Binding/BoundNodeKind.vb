@@ -18,6 +18,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
     ExpressionStatement
 
     ' Expressions
+    ErrorExpression
     LiteralExpression
     VariableExpression
     AssignmentExpression

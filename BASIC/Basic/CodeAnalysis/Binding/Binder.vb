@@ -201,12 +201,12 @@ Namespace Global.Basic.CodeAnalysis.Binding
       If String.IsNullOrEmpty(name) Then
         ' This means the token was inserted by the parser.  We already
         ' reported error so we can just return an error expression.
-        Return New BoundLiteralExpression(0)
+        Return New BoundErrorExpression
       End If
       Dim variable As VariableSymbol = Nothing
       If Not Me.m_scope.TryLookup(name, variable) Then
         Me.Diagnostics.ReportUndefinedName(syntax.IdentifierToken.Span, name)
-        Return New BoundLiteralExpression(0)
+        Return New BoundErrorExpression
       End If
       Return New BoundVariableExpression(variable)
     End Function
@@ -237,10 +237,13 @@ Namespace Global.Basic.CodeAnalysis.Binding
 
     Private Function BindUnaryEpression(syntax As UnaryExpressionSyntax) As BoundExpression
       Dim boundOperand = Me.BindExpression(syntax.Operand)
+      If boundOperand.Type Is TypeSymbol.Error Then
+        Return New BoundErrorExpression
+      End If
       Dim boundOperator = BoundUnaryOperator.Bind(syntax.OperatorToken.Kind, boundOperand.Type)
       If boundOperator Is Nothing Then
         Me.Diagnostics.ReportUndefinedUnaryOperator(syntax.OperatorToken.Span, syntax.OperatorToken.Text, boundOperand.Type)
-        Return boundOperand
+        Return New BoundErrorExpression
       End If
       Return New BoundUnaryExpression(boundOperator, boundOperand)
     End Function
@@ -248,10 +251,13 @@ Namespace Global.Basic.CodeAnalysis.Binding
     Private Function BindBinaryEpression(syntax As BinaryExpressionSyntax) As BoundExpression
       Dim boundLeft = Me.BindExpression(syntax.Left)
       Dim boundRight = Me.BindExpression(syntax.Right)
+      If boundLeft.Type Is TypeSymbol.Error OrElse boundRight.Type Is TypeSymbol.Error Then
+        Return New BoundErrorExpression
+      End If
       Dim boundOperator = BoundBinaryOperator.Bind(syntax.OperatorToken.Kind, boundLeft.Type, boundRight.Type)
       If boundOperator Is Nothing Then
         Me.Diagnostics.ReportUndefinedBinaryOperator(syntax.OperatorToken.Span, syntax.OperatorToken.Text, boundLeft.Type, boundRight.Type)
-        Return boundLeft
+        Return New BoundErrorExpression
       End If
       Return New BoundBinaryExpression(boundLeft, boundOperator, boundRight)
     End Function
