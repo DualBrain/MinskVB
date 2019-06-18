@@ -11,6 +11,7 @@ Namespace Global.Basic.CodeAnalysis.Symbols
 
     Public ReadOnly Print As New FunctionSymbol("print", ImmutableArray.Create(New ParameterSymbol("text", TypeSymbol.String)), TypeSymbol.Void)
     Public ReadOnly Input As New FunctionSymbol("input", ImmutableArray(Of ParameterSymbol).Empty, TypeSymbol.String)
+    Public ReadOnly Rnd As New FunctionSymbol("rnd", ImmutableArray.Create(New ParameterSymbol("max", TypeSymbol.Int)), TypeSymbol.Int)
 
     Friend Function GetAll() As IEnumerable(Of FunctionSymbol)
       Return GetType(BuiltinFunctions).GetFields(BindingFlags.Public Or BindingFlags.Static).

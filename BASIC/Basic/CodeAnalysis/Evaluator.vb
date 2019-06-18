@@ -9,6 +9,8 @@ Namespace Global.Basic.CodeAnalysis
 
   Friend NotInheritable Class Evaluator
 
+    Private m_random As Random
+
     Private m_lastValue As Object
 
     Sub New(root As BoundBlockStatement, variables As Dictionary(Of VariableSymbol, Object))
@@ -168,6 +170,10 @@ Namespace Global.Basic.CodeAnalysis
         Dim message = CStr(Me.EvaluateExpression(node.Arguments(0)))
         Console.WriteLine(message)
         Return Nothing
+      ElseIf node.Function Is BuiltinFunctions.Rnd Then
+        Dim max = CInt(Me.EvaluateExpression(node.Arguments(0)))
+        If Me.m_random Is Nothing Then Me.m_random = New Random
+        Return Me.m_random.Next(max)
       Else
         Throw New Exception($"Unexpectd function {node.Function}.")
       End If
