@@ -5,14 +5,15 @@ Option Infer On
 Namespace Global.Basic.CodeAnalysis.Symbols
 
   Public NotInheritable Class VariableSymbol
+    Inherits Symbol
 
     Friend Sub New(name As String, isReadOnly As Boolean, type As Type)
-      Me.Name = name
+      MyBase.New(name)
       Me.IsReadOnly = isReadOnly
       Me.Type = type
     End Sub
 
-    Public ReadOnly Property Name As String
+    Public Overrides ReadOnly Property Kind As SymbolKind = SymbolKind.Variable
     Public ReadOnly Property IsReadOnly As Boolean
     Public ReadOnly Property Type As Type
 
