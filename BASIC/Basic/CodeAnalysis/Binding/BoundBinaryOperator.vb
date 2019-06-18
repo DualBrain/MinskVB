@@ -6,6 +6,7 @@ Imports Basic.CodeAnalysis.Symbols
 Imports Basic.CodeAnalysis.Syntax
 
 Namespace Global.Basic.CodeAnalysis.Binding
+
   Friend NotInheritable Class BoundBinaryOperator
 
     Sub New(syntaxKind As SyntaxKind, kind As BoundBinaryOperatorKind, type As TypeSymbol)
@@ -45,6 +46,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
           New BoundBinaryOperator(SyntaxKind.LessThanGreaterThanToken, BoundBinaryOperatorKind.NotEquals, TypeSymbol.Int, TypeSymbol.Bool),
           New BoundBinaryOperator(SyntaxKind.GreaterThanEqualsToken, BoundBinaryOperatorKind.GreaterOrEquals, TypeSymbol.Int, TypeSymbol.Bool),
           New BoundBinaryOperator(SyntaxKind.GreaterThanToken, BoundBinaryOperatorKind.Greater, TypeSymbol.Int, TypeSymbol.Bool),
+ _
           New BoundBinaryOperator(SyntaxKind.AmpersandToken, BoundBinaryOperatorKind.BitwiseAnd, TypeSymbol.Bool),
           New BoundBinaryOperator(SyntaxKind.AmpersandAmpersandToken, BoundBinaryOperatorKind.LogicalAnd, TypeSymbol.Bool),
           New BoundBinaryOperator(SyntaxKind.PipeToken, BoundBinaryOperatorKind.BitwiseOr, TypeSymbol.Bool),
@@ -53,8 +55,10 @@ Namespace Global.Basic.CodeAnalysis.Binding
           New BoundBinaryOperator(SyntaxKind.AndKeyword, BoundBinaryOperatorKind.LogicalAnd, TypeSymbol.Bool),
           New BoundBinaryOperator(SyntaxKind.OrKeyword, BoundBinaryOperatorKind.LogicalOr, TypeSymbol.Bool),
           New BoundBinaryOperator(SyntaxKind.EqualsEqualsToken, BoundBinaryOperatorKind.Equals, TypeSymbol.Bool),
+          New BoundBinaryOperator(SyntaxKind.LessThanGreaterThanToken, BoundBinaryOperatorKind.NotEquals, TypeSymbol.Bool),
           New BoundBinaryOperator(SyntaxKind.BangEqualsToken, BoundBinaryOperatorKind.NotEquals, TypeSymbol.Bool),
-          New BoundBinaryOperator(SyntaxKind.LessThanGreaterThanToken, BoundBinaryOperatorKind.NotEquals, TypeSymbol.Bool)
+ _
+          New BoundBinaryOperator(SyntaxKind.PlusToken, BoundBinaryOperatorKind.Addition, TypeSymbol.String)
         }
 
     Public Shared Function Bind(syntaxKind As SyntaxKind, leftType As TypeSymbol, rightType As TypeSymbol) As BoundBinaryOperator

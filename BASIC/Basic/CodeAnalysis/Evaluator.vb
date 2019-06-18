@@ -53,62 +53,15 @@ Namespace Global.Basic.CodeAnalysis
         End Select
       End While
 
-      'Me.EvaluateStatement(Me.Root)
-
       Return Me.m_lastValue
 
     End Function
-
-    'Private Sub EvaluateStatement(node As BoundStatement)
-
-    '  Select Case node.Kind
-    '    Case BoundNodeKind.BlockStatement : Me.EvaluateBlockStatement(DirectCast(node, BoundBlockStatement))
-    '    Case BoundNodeKind.VariableDeclaration : Me.EvaluateVariableDeclaration(DirectCast(node, BoundVariableDeclaration))
-    '    Case BoundNodeKind.IfStatement : Me.EvaluateIfStatement(DirectCast(node, BoundIfStatement))
-    '    Case BoundNodeKind.WhileStatement : Me.EvaluateWhileStatement(DirectCast(node, BoundWhileStatement))
-    '    'Case BoundNodeKind.ForStatement : Me.EvaluateForStatement(DirectCast(node, BoundForStatement))
-    '    Case BoundNodeKind.ExpressionStatement : Me.EvaluateExpressionStatement(DirectCast(node, BoundExpressionStatement))
-    '    Case Else
-    '      Throw New Exception($"Unexpected statement {node.Kind}")
-    '  End Select
-
-    'End Sub
-
-    'Private Sub EvaluateBlockStatement(node As BoundBlockStatement)
-    '  For Each statement In node.Statements
-    '    Me.EvaluateStatement(statement)
-    '  Next
-    'End Sub
 
     Private Sub EvaluateVariableDeclaration(node As BoundVariableDeclaration)
       Dim value = Me.EvaluateExpression(node.Initializer)
       Me.Variables(node.Variable) = value
       Me.m_lastValue = value
     End Sub
-
-    'Private Sub EvaluateIfStatement(node As BoundIfStatement)
-    '  Dim condition = CBool(Me.EvaluateExpression(node.Condition))
-    '  If condition Then
-    '    Me.EvaluateStatement(node.ThenStatement)
-    '  ElseIf node.ElseStatement IsNot Nothing Then
-    '    Me.EvaluateStatement(node.ElseStatement)
-    '  End If
-    'End Sub
-
-    'Private Sub EvaluateWhileStatement(node As BoundWhileStatement)
-    '  While CBool(Me.EvaluateExpression(node.Condition))
-    '    Me.EvaluateStatement(node.Body)
-    '  End While
-    'End Sub
-
-    'Private Sub EvaluateForStatement(node As BoundForStatement)
-    '  Dim lowerBound = CInt(Me.EvaluateExpression(node.LowerBound))
-    '  Dim upperBound = CInt(Me.EvaluateExpression(node.UpperBound))
-    '  For i = lowerBound To upperBound
-    '    Me.Variables(node.Variable) = i
-    '    Me.EvaluateStatement(node.Body)
-    '  Next
-    'End Sub
 
     Private Sub EvaluateExpressionStatement(node As BoundExpressionStatement)
       Me.m_lastValue = Me.EvaluateExpression(node.Expression)
@@ -166,7 +119,12 @@ Namespace Global.Basic.CodeAnalysis
       Dim left = Me.EvaluateExpression(b.Left)
       Dim right = Me.EvaluateExpression(b.Right)
       Select Case b.Op.Kind
-        Case BoundBinaryOperatorKind.Addition : Return CInt(left) + CInt(right)
+        Case BoundBinaryOperatorKind.Addition
+          If b.Type Is TypeSymbol.Int Then
+            Return CInt(left) + CInt(right)
+          Else
+            Return CStr(left) & CStr(right)
+          End If
         Case BoundBinaryOperatorKind.Subtraction : Return CInt(left) - CInt(right)
         Case BoundBinaryOperatorKind.Multiplication : Return CInt(left) * CInt(right)
         Case BoundBinaryOperatorKind.Division : Return CInt(left) \ CInt(right)
