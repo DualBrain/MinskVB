@@ -75,6 +75,7 @@ Namespace Global.Basic.CodeAnalysis
         Case BoundNodeKind.AssignmentExpression : Return Me.EvaluateAssignmentExpression(node)
         Case BoundNodeKind.UnaryExpression : Return Me.EvaluateUnaryExpression(node)
         Case BoundNodeKind.BinaryExpression : Return Me.EvaluateBinaryExpression(node)
+        Case BoundNodeKind.CallExpression : Return Me.EvaluateCallExpression(DirectCast(node, BoundCallExpression))
         Case Else
           Throw New Exception($"Unexpected node {node.Kind}")
       End Select
@@ -157,6 +158,20 @@ Namespace Global.Basic.CodeAnalysis
         Case Else
           Throw New Exception($"Unexpected binary operator {b.Op}")
       End Select
+    End Function
+
+    Private Function EvaluateCallExpression(node As BoundCallExpression) As Object
+
+      If node.Function Is BuiltinFunctions.Input Then
+        Return Console.ReadLine()
+      ElseIf node.Function Is BuiltinFunctions.Print Then
+        Dim message = CStr(Me.EvaluateExpression(node.Arguments(0)))
+        Console.WriteLine(message)
+        Return Nothing
+      Else
+        Throw New Exception($"Unexpectd function {node.Function}.")
+      End If
+
     End Function
 
   End Class

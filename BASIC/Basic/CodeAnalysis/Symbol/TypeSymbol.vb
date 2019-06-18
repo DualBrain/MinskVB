@@ -11,6 +11,7 @@ Namespace Global.Basic.CodeAnalysis.Symbols
     Public Shared ReadOnly Int As New TypeSymbol("int")
     Public Shared ReadOnly Bool As New TypeSymbol("bool")
     Public Shared ReadOnly [String] As New TypeSymbol("string")
+    Public Shared ReadOnly Void As New TypeSymbol("void")
 
     Private Sub New(name As String)
       MyBase.New(name)

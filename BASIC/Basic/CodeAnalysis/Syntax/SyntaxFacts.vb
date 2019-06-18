@@ -162,6 +162,7 @@ Namespace Global.Basic.CodeAnalysis.Syntax
         Case SyntaxKind.CloseParenToken : Return ")"
         Case SyntaxKind.OpenBraceToken : Return "{"
         Case SyntaxKind.CloseBraceToken : Return "}"
+        Case SyntaxKind.CommaToken : Return ","
         Case SyntaxKind.FalseKeyword : Return "false"
         Case SyntaxKind.TrueKeyword : Return "true"
         Case SyntaxKind.NotKeyword : Return "not"

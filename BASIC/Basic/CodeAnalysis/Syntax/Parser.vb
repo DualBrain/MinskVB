@@ -224,40 +224,6 @@ Namespace Global.Basic.CodeAnalysis.Syntax
 
     End Function
 
-    'Private Function ParseTerm() As ExpressionSyntax
-
-    '  Dim left = Me.ParseFactor
-
-    '  While Me.Current.Kind = SyntaxKind.PlusToken OrElse
-    '        Me.Current.Kind = SyntaxKind.MinusToken
-
-    '    Dim operatorToken = Me.NextToken()
-    '    Dim right = Me.ParsePrimaryExpression()
-    '    left = New BinaryExpressionSyntax(left, operatorToken, right)
-
-    '  End While
-
-    '  Return left
-
-    'End Function
-
-    'Private Function ParseFactor() As ExpressionSyntax
-
-    '  Dim left = Me.ParsePrimaryExpression
-
-    '  While Me.Current.Kind = SyntaxKind.StarToken OrElse
-    '        Me.Current.Kind = SyntaxKind.SlashToken
-
-    '    Dim operatorToken = Me.NextToken()
-    '    Dim right = Me.ParsePrimaryExpression()
-    '    left = New BinaryExpressionSyntax(left, operatorToken, right)
-
-    '  End While
-
-    '  Return left
-
-    'End Function
-
     Private Function ParsePrimaryExpression() As ExpressionSyntax
 
       Select Case Me.Current.Kind
@@ -266,10 +232,10 @@ Namespace Global.Basic.CodeAnalysis.Syntax
         Case SyntaxKind.TrueKeyword : Return Me.ParseBooleanLiteral
         Case SyntaxKind.NumberToken : Return Me.ParseNumberLiteral
         Case SyntaxKind.StringToken : Return Me.ParseStringLiteral
-        Case SyntaxKind.IdentifierToken : Return Me.ParseNameExpression
+        Case SyntaxKind.IdentifierToken : Return Me.ParseNameorCallExpression
         Case Else
           ' Default to parsing a name expression if we reach this far.
-          Return Me.ParseNameExpression
+          Return Me.ParseNameOrCallExpression
       End Select
 
     End Function
@@ -295,6 +261,44 @@ Namespace Global.Basic.CodeAnalysis.Syntax
     Private Function ParseStringLiteral() As ExpressionSyntax
       Dim stringToken = Me.MatchToken(SyntaxKind.StringToken)
       Return New LiteralExpressionSyntax(stringToken)
+    End Function
+
+    Private Function ParseNameOrCallExpression() As ExpressionSyntax
+      If Me.Peek(0).Kind = SyntaxKind.IdentifierToken AndAlso
+         Me.Peek(1).Kind = SyntaxKind.OpenParenToken Then
+        Return Me.ParseCallExpression
+      Else
+        Return Me.ParseNameExpression
+      End If
+    End Function
+
+    Private Function ParseCallExpression() As ExpressionSyntax
+      Dim identifier = Me.MatchToken(SyntaxKind.IdentifierToken)
+      Dim openParen = Me.MatchToken(SyntaxKind.OpenParenToken)
+      Dim arguments = Me.ParseArguments
+      Dim closeParen = Me.MatchToken(SyntaxKind.CloseParenToken)
+      Return New CallExpressionSyntax(identifier, openParen, arguments, closeParen)
+    End Function
+
+    Private Function ParseArguments() As SeparatedSyntaxList(Of ExpressionSyntax)
+
+      Dim nodesAndSeparators = ImmutableArray.CreateBuilder(Of SyntaxNode)
+
+      While Me.Current.Kind <> SyntaxKind.CloseParenToken AndAlso
+            Me.Current.Kind <> SyntaxKind.EndOfFileToken
+
+        Dim expression = Me.ParseExpression
+        nodesAndSeparators.Add(expression)
+
+        If Me.Current.Kind <> SyntaxKind.CloseParenToken Then
+          Dim comma = Me.MatchToken(SyntaxKind.CommaToken)
+          nodesAndSeparators.Add(comma)
+        End If
+
+      End While
+
+      Return New SeparatedSyntaxList(Of ExpressionSyntax)(nodesAndSeparators.ToImmutable)
+
     End Function
 
     Private Function ParseNameExpression() As ExpressionSyntax

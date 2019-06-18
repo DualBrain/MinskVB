@@ -35,6 +35,7 @@ Namespace Global.Basic.CodeAnalysis.Syntax
     CloseParenToken
     OpenBraceToken
     CloseBraceToken
+    CommaToken
     IdentifierToken
 
     ' Keywords
@@ -85,6 +86,7 @@ Namespace Global.Basic.CodeAnalysis.Syntax
     BinaryExpression
     ParenExpression
     AssignmentExpression
+    CallExpression
 
   End Enum
 

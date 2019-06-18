@@ -86,7 +86,16 @@ Namespace Global.Basic.CodeAnalysis.Binding
       Return result
     End Function
 
-    Public Function BindExpression(syntax As ExpressionSyntax) As BoundExpression
+    Public Function BindExpression(syntax As ExpressionSyntax, Optional canBeVoid As Boolean = False) As BoundExpression
+      Dim result = Me.BindExpressionInternal(syntax)
+      If Not canBeVoid AndAlso result.Type Is TypeSymbol.Void Then
+        Me.Diagnostics.ReportExpressionMustHaveValue(syntax.Span)
+        Return New BoundErrorExpression
+      End If
+      Return result
+    End Function
+
+    Public Function BindExpressionInternal(syntax As ExpressionSyntax) As BoundExpression
 
       Select Case syntax.Kind
         Case SyntaxKind.ParenExpression
@@ -101,6 +110,8 @@ Namespace Global.Basic.CodeAnalysis.Binding
           Return Me.BindUnaryEpression(DirectCast(syntax, UnaryExpressionSyntax))
         Case SyntaxKind.BinaryExpression
           Return Me.BindBinaryEpression(DirectCast(syntax, BinaryExpressionSyntax))
+        Case SyntaxKind.CallExpression
+          Return Me.BindCallEpression(DirectCast(syntax, CallExpressionSyntax))
         Case Else
           Throw New Exception($"Unexpected syntax {syntax.Kind}")
       End Select
@@ -176,7 +187,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
     End Function
 
     Private Function BindExpressionStatement(syntax As ExpressionStatementSyntax) As BoundStatement
-      Dim expression = Me.BindExpression(syntax.Expression)
+      Dim expression = Me.BindExpression(syntax.Expression, True)
       Return New BoundExpressionStatement(expression)
     End Function
 
@@ -253,6 +264,40 @@ Namespace Global.Basic.CodeAnalysis.Binding
         Return New BoundErrorExpression
       End If
       Return New BoundBinaryExpression(boundLeft, boundOperator, boundRight)
+    End Function
+
+    Private Function BindCallEpression(syntax As CallExpressionSyntax) As BoundExpression
+
+      Dim boundArguments = ImmutableArray.CreateBuilder(Of BoundExpression)
+
+      For Each argument In syntax.Arguments
+        Dim boundArgument = Me.BindExpression(argument)
+        boundArguments.Add(boundArgument)
+      Next
+
+      Dim functions = BuiltinFunctions.GetAll
+      Dim func = functions.SingleOrDefault(Function(f) f.Name = syntax.Identifier.Text)
+
+      If func Is Nothing Then
+        Me.Diagnostics.ReportUndefinedFunction(syntax.Identifier.Span, syntax.Identifier.Text)
+        Return New BoundErrorExpression
+      End If
+      If syntax.Arguments.Count <> func.Parameters.Length Then
+        Me.Diagnostics.ReportWrongArgumentCount(syntax.Span, func.Name, func.Parameters.Length, syntax.Arguments.Count)
+        Return New BoundErrorExpression
+      End If
+
+      For i = 0 To syntax.Arguments.Count - 1
+        Dim argument = boundArguments(i)
+        Dim parameter = func.Parameters(i)
+        If argument.Type IsNot parameter.Type Then
+          Me.Diagnostics.ReportWrongArgumentType(syntax.Span, parameter.Name, parameter.Type, argument.Type)
+          Return New BoundErrorExpression
+        End If
+      Next
+
+      Return New BoundCallExpression(func, boundArguments.ToImmutableArray)
+
     End Function
 
     Private Function BindVariable(identifier As SyntaxToken, isReadOnly As Boolean, type As TypeSymbol) As VariableSymbol

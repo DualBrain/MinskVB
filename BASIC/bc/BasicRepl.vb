@@ -87,6 +87,7 @@ Friend NotInheritable Class BasicRepl
   End Function
 
   Protected Overrides Sub EvaluateSubmission(text As String)
+
     Dim tree = SyntaxTree.Parse(text)
 
     'If Not isBlank AndAlso tree.Diagnostics.Any Then
@@ -111,11 +112,11 @@ Friend NotInheritable Class BasicRepl
 
     If Not result.Diagnostics.Any Then
 
-      ' No errors detected, attempt to evaluate (execute).
-
-      ForegroundColor = White
-      WriteLine(result.Value)
-      ResetColor()
+      If result.Value IsNot Nothing Then
+        ForegroundColor = White
+        WriteLine(result.Value)
+        ResetColor()
+      End If
 
       Me.m_previous = compilation
 

@@ -4,7 +4,7 @@ Option Infer On
 
 Namespace Global.Basic.CodeAnalysis.Symbols
 
-  Public NotInheritable Class VariableSymbol
+  Public Class VariableSymbol
     Inherits Symbol
 
     Friend Sub New(name As String, isReadOnly As Boolean, type As TypeSymbol)

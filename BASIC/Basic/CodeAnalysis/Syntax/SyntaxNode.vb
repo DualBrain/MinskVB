@@ -33,6 +33,11 @@ Namespace Global.Basic.CodeAnalysis.Syntax
           If child IsNot Nothing Then
             Yield child
           End If
+        ElseIf GetType(SeparatedSyntaxList).IsAssignableFrom(p.PropertyType) Then
+          Dim separatedSyntaxList = DirectCast(p.GetValue(Me), SeparatedSyntaxList)
+          For Each child In separatedSyntaxList.GetWithSeparators
+            Yield child
+          Next
         ElseIf GetType(IEnumerable(Of SyntaxNode)).IsAssignableFrom(p.PropertyType) Then
           Dim children = DirectCast(p.GetValue(Me), IEnumerable(Of SyntaxNode))
           For Each child In children

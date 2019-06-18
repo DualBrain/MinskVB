@@ -74,6 +74,22 @@ Namespace Global.Basic.CodeAnalysis
       Me.Report(span, $"Variable '{name}' is read-only and cannot be assigned to.")
     End Sub
 
+    Public Sub ReportUndefinedFunction(span As TextSpan, name As String)
+      Me.Report(span, $"Function '{name}' doesn't exist.")
+    End Sub
+
+    Public Sub ReportExpressionMustHaveValue(span As TextSpan)
+      Me.Report(span, "Expression must have a value.")
+    End Sub
+
+    Public Sub ReportWrongArgumentCount(span As TextSpan, name As String, expectedCount As Integer, actualCount As Integer)
+      Me.Report(span, $"Function '{name}' requires {expectedCount} arguments but was given {actualCount}.")
+    End Sub
+
+    Public Sub ReportWrongArgumentType(span As TextSpan, name As String, expectedType As TypeSymbol, actualType As TypeSymbol)
+      Me.Report(span, $"Parameter {name} requires a value of type '{expectedType}' but was given a value of type '{actualType}'.")
+    End Sub
+
   End Class
 
 End Namespace

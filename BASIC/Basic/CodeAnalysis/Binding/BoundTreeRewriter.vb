@@ -121,6 +121,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
         Case BoundNodeKind.AssignmentExpression : Return Me.RewriteAssignmentExpression(DirectCast(node, BoundAssignmentExpression))
         Case BoundNodeKind.UnaryExpression : Return Me.RewriteUnaryExpression(DirectCast(node, BoundUnaryExpression))
         Case BoundNodeKind.BinaryExpression : Return Me.RewriteBinaryExpression(DirectCast(node, BoundBinaryExpression))
+        Case BoundNodeKind.CallExpression : Return Me.RewriteCallExpression(DirectCast(node, BoundCallExpression))
         Case Else
           Throw New Exception($"Unexpected node: {node.Kind}")
       End Select
@@ -165,6 +166,29 @@ Namespace Global.Basic.CodeAnalysis.Binding
       Else
         Return New BoundBinaryExpression(left, node.Op, right)
       End If
+    End Function
+
+    Protected Overridable Function RewriteCallExpression(node As BoundCallExpression) As BoundExpression
+      Dim builder As ImmutableArray(Of BoundExpression).Builder = Nothing
+      For i = 0 To node.Arguments.Length - 1
+        Dim oldArgument = node.Arguments(i)
+        Dim newArgument = Me.RewriteExpression(oldArgument)
+        If newArgument IsNot oldArgument Then
+          If builder Is Nothing Then
+            builder = ImmutableArray.CreateBuilder(Of BoundExpression)(node.Arguments.Length)
+            For j = 0 To i - 1
+              builder.Add(node.Arguments(j))
+            Next
+          End If
+        End If
+        If builder IsNot Nothing Then
+          builder.Add(newArgument)
+        End If
+      Next
+      If builder Is Nothing Then
+        Return node
+      End If
+      Return New BoundCallExpression(node.Function, builder.MoveToImmutable)
     End Function
 
   End Class
