@@ -191,7 +191,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
 
     Private Function BindNameExpression(syntax As NameExpressionSyntax) As BoundExpression
       Dim name = syntax.IdentifierToken.Text
-      If String.IsNullOrEmpty(name) Then
+      If syntax.IdentifierToken.IsMissing Then
         ' This means the token was inserted by the parser.  We already
         ' reported error so we can just return an error expression.
         Return New BoundErrorExpression
