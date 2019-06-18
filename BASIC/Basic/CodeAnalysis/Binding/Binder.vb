@@ -57,21 +57,27 @@ Namespace Global.Basic.CodeAnalysis.Binding
         previous = previous.Previous
       End While
 
-      ' submission 3 -> submission 2 -> submission 1
-
-      Dim parent As BoundScope = Nothing
+      Dim parent = CreateRootScope()
 
       While stack.Count > 0
         previous = stack.Pop
         Dim scope = New BoundScope(parent)
         For Each v In previous.Variables
-          scope.TryDeclare(v)
+          scope.TryDeclareVariable(v)
         Next
         parent = scope
       End While
 
       Return parent
 
+    End Function
+
+    Private Shared Function CreateRootScope() As BoundScope
+      Dim result = New BoundScope(Nothing)
+      For Each f In BuiltinFunctions.GetAll
+        result.TryDeclareFunction(f)
+      Next
+      Return result
     End Function
 
     Public ReadOnly Property Diagnostics As DiagnosticBag = New DiagnosticBag
@@ -208,7 +214,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
         Return New BoundErrorExpression
       End If
       Dim variable As VariableSymbol = Nothing
-      If Not Me.m_scope.TryLookup(name, variable) Then
+      If Not Me.m_scope.TryLookupVariable(name, variable) Then
         Me.Diagnostics.ReportUndefinedName(syntax.IdentifierToken.Span, name)
         Return New BoundErrorExpression
       End If
@@ -221,7 +227,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
       Dim boundExpression = Me.BindExpression(syntax.Expression)
 
       Dim variable As VariableSymbol = Nothing
-      If Not Me.m_scope.TryLookup(name.ToLower, variable) Then
+      If Not Me.m_scope.TryLookupVariable(name.ToLower, variable) Then
         Me.Diagnostics.ReportUndefinedName(syntax.IdentifierToken.Span, name)
         Return boundExpression
       End If
@@ -275,10 +281,9 @@ Namespace Global.Basic.CodeAnalysis.Binding
         boundArguments.Add(boundArgument)
       Next
 
-      Dim functions = BuiltinFunctions.GetAll
-      Dim func = functions.SingleOrDefault(Function(f) f.Name = syntax.Identifier.Text)
+      Dim func As FunctionSymbol = Nothing
 
-      If func Is Nothing Then
+      If Not Me.m_scope.TryLookupFunction(syntax.Identifier.Text, func) Then
         Me.Diagnostics.ReportUndefinedFunction(syntax.Identifier.Span, syntax.Identifier.Text)
         Return New BoundErrorExpression
       End If
@@ -304,7 +309,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
       Dim name = If(identifier.Text, "?")
       Dim [declare] = Not identifier.IsMissing
       Dim variable = New VariableSymbol(name, isReadOnly, type)
-      If [declare] AndAlso Not Me.m_scope.TryDeclare(variable) Then
+      If [declare] AndAlso Not Me.m_scope.TryDeclareVariable(variable) Then
         Me.Diagnostics.ReportVariableAlreadyDeclared(identifier.Span, name)
       End If
       Return variable
