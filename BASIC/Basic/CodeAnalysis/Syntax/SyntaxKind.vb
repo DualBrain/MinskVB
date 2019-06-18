@@ -60,6 +60,7 @@ Namespace Global.Basic.CodeAnalysis.Syntax
     'EndIfKeyword
 
     WhileKeyword
+    DoKeyword
 
     ForKeyword
     ToKeyword
@@ -75,6 +76,7 @@ Namespace Global.Basic.CodeAnalysis.Syntax
     VariableDeclaration
     IfStatement
     WhileStatement
+    DoWhileStatement
     ForStatement
     ExpressionStatement
 

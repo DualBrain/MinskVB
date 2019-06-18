@@ -115,28 +115,54 @@ Namespace Global.Basic.CodeAnalysis.Lowering
       ' <body>
       ' check:
       ' gotoTrue <condition> continue
-      ' end:
+      '' end:
 
       Dim continueLabel = Me.GenerateLabel
       Dim checkLabel = Me.GenerateLabel
-      Dim endLabel = Me.GenerateLabel
+      'Dim endLabel = Me.GenerateLabel
 
       Dim gotoCheck = New BoundGotoStatement(checkLabel)
       Dim continueLabelStatement = New BoundLabelStatement(continueLabel)
       Dim checkLabelStatement = New BoundLabelStatement(checkLabel)
       Dim gotoTrue = New BoundConditionalGotoStatement(continueLabel, node.Condition)
-      Dim endLabelStatement = New BoundLabelStatement(endLabel)
+      'Dim endLabelStatement = New BoundLabelStatement(endLabel)
 
       Dim result = New BoundBlockStatement(ImmutableArray.Create(Of BoundStatement)(gotoCheck,
-                                                                                          continueLabelStatement,
-                                                                                          node.Body,
-                                                                                          checkLabelStatement,
-                                                                                          gotoTrue,
-                                                                                          endLabelStatement))
+                                                                                    continueLabelStatement,
+                                                                                    node.Body,
+                                                                                    checkLabelStatement,
+                                                                                    gotoTrue)) ',
+      'endLabelStatement))
 
       Return Me.RewriteStatement(result)
 
     End Function
+
+    Protected Overrides Function RewriteDoWhileStatement(node As BoundDoWhileStatement) As BoundStatement
+
+      ' do 
+      '   <body>
+      ' while <condition>
+      '
+      ' ------->
+      '
+      ' continue:
+      ' <body>
+      ' check:
+      ' gotoTrue <condition> continue
+
+      Dim continueLabel = Me.GenerateLabel
+      Dim continueLabelStatement = New BoundLabelStatement(continueLabel)
+      Dim gotoTrue = New BoundConditionalGotoStatement(continueLabel, node.Condition)
+
+      Dim result = New BoundBlockStatement(ImmutableArray.Create(Of BoundStatement)(continueLabelStatement,
+                                                                                    node.Body,
+                                                                                    gotoTrue))
+
+      Return Me.RewriteStatement(result)
+
+    End Function
+
 
     Protected Overrides Function RewriteForStatement(node As BoundForStatement) As BoundStatement
 

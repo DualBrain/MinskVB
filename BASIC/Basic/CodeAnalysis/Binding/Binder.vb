@@ -119,6 +119,8 @@ Namespace Global.Basic.CodeAnalysis.Binding
           Return Me.BindIfStatement(DirectCast(syntax, IfStatementSyntax))
         Case SyntaxKind.WhileStatement
           Return Me.BindWhileStatement(DirectCast(syntax, WhileStatementSyntax))
+        Case SyntaxKind.DoWhileStatement
+          Return Me.BindDoWhileStatement(DirectCast(syntax, DoWhileStatementSyntax))
         Case SyntaxKind.ForStatement
           Return Me.BindForStatement(DirectCast(syntax, ForStatementSyntax))
         Case SyntaxKind.ExpressionStatement
@@ -158,6 +160,12 @@ Namespace Global.Basic.CodeAnalysis.Binding
       Dim condition = Me.BindExpression(syntax.Condition, TypeSymbol.Bool)
       Dim body = Me.BindStatement(syntax.Body)
       Return New BoundWhileStatement(condition, body)
+    End Function
+
+    Private Function BindDoWhileStatement(syntax As DoWhileStatementSyntax) As BoundStatement
+      Dim body = Me.BindStatement(syntax.Body)
+      Dim condition = Me.BindExpression(syntax.Condition, TypeSymbol.Bool)
+      Return New BoundDoWhileStatement(body, condition)
     End Function
 
     Private Function BindForStatement(syntax As ForStatementSyntax) As BoundStatement

@@ -90,6 +90,7 @@ Namespace Global.Basic.Tests.CodeAnalysis
     <InlineData("{ var i = 10 var result = 0 while i > 0 { result = result + i i = i - 1} result }", 55)>
     <InlineData("{ var result = 0 for i = 1 to 10 { result = result + i} result }", 55)>
     <InlineData("{ var a = 10 for i = 1 to (a = a - 1) { } a }", 9)>
+    <InlineData("{ var a = 0 do a = a + 1 while a < 10 a}", 10)>
     Public Sub SyntaxFact_GetText_RoundTrips(text As String, expectedValue As Object)
       AssertValue(text, expectedValue)
     End Sub
@@ -156,6 +157,24 @@ Namespace Global.Basic.Tests.CodeAnalysis
           var x = 0
           while [10]
             x = 10
+        }"
+
+      Dim diagnostics = "
+        Cannot convert type 'int' to 'bool'."
+
+      Me.AssertDiagnostics(text, diagnostics)
+
+    End Sub
+
+    <Fact>
+    Public Sub Evaluator_DoWhileStatement_Reports_CannotConvert()
+
+      Dim text = "
+        {
+          var x = 0
+          do
+            x = 10
+          while [10]
         }"
 
       Dim diagnostics = "

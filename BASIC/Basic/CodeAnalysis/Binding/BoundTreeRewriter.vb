@@ -14,6 +14,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
         Case BoundNodeKind.VariableDeclaration : Return Me.RewriteVariableDeclaration(DirectCast(node, BoundVariableDeclaration))
         Case BoundNodeKind.IfStatement : Return Me.RewriteIfStatement(DirectCast(node, BoundIfStatement))
         Case BoundNodeKind.WhileStatement : Return Me.RewriteWhileStatement(DirectCast(node, BoundWhileStatement))
+        Case BoundNodeKind.DoWhileStatement : Return Me.RewriteDoWhileStatement(DirectCast(node, BoundDoWhileStatement))
         Case BoundNodeKind.ForStatement : Return Me.RewriteForStatement(DirectCast(node, BoundForStatement))
         Case BoundNodeKind.LabelStatement : Return Me.RewriteLabeltatement(DirectCast(node, BoundLabelStatement))
         Case BoundNodeKind.GotoStatement : Return Me.RewriteGotoStatement(DirectCast(node, BoundGotoStatement))
@@ -74,6 +75,15 @@ Namespace Global.Basic.CodeAnalysis.Binding
         Return node
       End If
       Return New BoundWhileStatement(condition, body)
+    End Function
+
+    Protected Overridable Function RewriteDoWhileStatement(node As BoundDoWhileStatement) As BoundStatement
+      Dim body = Me.RewriteStatement(node.Body)
+      Dim condition = Me.RewriteExpression(node.Condition)
+      If body Is node.Body AndAlso condition Is node.Condition Then
+        Return node
+      End If
+      Return New BoundDoWhileStatement(body, condition)
     End Function
 
     Protected Overridable Function RewriteForStatement(node As BoundForStatement) As BoundStatement

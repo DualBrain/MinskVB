@@ -29,9 +29,9 @@ Namespace Global.Basic.Tests.CodeAnalysis.Syntax
     Sub Lexer_Covers_AllTokens()
 
       Dim tokenKinds = System.Enum.GetValues(GetType(SyntaxKind)) _
-                                         .Cast(Of SyntaxKind) _
-                                         .Where(Function(k) k.ToString.EndsWith("Keyword") OrElse
-                                                            k.ToString.EndsWith("Token"))
+                                  .Cast(Of SyntaxKind) _
+                                  .Where(Function(k) k.ToString.EndsWith("Keyword") OrElse
+                                                     k.ToString.EndsWith("Token"))
 
       Dim testedTokenKinds = GetTokens.Concat(GetSeparators).Select(Function(t) t.kind)
 

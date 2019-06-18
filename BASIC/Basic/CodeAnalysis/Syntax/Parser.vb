@@ -76,6 +76,8 @@ Namespace Global.Basic.CodeAnalysis.Syntax
           Return Me.ParseIfStatement
         Case SyntaxKind.WhileKeyword
           Return Me.ParseWhileStatement
+        Case SyntaxKind.DoKeyword
+          Return Me.ParseDoWhileStatement
         Case SyntaxKind.ForKeyword
           Return Me.ParseForStatement
         Case Else
@@ -158,6 +160,14 @@ Namespace Global.Basic.CodeAnalysis.Syntax
       Dim condition = Me.ParseExpression
       Dim body = Me.ParseStatement
       Return New WhileStatementSyntax(keyword, condition, body)
+    End Function
+
+    Private Function ParseDoWhileStatement() As StatementSyntax
+      Dim doKeyword = Me.MatchToken(SyntaxKind.DoKeyword)
+      Dim body = Me.ParseStatement
+      Dim whileKeyword = Me.MatchToken(SyntaxKind.WhileKeyword)
+      Dim condition = Me.ParseExpression
+      Return New DoWhileStatementSyntax(doKeyword, body, whileKeyword, condition)
     End Function
 
     Private Function ParseForStatement() As StatementSyntax
