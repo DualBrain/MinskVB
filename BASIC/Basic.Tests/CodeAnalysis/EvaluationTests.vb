@@ -142,7 +142,7 @@ Namespace Global.Basic.Tests.CodeAnalysis
         }"
 
       Dim diagnostics = "
-        Cannot convert type 'System.Int32' to 'System.Boolean'."
+        Cannot convert type 'int' to 'bool'."
 
       Me.AssertDiagnostics(text, diagnostics)
 
@@ -159,7 +159,7 @@ Namespace Global.Basic.Tests.CodeAnalysis
         }"
 
       Dim diagnostics = "
-        Cannot convert type 'System.Int32' to 'System.Boolean'."
+        Cannot convert type 'int' to 'bool'."
 
       Me.AssertDiagnostics(text, diagnostics)
 
@@ -176,7 +176,7 @@ Namespace Global.Basic.Tests.CodeAnalysis
         }"
 
       Dim diagnostics = "
-        Cannot convert type 'System.Boolean' to 'System.Int32'."
+        Cannot convert type 'bool' to 'int'."
 
       Me.AssertDiagnostics(text, diagnostics)
 
@@ -193,7 +193,7 @@ Namespace Global.Basic.Tests.CodeAnalysis
         }"
 
       Dim diagnostics = "
-        Cannot convert type 'System.Boolean' to 'System.Int32'."
+        Cannot convert type 'bool' to 'int'."
 
       Me.AssertDiagnostics(text, diagnostics)
 
@@ -226,7 +226,7 @@ Namespace Global.Basic.Tests.CodeAnalysis
 
       Dim text = "[+]true"
 
-      Dim diagnostics = "Unary operator '+' is not defined for type 'System.Boolean'."
+      Dim diagnostics = "Unary operator '+' is not defined for type 'bool'."
 
       Me.AssertDiagnostics(text, diagnostics)
 
@@ -237,7 +237,7 @@ Namespace Global.Basic.Tests.CodeAnalysis
 
       Dim text = "10 [+] false"
 
-      Dim diagnostics = "Binary operator '+' is not defined for type 'System.Int32' and 'System.Boolean'."
+      Dim diagnostics = "Binary operator '+' is not defined for type 'int' and 'bool'."
 
       Me.AssertDiagnostics(text, diagnostics)
 
@@ -280,7 +280,7 @@ Namespace Global.Basic.Tests.CodeAnalysis
 
       Dim diagnostics = "
         Variable 'x' is read-only and cannot be assigned to.
-        Cannot convert type 'System.Boolean' to 'System.Int32'."
+        Cannot convert type 'bool' to 'int'."
 
       Me.AssertDiagnostics(text, diagnostics)
 

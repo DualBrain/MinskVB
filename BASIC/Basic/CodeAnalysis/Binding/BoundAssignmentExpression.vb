@@ -16,7 +16,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
     End Sub
 
     Public Overrides ReadOnly Property Kind As BoundNodeKind = BoundNodeKind.AssignmentExpression
-    Public Overrides ReadOnly Property Type As Type
+    Public Overrides ReadOnly Property Type As TypeSymbol
     Public ReadOnly Property Variable As VariableSymbol
     Public ReadOnly Property Expression As BoundExpression
 

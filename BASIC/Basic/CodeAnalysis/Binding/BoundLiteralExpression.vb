@@ -2,6 +2,8 @@
 Option Strict On
 Option Infer On
 
+Imports Basic.CodeAnalysis.Symbols
+
 Namespace Global.Basic.CodeAnalysis.Binding
 
   Friend NotInheritable Class BoundLiteralExpression
@@ -9,14 +11,19 @@ Namespace Global.Basic.CodeAnalysis.Binding
 
     Sub New(value As Object)
       Me.Value = value
+      If TypeOf Me.Value Is Boolean Then
+        Me.Type = TypeSymbol.Bool
+      ElseIf TypeOf Me.Value Is Integer Then
+        Me.Type = TypeSymbol.Int
+      ElseIf TypeOf value Is String Then
+        Me.Type = TypeSymbol.String
+      Else
+        Throw New Exception($"Unexpected literal '{value}' of type {value.GetType}.")
+      End If
     End Sub
 
     Public Overrides ReadOnly Property Kind As BoundNodeKind = BoundNodeKind.LiteralExpression
-    Public Overrides ReadOnly Property Type As Type
-      Get
-        Return Me.Value.GetType
-      End Get
-    End Property
+    Public Overrides ReadOnly Property Type As TypeSymbol
     Public ReadOnly Property Value As Object
 
   End Class

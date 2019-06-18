@@ -159,18 +159,18 @@ Namespace Global.Basic.CodeAnalysis.Lowering
 
       Dim variableDeclaration = New BoundVariableDeclaration(node.Variable, node.LowerBound)
       Dim variableExpression = New BoundVariableExpression(node.Variable)
-      Dim upperBoundSymbol = New VariableSymbol("upperBound", True, GetType(Integer))
+      Dim upperBoundSymbol = New VariableSymbol("upperBound", True, TypeSymbol.Int)
       Dim upperBoundDeclaration = New BoundVariableDeclaration(upperBoundSymbol, node.UpperBound)
       Dim condition = New BoundBinaryExpression(
               variableExpression,
-              BoundBinaryOperator.Bind(SyntaxKind.LessThanEqualsToken, GetType(Integer), GetType(Integer)),
+              BoundBinaryOperator.Bind(SyntaxKind.LessThanEqualsToken, TypeSymbol.Int, TypeSymbol.Int),
               New BoundVariableExpression(upperBoundSymbol))
       Dim increment = New BoundExpressionStatement(
               New BoundAssignmentExpression(
                 node.Variable,
                 New BoundBinaryExpression(
                   variableExpression,
-                  BoundBinaryOperator.Bind(SyntaxKind.PlusToken, GetType(Integer), GetType(Integer)),
+                  BoundBinaryOperator.Bind(SyntaxKind.PlusToken, TypeSymbol.Int, TypeSymbol.Int),
                   New BoundLiteralExpression(1))))
       Dim whileBody = New BoundBlockStatement(ImmutableArray.Create(Of BoundStatement)(node.Body, increment))
       Dim whileStatement = New BoundWhileStatement(condition, whileBody)

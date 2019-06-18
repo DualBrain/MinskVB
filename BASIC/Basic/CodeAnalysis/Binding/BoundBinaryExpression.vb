@@ -2,6 +2,8 @@
 Option Strict On
 Option Infer On
 
+Imports Basic.CodeAnalysis.Symbols
+
 Namespace Global.Basic.CodeAnalysis.Binding
 
   Friend NotInheritable Class BoundBinaryExpression
@@ -14,7 +16,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
     End Sub
 
     Public Overrides ReadOnly Property Kind As BoundNodeKind = BoundNodeKind.BinaryExpression
-    Public Overrides ReadOnly Property Type As Type
+    Public Overrides ReadOnly Property Type As TypeSymbol
       Get
         Return Me.Op.Type
       End Get

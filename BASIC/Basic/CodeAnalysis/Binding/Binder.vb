@@ -76,9 +76,9 @@ Namespace Global.Basic.CodeAnalysis.Binding
 
     Public ReadOnly Property Diagnostics As DiagnosticBag = New DiagnosticBag
 
-    Private Function BindExpression(syntax As ExpressionSyntax, targetType As Type) As BoundExpression
+    Private Function BindExpression(syntax As ExpressionSyntax, targetType As TypeSymbol) As BoundExpression
       Dim result = Me.BindExpression(syntax)
-      If result.Type <> targetType Then
+      If result.Type IsNot targetType Then
         Me.Diagnostics.ReportCannotConvert(syntax.Span, result.Type, targetType)
       End If
       Return result
@@ -149,27 +149,27 @@ Namespace Global.Basic.CodeAnalysis.Binding
     End Function
 
     Private Function BindIfStatement(syntax As IfStatementSyntax) As BoundStatement
-      Dim condition = Me.BindExpression(syntax.Condition, GetType(Boolean))
+      Dim condition = Me.BindExpression(syntax.Condition, TypeSymbol.Bool)
       Dim thenStatement = Me.BindStatement(syntax.ThenStatement)
       Dim elseStatement = If(syntax.ElseClause IsNot Nothing, Me.BindStatement(syntax.ElseClause.ElseStatement), Nothing)
       Return New BoundIfStatement(condition, thenStatement, elseStatement)
     End Function
 
     Private Function BindWhileStatement(syntax As WhileStatementSyntax) As BoundStatement
-      Dim condition = Me.BindExpression(syntax.Condition, GetType(Boolean))
+      Dim condition = Me.BindExpression(syntax.Condition, TypeSymbol.Bool)
       Dim body = Me.BindStatement(syntax.Body)
       Return New BoundWhileStatement(condition, body)
     End Function
 
     Private Function BindForStatement(syntax As ForStatementSyntax) As BoundStatement
 
-      Dim lowerBound = Me.BindExpression(syntax.LowerBound, GetType(Integer))
-      Dim upperBound = Me.BindExpression(syntax.UpperBound, GetType(Integer))
+      Dim lowerBound = Me.BindExpression(syntax.LowerBound, TypeSymbol.Int)
+      Dim upperBound = Me.BindExpression(syntax.UpperBound, TypeSymbol.Int)
 
       Me.m_scope = New BoundScope(Me.m_scope)
 
       Dim name = syntax.Identifier.Text
-      Dim variable = New VariableSymbol(name.ToLower, True, GetType(Integer))
+      Dim variable = New VariableSymbol(name.ToLower, True, TypeSymbol.Int)
       If Not Me.m_scope.TryDeclare(variable) Then
         Me.Diagnostics.ReportVariableAlreadyDeclared(syntax.Identifier.Span, name)
       End If

@@ -171,19 +171,19 @@ Namespace Global.Basic.CodeAnalysis
         Case BoundBinaryOperatorKind.Multiplication : Return CInt(left) * CInt(right)
         Case BoundBinaryOperatorKind.Division : Return CInt(left) \ CInt(right)
         Case BoundBinaryOperatorKind.BitwiseAnd
-          If b.Type = GetType(Integer) Then
+          If b.Type Is TypeSymbol.Int Then
             Return CInt(left) And CInt(right)
           Else
             Return CBool(left) And CBool(right)
           End If
         Case BoundBinaryOperatorKind.BitwiseOr
-          If b.Type = GetType(Integer) Then
+          If b.Type Is TypeSymbol.Int Then
             Return CInt(left) Or CInt(right)
           Else
             Return CBool(left) Or CBool(right)
           End If
         Case BoundBinaryOperatorKind.BitwiseXor
-          If b.Type = GetType(Integer) Then
+          If b.Type Is TypeSymbol.Int Then
             Return CInt(left) Xor CInt(right)
           Else
             Return CBool(left) Xor CBool(right)

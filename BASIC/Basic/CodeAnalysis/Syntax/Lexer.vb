@@ -3,6 +3,7 @@ Option Strict On
 Option Infer On
 
 Imports System.Text
+Imports Basic.CodeAnalysis.Symbols
 Imports Basic.CodeAnalysis.Text
 
 Namespace Global.Basic.CodeAnalysis.Syntax
@@ -138,7 +139,7 @@ Namespace Global.Basic.CodeAnalysis.Syntax
       Dim text = Me.Text.ToString(Me.Start, length)
       Dim value As Integer
       If Not Integer.TryParse(text, value) Then
-        Me.Diagnostics.ReportInvalidNumber(New TextSpan(Me.Start, length), text, GetType(Integer))
+        Me.Diagnostics.ReportInvalidNumber(New TextSpan(Me.Start, length), text, TypeSymbol.Int)
       End If
 
       Me.Value = value
