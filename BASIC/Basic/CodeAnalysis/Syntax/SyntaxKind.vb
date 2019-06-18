@@ -36,6 +36,7 @@ Namespace Global.Basic.CodeAnalysis.Syntax
     OpenBraceToken
     CloseBraceToken
     CommaToken
+    ColonToken
     IdentifierToken
 
     ' Keywords
@@ -69,6 +70,7 @@ Namespace Global.Basic.CodeAnalysis.Syntax
 
     CompilationUnit
     ElseClause
+    TypeClause
 
     ' Statements
 

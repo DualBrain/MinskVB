@@ -10,9 +10,10 @@ Namespace Global.Basic.CodeAnalysis.Syntax
   Public NotInheritable Class VariableDeclarationSyntax
     Inherits StatementSyntax
 
-    Sub New(keyword As SyntaxToken, identifier As SyntaxToken, equalsToken As SyntaxToken, initializer As ExpressionSyntax)
+    Sub New(keyword As SyntaxToken, identifier As SyntaxToken, typeClause As TypeClauseSyntax, equalsToken As SyntaxToken, initializer As ExpressionSyntax)
       Me.Keyword = keyword
       Me.Identifier = identifier
+      Me.TypeClause = typeClause
       Me.EqualsToken = equalsToken
       Me.Initializer = initializer
     End Sub
@@ -20,6 +21,7 @@ Namespace Global.Basic.CodeAnalysis.Syntax
     Public Overrides ReadOnly Property Kind As SyntaxKind = SyntaxKind.VariableDeclaration
     Public ReadOnly Property Keyword As SyntaxToken
     Public ReadOnly Property Identifier As SyntaxToken
+    Public ReadOnly Property TypeClause As TypeClauseSyntax
     Public ReadOnly Property EqualsToken As SyntaxToken
     Public ReadOnly Property Initializer As ExpressionSyntax
 

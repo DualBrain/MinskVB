@@ -131,11 +131,25 @@ Namespace Global.Basic.CodeAnalysis.Syntax
 
       Dim keyword = Me.MatchToken(expected)
       Dim identifier = Me.MatchToken(SyntaxKind.IdentifierToken)
+      Dim typeClause = Me.ParseOptionalTypeClause()
       Dim equals = Me.MatchToken(SyntaxKind.EqualsToken)
       Dim initializer = Me.ParseExpression()
 
-      Return New VariableDeclarationSyntax(keyword, identifier, equals, initializer)
+      Return New VariableDeclarationSyntax(keyword, identifier, typeClause, equals, initializer)
 
+    End Function
+
+    Private Function ParseOptionalTypeClause() As TypeClauseSyntax
+      If Me.Current.Kind <> SyntaxKind.ColonToken Then
+        Return Nothing
+      End If
+      Return Me.ParseTypeClause()
+    End Function
+
+    Private Function ParseTypeClause() As TypeClauseSyntax
+      Dim colonToken = Me.MatchToken(SyntaxKind.ColonToken)
+      Dim identifier = Me.MatchToken(SyntaxKind.IdentifierToken)
+      Return New TypeClauseSyntax(colonToken, identifier)
     End Function
 
     Private Function ParseIfStatement() As StatementSyntax

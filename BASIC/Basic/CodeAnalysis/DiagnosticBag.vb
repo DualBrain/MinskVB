@@ -62,8 +62,16 @@ Namespace Global.Basic.CodeAnalysis
       Me.Report(span, $"Variable '{name}' doesn't exist.")
     End Sub
 
+    Friend Sub ReportUndefinedType(span As TextSpan, name As String)
+      Me.Report(span, $"Type '{name}' doesn't exist.")
+    End Sub
+
     Public Sub ReportCannotConvert(span As TextSpan, fromType As TypeSymbol, toType As TypeSymbol)
       Me.Report(span, $"Cannot convert type '{fromType}' to '{toType}'.")
+    End Sub
+
+    Public Sub ReportCannotConvertImplicitly(span As TextSpan, fromType As TypeSymbol, toType As TypeSymbol)
+      Me.Report(span, $"Cannot convert type '{fromType}' to '{toType}'. An explicit conversion exists (are you missing a cast?)")
     End Sub
 
     Public Sub ReportSymbolAlreadyDeclared(span As TextSpan, name As String)

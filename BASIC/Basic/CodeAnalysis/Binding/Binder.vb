@@ -138,9 +138,24 @@ Namespace Global.Basic.CodeAnalysis.Binding
 
     Private Function BindVariableDeclaration(syntax As VariableDeclarationSyntax) As BoundStatement
       Dim isReadOnly = syntax.Keyword.Kind = SyntaxKind.LetKeyword
+      Dim type = Me.BindTypeClause(syntax.TypeClause)
       Dim initializer = Me.BindExpression(syntax.Initializer)
-      Dim variable = Me.BindVariable(syntax.Identifier, isReadOnly, initializer.Type)
-      Return New BoundVariableDeclaration(variable, initializer)
+      Dim variableType = If(type, initializer.Type)
+      Dim variable = Me.BindVariable(syntax.Identifier, isReadOnly, variableType)
+      Dim convertedInitializer = Me.BindConversion(syntax.Initializer.Span, initializer, variableType)
+      Return New BoundVariableDeclaration(variable, convertedInitializer)
+    End Function
+
+    Private Function BindTypeClause(syntax As TypeClauseSyntax) As TypeSymbol
+      If syntax Is Nothing Then
+        Return Nothing
+      End If
+      Dim type = Me.LookupType(syntax.Identifier.Text)
+      If type Is Nothing Then
+        Me.Diagnostics.ReportUndefinedType(syntax.Identifier.Span, syntax.Identifier.Text)
+        Return Nothing
+      End If
+      Return type
     End Function
 
     Private Function BindIfStatement(syntax As IfStatementSyntax) As BoundStatement
@@ -259,7 +274,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
 
       Dim t = Me.LookupType(syntax.Identifier.Text)
       If syntax.Arguments.Count = 1 AndAlso TypeOf t Is TypeSymbol Then
-        Return Me.BindConversion(syntax.Arguments(0), t)
+        Return Me.BindConversion(syntax.Arguments(0), t, True)
       End If
 
       Dim boundArguments = ImmutableArray.CreateBuilder(Of BoundExpression)
@@ -293,12 +308,15 @@ Namespace Global.Basic.CodeAnalysis.Binding
 
     End Function
 
-    Private Function BindConversion(syntax As ExpressionSyntax, [type] As TypeSymbol) As BoundExpression
+    Private Function BindConversion(syntax As ExpressionSyntax, [type] As TypeSymbol, Optional allowExplicit As Boolean = False) As BoundExpression
       Dim expression = Me.BindExpression(syntax)
-      Return Me.BindConversion(syntax.Span, expression, type)
+      Return Me.BindConversion(syntax.Span, expression, type, allowExplicit)
     End Function
 
-    Private Function BindConversion(diagnosticSpan As Text.TextSpan, expression As BoundExpression, type As TypeSymbol) As BoundExpression
+    Private Function BindConversion(diagnosticSpan As Text.TextSpan,
+                                    expression As BoundExpression,
+                                    type As TypeSymbol,
+                                    Optional allowExplicit As Boolean = False) As BoundExpression
       Dim c = Conversion.Classify(expression.Type, [type])
       If Not c.Exists Then
         If expression.Type IsNot TypeSymbol.Error AndAlso [type] IsNot TypeSymbol.Error Then
@@ -306,6 +324,10 @@ Namespace Global.Basic.CodeAnalysis.Binding
         End If
         Return New BoundErrorExpression
       End If
+      If Not allowExplicit AndAlso c.IsExplicit Then
+        Me.Diagnostics.ReportCannotConvertImplicitly(diagnosticSpan, expression.Type, [type])
+      End If
+
       If c.IsIdentity Then Return expression
       Return New BoundConversionExpression([type], expression)
     End Function
