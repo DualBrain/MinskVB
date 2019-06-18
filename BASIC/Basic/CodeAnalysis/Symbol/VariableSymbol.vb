@@ -17,10 +17,6 @@ Namespace Global.Basic.CodeAnalysis.Symbols
     Public ReadOnly Property IsReadOnly As Boolean
     Public ReadOnly Property Type As Type
 
-    Public Overrides Function ToString() As String
-      Return Me.Name
-    End Function
-
   End Class
 
 End Namespace

@@ -13,6 +13,10 @@ Namespace Global.Basic.CodeAnalysis.Symbols
     Public MustOverride ReadOnly Property Kind As SymbolKind
     Public ReadOnly Property Name As String
 
+    Public Overrides Function ToString() As String
+      Return Me.Name
+    End Function
+
   End Class
 
 End Namespace
