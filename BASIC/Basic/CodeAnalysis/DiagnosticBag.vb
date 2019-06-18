@@ -66,8 +66,8 @@ Namespace Global.Basic.CodeAnalysis
       Me.Report(span, $"Cannot convert type '{fromType}' to '{toType}'.")
     End Sub
 
-    Public Sub ReportVariableAlreadyDeclared(span As TextSpan, name As String)
-      Me.Report(span, $"Variable '{name}' is already declared.")
+    Public Sub ReportSymbolAlreadyDeclared(span As TextSpan, name As String)
+      Me.Report(span, $"'{name}' is already declared.")
     End Sub
 
     Public Sub ReportCannotAssign(span As TextSpan, name As String)

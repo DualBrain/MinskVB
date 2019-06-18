@@ -317,7 +317,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
       Dim [declare] = Not identifier.IsMissing
       Dim variable = New VariableSymbol(name, isReadOnly, type)
       If [declare] AndAlso Not Me.m_scope.TryDeclareVariable(variable) Then
-        Me.Diagnostics.ReportVariableAlreadyDeclared(identifier.Span, name)
+        Me.Diagnostics.ReportSymbolAlreadyDeclared(identifier.Span, name)
       End If
       Return variable
     End Function

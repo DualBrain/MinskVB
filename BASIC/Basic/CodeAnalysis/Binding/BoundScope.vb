@@ -10,8 +10,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
 
   Friend NotInheritable Class BoundScope
 
-    Private m_variables As Dictionary(Of String, VariableSymbol)
-    Private m_functions As Dictionary(Of String, FunctionSymbol) = New Dictionary(Of String, FunctionSymbol)
+    Private m_symbols As New Dictionary(Of String, Symbol)
 
     Public Sub New(parent As BoundScope)
       Me.Parent = parent
@@ -20,79 +19,64 @@ Namespace Global.Basic.CodeAnalysis.Binding
     Public ReadOnly Property Parent As BoundScope
 
     Public Function TryDeclareVariable(variable As VariableSymbol) As Boolean
+      Return Me.TryDeclareSymbol(variable)
+    End Function
 
-      If Me.m_variables Is Nothing Then
-        Me.m_variables = New Dictionary(Of String, VariableSymbol)
-      End If
-
-      If Me.m_variables.ContainsKey(variable?.Name?.ToLower) Then
+    Private Function TryDeclareSymbol(Of TSymbol As Symbol)(symbol As TSymbol) As Boolean
+      If Me.m_symbols Is Nothing Then
+        Me.m_symbols = New Dictionary(Of String, Symbol)()
+      ElseIf Me.m_symbols.ContainsKey(symbol.Name) Then
         Return False
       End If
-
-      Me.m_variables.Add(variable?.Name?.ToLower, variable)
+      Me.m_symbols.Add(symbol.Name, symbol)
       Return True
-
     End Function
 
     Public Function TryLookupVariable(name As String, <Out()> ByRef variable As VariableSymbol) As Boolean
-
-      variable = Nothing
-
-      If Me.m_variables IsNot Nothing AndAlso Me.m_variables.TryGetValue(name.ToLower, variable) Then
-        Return True
-      End If
-
-      If Me.Parent Is Nothing Then
-        Return False
-      End If
-
-      Return Me.Parent.TryLookupVariable(name.ToLower, variable)
-
+      Return Me.TryLookupSymbol(name, variable)
     End Function
 
     Public Function GetDeclaredVariables() As ImmutableArray(Of VariableSymbol)
-      If Me.m_variables Is Nothing Then
-        Return ImmutableArray(Of VariableSymbol).Empty
-      End If
-      Return Me.m_variables.Values.ToImmutableArray
+      Return Me.GetDeclaredSymbols(Of VariableSymbol)
     End Function
 
     Public Function TryDeclareFunction([function] As FunctionSymbol) As Boolean
-
-      If Me.m_functions Is Nothing Then
-        Me.m_functions = New Dictionary(Of String, FunctionSymbol)
-      End If
-
-      If Me.m_functions.ContainsKey([function]?.Name?.ToLower) Then
-        Return False
-      End If
-
-      Me.m_functions.Add([function]?.Name?.ToLower, [function])
-      Return True
-
+      Return Me.TryDeclareSymbol([function])
     End Function
 
     Public Function TryLookupFunction(name As String, <Out()> ByRef [function] As FunctionSymbol) As Boolean
+      Return Me.TryLookupSymbol(name, [function])
+    End Function
 
-      [function] = Nothing
+    Private Function TryLookupSymbol(Of TSymbol As Symbol)(name As String, ByRef symbol As TSymbol) As Boolean
 
-      If Me.m_functions IsNot Nothing AndAlso Me.m_functions.TryGetValue(name.ToLower, [function]) Then
-        Return True
+      symbol = Nothing
+
+      Dim declaredSymbol As Symbol
+      If Me.m_symbols IsNot Nothing AndAlso Me.m_symbols.TryGetValue(name.ToLower, declaredSymbol) Then
+        If TypeOf declaredSymbol Is TSymbol Then
+          symbol = DirectCast(declaredSymbol, TSymbol)
+          Return True
+        End If
+        Return False
       End If
 
       If Me.Parent Is Nothing Then
         Return False
       End If
 
-      Return Me.Parent.TryLookupFunction(name.ToLower, [function])
+      Return Me.Parent.TryLookupSymbol(name, symbol)
 
     End Function
-
     Public Function GetDeclaredFunctions() As ImmutableArray(Of FunctionSymbol)
-      If Me.m_functions Is Nothing Then
-        Return ImmutableArray(Of FunctionSymbol).Empty
+      Return Me.GetDeclaredSymbols(Of FunctionSymbol)
+    End Function
+
+    Private Function GetDeclaredSymbols(Of TSymbol As Symbol)() As ImmutableArray(Of TSymbol)
+      If Me.m_symbols Is Nothing Then
+        Return ImmutableArray(Of TSymbol).Empty
       End If
-      Return Me.m_functions.Values.ToImmutableArray
+      Return Me.m_symbols.Values.OfType(Of TSymbol).ToImmutableArray
     End Function
 
   End Class

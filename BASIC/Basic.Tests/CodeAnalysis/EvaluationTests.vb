@@ -305,6 +305,22 @@ Namespace Global.Basic.Tests.CodeAnalysis
 
     End Sub
 
+    <Fact>
+    Public Sub Evaluator_Variables_Can_Shadow_Functions()
+
+      Dim text = "
+        {
+          let print = 42
+          [print](""test"")
+        }"
+
+      Dim diagnostics = "
+        Function 'print' doesn't exist."
+
+      Me.AssertDiagnostics(text, diagnostics)
+
+    End Sub
+
     Private Shared Sub AssertValue(text As String, expectedValue As Object)
 
       Dim tree = SyntaxTree.Parse(text)
