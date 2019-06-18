@@ -16,10 +16,10 @@ Namespace Global.Basic.CodeAnalysis.Lowering
     Private Sub New()
     End Sub
 
-    Private Function GenerateLabel() As LabelSymbol
+    Private Function GenerateLabel() As BoundLabel
       Me.m_labelCount += 1
       Dim name = $"Label{Me.m_labelCount}"
-      Return New LabelSymbol(name)
+      Return New BoundLabel(name)
     End Function
 
     Public Shared Function Lower(statement As BoundStatement) As BoundBlockStatement

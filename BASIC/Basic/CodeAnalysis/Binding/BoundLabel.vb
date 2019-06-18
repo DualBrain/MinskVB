@@ -2,9 +2,9 @@
 Option Strict On
 Option Infer On
 
-Namespace Global.Basic.CodeAnalysis
+Namespace Global.Basic.CodeAnalysis.Binding
 
-  Friend NotInheritable Class LabelSymbol
+  Friend NotInheritable Class BoundLabel
 
     Friend Sub New(name As String)
       Me.Name = name

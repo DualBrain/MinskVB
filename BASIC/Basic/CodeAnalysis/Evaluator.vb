@@ -20,7 +20,7 @@ Namespace Global.Basic.CodeAnalysis
 
     Public Function Evaluate() As Object
 
-      Dim labelToIndex = New Dictionary(Of LabelSymbol, Integer)
+      Dim labelToIndex = New Dictionary(Of BoundLabel, Integer)
       For i = 0 To Me.Root.Statements.Length - 1
         If TypeOf Me.Root.Statements(i) Is BoundLabelStatement Then
           labelToIndex.Add(DirectCast(Me.Root.Statements(i), BoundLabelStatement).Label, i + 1)
