@@ -4,6 +4,7 @@ Option Infer On
 
 Imports System.Collections.Immutable
 Imports Basic.CodeAnalysis.Binding
+Imports Basic.CodeAnalysis.Symbols
 Imports Basic.CodeAnalysis.Syntax
 
 Namespace Global.Basic.CodeAnalysis.Lowering
@@ -91,11 +92,11 @@ Namespace Global.Basic.CodeAnalysis.Lowering
         Dim endLabelStatement = New BoundLabelStatement(endLabel)
 
         Dim result = New BoundBlockStatement(ImmutableArray.Create(Of BoundStatement)(gotoFalse,
-                                                                                      node.ThenStatement,
-                                                                                      gotoEndStatement,
-                                                                                      elseLabelStatement,
-                                                                                      node.ElseStatement,
-                                                                                      endLabelStatement))
+                                                                                              node.ThenStatement,
+                                                                                              gotoEndStatement,
+                                                                                              elseLabelStatement,
+                                                                                              node.ElseStatement,
+                                                                                              endLabelStatement))
         Return Me.RewriteStatement(result)
 
       End If
@@ -127,11 +128,11 @@ Namespace Global.Basic.CodeAnalysis.Lowering
       Dim endLabelStatement = New BoundLabelStatement(endLabel)
 
       Dim result = New BoundBlockStatement(ImmutableArray.Create(Of BoundStatement)(gotoCheck,
-                                                                                    continueLabelStatement,
-                                                                                    node.Body,
-                                                                                    checkLabelStatement,
-                                                                                    gotoTrue,
-                                                                                    endLabelStatement))
+                                                                                          continueLabelStatement,
+                                                                                          node.Body,
+                                                                                          checkLabelStatement,
+                                                                                          gotoTrue,
+                                                                                          endLabelStatement))
 
       Return Me.RewriteStatement(result)
 
@@ -161,23 +162,23 @@ Namespace Global.Basic.CodeAnalysis.Lowering
       Dim upperBoundSymbol = New VariableSymbol("upperBound", True, GetType(Integer))
       Dim upperBoundDeclaration = New BoundVariableDeclaration(upperBoundSymbol, node.UpperBound)
       Dim condition = New BoundBinaryExpression(
-        variableExpression,
-        BoundBinaryOperator.Bind(SyntaxKind.LessThanEqualsToken, GetType(Integer), GetType(Integer)),
-        New BoundVariableExpression(upperBoundSymbol))
+              variableExpression,
+              BoundBinaryOperator.Bind(SyntaxKind.LessThanEqualsToken, GetType(Integer), GetType(Integer)),
+              New BoundVariableExpression(upperBoundSymbol))
       Dim increment = New BoundExpressionStatement(
-        New BoundAssignmentExpression(
-          node.Variable,
-          New BoundBinaryExpression(
-            variableExpression,
-            BoundBinaryOperator.Bind(SyntaxKind.PlusToken, GetType(Integer), GetType(Integer)),
-            New BoundLiteralExpression(1))))
+              New BoundAssignmentExpression(
+                node.Variable,
+                New BoundBinaryExpression(
+                  variableExpression,
+                  BoundBinaryOperator.Bind(SyntaxKind.PlusToken, GetType(Integer), GetType(Integer)),
+                  New BoundLiteralExpression(1))))
       Dim whileBody = New BoundBlockStatement(ImmutableArray.Create(Of BoundStatement)(node.Body, increment))
       Dim whileStatement = New BoundWhileStatement(condition, whileBody)
       'Dim result = New BoundBlockStatement(ImmutableArray.Create(Of BoundStatement)(variableDeclaration, whileStatement))
       Dim result = New BoundBlockStatement(ImmutableArray.Create(Of BoundStatement)(
-        variableDeclaration,
-        upperBoundDeclaration,
-        whileStatement))
+              variableDeclaration,
+              upperBoundDeclaration,
+              whileStatement))
 
       Return Me.RewriteStatement(result)
 

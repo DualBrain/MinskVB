@@ -7,6 +7,7 @@ Imports System.IO
 Imports System.Threading
 
 Imports Basic.CodeAnalysis.Binding
+Imports Basic.CodeAnalysis.Symbols
 Imports Basic.CodeAnalysis.Syntax
 
 Namespace Global.Basic.CodeAnalysis

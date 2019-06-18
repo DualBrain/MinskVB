@@ -5,6 +5,7 @@ Option Infer On
 Imports Xunit
 Imports Basic.CodeAnalysis
 Imports Basic.CodeAnalysis.Syntax
+Imports Basic.CodeAnalysis.Symbols
 
 Namespace Global.Basic.Tests.CodeAnalysis
 

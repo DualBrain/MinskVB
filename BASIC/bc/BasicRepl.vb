@@ -3,6 +3,7 @@ Option Strict On
 Option Infer On
 
 Imports Basic.CodeAnalysis
+Imports Basic.CodeAnalysis.Symbols
 Imports Basic.CodeAnalysis.Syntax
 Imports Basic.CodeAnalysis.Text
 Imports System.Console
@@ -57,10 +58,10 @@ Friend NotInheritable Class BasicRepl
     If String.IsNullOrEmpty(text) Then Return True
 
     Dim lastTwoLinesAreBlank = text.Split(Environment.NewLine).
-                                    Reverse().
-                                    TakeWhile(Function(s) String.IsNullOrEmpty(s)).
-                                    Take(2).
-                                    Count() = 2
+                                        Reverse().
+                                        TakeWhile(Function(s) String.IsNullOrEmpty(s)).
+                                        Take(2).
+                                        Count() = 2
 
     If lastTwoLinesAreBlank Then
       Return True

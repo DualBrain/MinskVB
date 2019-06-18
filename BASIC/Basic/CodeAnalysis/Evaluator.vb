@@ -3,6 +3,7 @@ Option Strict On
 Option Infer On
 
 Imports Basic.CodeAnalysis.Binding
+Imports Basic.CodeAnalysis.Symbols
 
 Namespace Global.Basic.CodeAnalysis
 

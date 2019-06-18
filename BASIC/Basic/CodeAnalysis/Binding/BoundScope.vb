@@ -4,6 +4,7 @@ Option Infer On
 
 Imports System.Collections.Immutable
 Imports System.Runtime.InteropServices
+Imports Basic.CodeAnalysis.Symbols
 
 Namespace Global.Basic.CodeAnalysis.Binding
 
