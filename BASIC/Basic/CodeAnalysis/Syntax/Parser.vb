@@ -59,9 +59,86 @@ Namespace Global.Basic.CodeAnalysis.Syntax
     End Function
 
     Public Function ParseCompilationUnit() As CompilationUnitSyntax
-      Dim statement = Me.ParseStatement
+      Dim members = Me.ParseMembers
       Dim endOfFileToken = Me.MatchToken(SyntaxKind.EndOfFileToken)
-      Return New CompilationUnitSyntax(statement, endOfFileToken)
+      Return New CompilationUnitSyntax(members, endOfFileToken)
+    End Function
+
+    Private Function ParseMembers() As ImmutableArray(Of MemberSyntax)
+
+      Dim members = ImmutableArray.CreateBuilder(Of MemberSyntax)
+
+      While Me.Current.Kind <> SyntaxKind.EndOfFileToken
+
+        Dim startToken = Me.Current
+
+        Dim member = Me.ParseMember()
+        members.Add(member)
+
+        ' If ParseStatement() did not consume any tokens,
+        ' we need to skip the current token and continue
+        ' in order to avoid an infinite loop.
+        ' We don't need to report an error because we'll
+        ' already tried to parse an expression statement
+        ' and reported one.
+        If (Me.Current Is startToken) Then
+          Me.NextToken()
+        End If
+
+      End While
+
+      Return members.ToImmutable
+
+    End Function
+
+    Private Function ParseMember() As MemberSyntax
+      If Me.Current.Kind = SyntaxKind.FunctionKeyword Then
+        Return Me.ParseFunctionDeclaration
+      End If
+      Return Me.ParseGlobalStatement
+    End Function
+
+    Private Function ParseFunctionDeclaration() As MemberSyntax
+      Dim functionKeyword = Me.MatchToken(SyntaxKind.FunctionKeyword)
+      Dim identifier = Me.MatchToken(SyntaxKind.IdentifierToken)
+      Dim openParen = Me.MatchToken(SyntaxKind.OpenParenToken)
+      Dim parameters = Me.ParseParameterList
+      Dim closeParen = Me.MatchToken(SyntaxKind.CloseParenToken)
+      Dim type = Me.ParseOptionalTypeClause
+      Dim body = me.ParseBlockStatement()
+      Return New FunctionDeclarationSyntax(functionKeyword, identifier, openParen, parameters, closeParen, type, body)
+    End Function
+
+    Private Function ParseParameterList() As SeparatedSyntaxList(Of ParameterSyntax)
+
+      Dim nodesAndSeparators = ImmutableArray.CreateBuilder(Of SyntaxNode)
+
+      While Me.Current.Kind <> SyntaxKind.CloseParenToken AndAlso
+            Me.Current.Kind <> SyntaxKind.EndOfFileToken
+
+        Dim parameter = Me.ParseParameter
+        nodesAndSeparators.Add(parameter)
+
+        If Me.Current.Kind <> SyntaxKind.CloseParenToken Then
+          Dim comma = Me.MatchToken(SyntaxKind.CommaToken)
+          nodesAndSeparators.Add(comma)
+        End If
+
+      End While
+
+      Return New SeparatedSyntaxList(Of ParameterSyntax)(nodesAndSeparators.ToImmutable)
+
+    End Function
+
+    Private Function ParseParameter() As ParameterSyntax
+      Dim identifier = Me.MatchToken(SyntaxKind.IdentifierToken)
+      Dim type = Me.ParseTypeClause()
+      Return New ParameterSyntax(identifier, type)
+    End Function
+
+    Private Function ParseGlobalStatement() As MemberSyntax
+      Dim statement = Me.ParseStatement
+      Return New GlobalStatementSyntax(statement)
     End Function
 
     Private Function ParseStatement() As StatementSyntax

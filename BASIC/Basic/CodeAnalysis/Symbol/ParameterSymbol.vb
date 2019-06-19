@@ -5,7 +5,7 @@ Option Infer On
 Namespace Global.Basic.CodeAnalysis.Symbols
 
   Public NotInheritable Class ParameterSymbol
-    Inherits VariableSymbol
+    Inherits LocalVariableSymbol
 
     Sub New(name As String, type As TypeSymbol)
       MyBase.New(name, True, type)

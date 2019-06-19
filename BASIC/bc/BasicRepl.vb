@@ -77,8 +77,8 @@ Friend NotInheritable Class BasicRepl
 
     Dim tree = SyntaxTree.Parse(text)
 
-    ' Use Statement because we need to exclude the EndOfFileToken.
-    If tree.Root.Statement.GetLastToken.IsMissing Then
+    ' Use Members because we need to exclude the EndOfFileToken.
+    If tree.Root.Members.Last.GetLastToken.IsMissing Then
       Return False
     End If
 

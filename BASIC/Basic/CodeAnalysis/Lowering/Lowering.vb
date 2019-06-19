@@ -185,7 +185,7 @@ Namespace Global.Basic.CodeAnalysis.Lowering
 
       Dim variableDeclaration = New BoundVariableDeclaration(node.Variable, node.LowerBound)
       Dim variableExpression = New BoundVariableExpression(node.Variable)
-      Dim upperBoundSymbol = New VariableSymbol("upperBound", True, TypeSymbol.Int)
+      Dim upperBoundSymbol = New LocalVariableSymbol("upperBound", True, TypeSymbol.Int)
       Dim upperBoundDeclaration = New BoundVariableDeclaration(upperBoundSymbol, node.UpperBound)
       Dim condition = New BoundBinaryExpression(
               variableExpression,

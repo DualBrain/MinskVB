@@ -4,7 +4,7 @@ Option Infer On
 
 Namespace Global.Basic.CodeAnalysis.Symbols
 
-  Public Class VariableSymbol
+  Public MustInherit Class VariableSymbol
     Inherits Symbol
 
     Friend Sub New(name As String, isReadOnly As Boolean, type As TypeSymbol)
@@ -13,7 +13,6 @@ Namespace Global.Basic.CodeAnalysis.Symbols
       Me.Type = type
     End Sub
 
-    Public Overrides ReadOnly Property Kind As SymbolKind = SymbolKind.Variable
     Public ReadOnly Property IsReadOnly As Boolean
     Public ReadOnly Property Type As TypeSymbol
 

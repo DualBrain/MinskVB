@@ -11,6 +11,7 @@ Imports Basic.CodeAnalysis.Symbols
 Imports Basic.CodeAnalysis.Syntax
 
 Namespace Global.Basic.CodeAnalysis
+
   Public NotInheritable Class Compilation
 
     Private m_globalScope As BoundGlobalScope = Nothing
@@ -44,13 +45,17 @@ Namespace Global.Basic.CodeAnalysis
     Public Function Evaluate(variables As Dictionary(Of VariableSymbol, Object)) As EvaluationResult
 
       Dim diagnostics = Me.Syntax.Diagnostics.Concat(Me.GlobalScope.Diagnostics).ToImmutableArray
-
       If diagnostics.Any Then
         Return New EvaluationResult(diagnostics, Nothing)
       End If
 
+      Dim program = Binder.BindProgram(Me.GlobalScope)
+      If program.Diagnostics.Any Then
+        Return New EvaluationResult(program.Diagnostics.ToImmutableArray, Nothing)
+      End If
+
       Dim statement = Me.GetStatement()
-      Dim evaluator = New Evaluator(statement, variables)
+      Dim evaluator = New Evaluator(program.FunctionBodies, statement, variables)
       Dim value = evaluator.Evaluate
 
       Return New EvaluationResult(ImmutableArray(Of Diagnostic).Empty, value)

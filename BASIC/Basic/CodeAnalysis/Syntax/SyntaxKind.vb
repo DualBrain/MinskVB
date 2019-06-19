@@ -54,6 +54,8 @@ Namespace Global.Basic.CodeAnalysis.Syntax
     VarKeyword
     DimKeyword
 
+    FunctionKeyword
+
     IfKeyword
     'ThenKeyword
     ElseKeyword
@@ -69,8 +71,11 @@ Namespace Global.Basic.CodeAnalysis.Syntax
     ' Nodes
 
     CompilationUnit
-    ElseClause
+    GlobalStatement
+    FunctionDeclaration
+    Parameter
     TypeClause
+    ElseClause
 
     ' Statements
 

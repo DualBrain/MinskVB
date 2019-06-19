@@ -9,30 +9,37 @@ Namespace Global.Basic.CodeAnalysis
 
   Friend NotInheritable Class Evaluator
 
+    Private ReadOnly m_locals As New Stack(Of Dictionary(Of VariableSymbol, Object))
+    Private ReadOnly m_functionBodies As Immutable.ImmutableDictionary(Of FunctionSymbol, BoundBlockStatement)
     Private m_random As Random
 
     Private m_lastValue As Object
 
-    Sub New(root As BoundBlockStatement, variables As Dictionary(Of VariableSymbol, Object))
+    Sub New(functionBodies As Immutable.ImmutableDictionary(Of FunctionSymbol, BoundBlockStatement), root As BoundBlockStatement, variables As Dictionary(Of VariableSymbol, Object))
+      Me.m_functionBodies = functionBodies
       Me.Root = root
-      Me.Variables = variables
+      Me.Globals = variables
     End Sub
 
     Public ReadOnly Property Root As BoundBlockStatement
-    Public ReadOnly Property Variables As Dictionary(Of VariableSymbol, Object)
+    Public ReadOnly Property Globals As Dictionary(Of VariableSymbol, Object)
 
     Public Function Evaluate() As Object
+      Return Me.EvaluateStatement(Me.Root)
+    End Function
+
+    Private Function EvaluateStatement(body As BoundBlockStatement) As Object
 
       Dim labelToIndex = New Dictionary(Of BoundLabel, Integer)
-      For i = 0 To Me.Root.Statements.Length - 1
-        If TypeOf Me.Root.Statements(i) Is BoundLabelStatement Then
-          labelToIndex.Add(DirectCast(Me.Root.Statements(i), BoundLabelStatement).Label, i + 1)
+      For i = 0 To body.Statements.Length - 1
+        If TypeOf body.Statements(i) Is BoundLabelStatement Then
+          labelToIndex.Add(DirectCast(body.Statements(i), BoundLabelStatement).Label, i + 1)
         End If
       Next
 
       Dim index = 0
-      While index < Me.Root.Statements.Length
-        Dim s = Me.Root.Statements(index)
+      While index < body.Statements.Length
+        Dim s = body.Statements(index)
         Select Case s.Kind
           Case BoundNodeKind.VariableDeclaration : Me.EvaluateVariableDeclaration(DirectCast(s, BoundVariableDeclaration)) : index += 1
           Case BoundNodeKind.ExpressionStatement : Me.EvaluateExpressionStatement(DirectCast(s, BoundExpressionStatement)) : index += 1
@@ -61,8 +68,8 @@ Namespace Global.Basic.CodeAnalysis
 
     Private Sub EvaluateVariableDeclaration(node As BoundVariableDeclaration)
       Dim value = Me.EvaluateExpression(node.Initializer)
-      Me.Variables(node.Variable) = value
       Me.m_lastValue = value
+      Me.Assign(node.Variable, value)
     End Sub
 
     Private Sub EvaluateExpressionStatement(node As BoundExpressionStatement)
@@ -73,8 +80,8 @@ Namespace Global.Basic.CodeAnalysis
 
       Select Case node.Kind
         Case BoundNodeKind.LiteralExpression : Return Me.EvaluateLiteralExpression(node)
-        Case BoundNodeKind.VariableExpression : Return Me.EvaluateVariableExpression(node)
-        Case BoundNodeKind.AssignmentExpression : Return Me.EvaluateAssignmentExpression(node)
+        Case BoundNodeKind.VariableExpression : Return Me.EvaluateVariableExpression(DirectCast(node, BoundVariableExpression))
+        Case BoundNodeKind.AssignmentExpression : Return Me.EvaluateAssignmentExpression(DirectCast(node, BoundAssignmentExpression))
         Case BoundNodeKind.UnaryExpression : Return Me.EvaluateUnaryExpression(node)
         Case BoundNodeKind.BinaryExpression : Return Me.EvaluateBinaryExpression(node)
         Case BoundNodeKind.CallExpression : Return Me.EvaluateCallExpression(DirectCast(node, BoundCallExpression))
@@ -89,15 +96,18 @@ Namespace Global.Basic.CodeAnalysis
       Return DirectCast(node, BoundLiteralExpression).Value
     End Function
 
-    Private Function EvaluateVariableExpression(node As BoundExpression) As Object
-      Dim v = DirectCast(node, BoundVariableExpression)
-      Return Me.Variables(v.Variable)
+    Private Function EvaluateVariableExpression(v As BoundVariableExpression) As Object
+      If v.Variable.Kind = SymbolKind.GlobalVariable Then
+        Return Me.Globals(v.Variable)
+      Else
+        Dim locals = Me.m_locals.Peek()
+        Return locals(v.Variable)
+      End If
     End Function
 
-    Private Function EvaluateAssignmentExpression(node As BoundExpression) As Object
-      Dim a = DirectCast(node, BoundAssignmentExpression)
+    Private Function EvaluateAssignmentExpression(a As BoundAssignmentExpression) As Object
       Dim value = Me.EvaluateExpression(a.Expression)
-      Me.Variables(a.Variable) = value
+      Me.Assign(a.Variable, value)
       Return value
     End Function
 
@@ -176,7 +186,17 @@ Namespace Global.Basic.CodeAnalysis
         If Me.m_random Is Nothing Then Me.m_random = New Random
         Return Me.m_random.Next(max)
       Else
-        Throw New Exception($"Unexpected function {node.Function}.")
+        Dim locals = New Dictionary(Of VariableSymbol, Object)
+        For i = 0 To node.Arguments.Length - 1
+          Dim parameter = node.Function.Parameters(i)
+          Dim value = Me.EvaluateExpression(node.Arguments(i))
+          locals.Add(parameter, value)
+        Next
+        Me.m_locals.Push(locals)
+        Dim statement = Me.m_functionBodies(node.Function)
+        Dim result = Me.EvaluateStatement(statement)
+        Me.m_locals.Pop()
+        Return result
       End If
 
     End Function
@@ -194,6 +214,14 @@ Namespace Global.Basic.CodeAnalysis
       End If
     End Function
 
+    Private Sub Assign(variable As VariableSymbol, value As Object)
+      If variable.Kind = SymbolKind.GlobalVariable Then
+        Me.Globals(variable) = value
+      Else
+        Dim locals = Me.m_locals.Peek()
+        locals(variable) = value
+      End If
+    End Sub
 
   End Class
 

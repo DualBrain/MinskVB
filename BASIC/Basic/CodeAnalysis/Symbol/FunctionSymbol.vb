@@ -4,6 +4,7 @@ Option Infer On
 
 Imports System.Collections.Immutable
 Imports System.Reflection
+Imports Basic.CodeAnalysis.Syntax
 
 Namespace Global.Basic.CodeAnalysis.Symbols
 
@@ -15,8 +16,8 @@ Namespace Global.Basic.CodeAnalysis.Symbols
 
     Friend Function GetAll() As IEnumerable(Of FunctionSymbol)
       Return GetType(BuiltinFunctions).GetFields(BindingFlags.Public Or BindingFlags.Static).
-                                       Where(Function(f) f.FieldType = GetType(FunctionSymbol)).
-                                       Select(Function(f) CType(f.GetValue(Nothing), FunctionSymbol))
+                                             Where(Function(f) f.FieldType = GetType(FunctionSymbol)).
+                                             Select(Function(f) CType(f.GetValue(Nothing), FunctionSymbol))
     End Function
 
   End Module
@@ -24,13 +25,15 @@ Namespace Global.Basic.CodeAnalysis.Symbols
   Public NotInheritable Class FunctionSymbol
     Inherits Symbol
 
-    Sub New(name As String, paremeters As ImmutableArray(Of ParameterSymbol), type As TypeSymbol)
+    Sub New(name As String, paremeters As ImmutableArray(Of ParameterSymbol), type As TypeSymbol, Optional declaration As FunctionDeclarationSyntax = Nothing)
       MyBase.New(name)
       Me.Parameters = paremeters
       Me.Type = type
+      Me.Declaration = declaration
     End Sub
 
     Public Overrides ReadOnly Property Kind As SymbolKind = SymbolKind.Function
+    Public ReadOnly Property Declaration As FunctionDeclarationSyntax
     Public ReadOnly Property Parameters As ImmutableArray(Of ParameterSymbol)
     Public ReadOnly Property Type As TypeSymbol
 

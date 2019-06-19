@@ -122,7 +122,7 @@ Namespace Global.Basic.Tests.CodeAnalysis.Syntax
     Private Shared Function ParseExpression(text As String) As ExpressionSyntax
       Dim tree = SyntaxTree.Parse(text)
       Dim root = tree.Root
-      Dim statement = root.Statement
+      Dim statement = root.Members
       Return Assert.IsType(Of ExpressionStatementSyntax)(statement).Expression
     End Function
 

@@ -77,6 +77,8 @@ Namespace Global.Basic.CodeAnalysis.Syntax
         Case "dim"
           Return SyntaxKind.DimKeyword
 
+        Case "function"
+          Return SyntaxKind.FunctionKeyword
         Case "if"
           Return SyntaxKind.IfKeyword
         'Case "then"
@@ -177,6 +179,7 @@ Namespace Global.Basic.CodeAnalysis.Syntax
         Case SyntaxKind.VarKeyword : Return "var"
         Case SyntaxKind.DimKeyword : Return "dim"
 
+        Case SyntaxKind.FunctionKeyword : Return "function"
         Case SyntaxKind.IfKeyword : Return "if"
         'Case SyntaxKind.ThenKeyword : Return "then"
         Case SyntaxKind.ElseKeyword : Return "else"

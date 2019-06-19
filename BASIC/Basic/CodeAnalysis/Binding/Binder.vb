@@ -3,6 +3,7 @@ Option Strict On
 Option Infer On
 
 Imports System.Collections.Immutable
+Imports Basic.CodeAnalysis.Lowering
 Imports Basic.CodeAnalysis.Symbols
 Imports Basic.CodeAnalysis.Syntax
 
@@ -11,16 +12,41 @@ Namespace Global.Basic.CodeAnalysis.Binding
   Friend NotInheritable Class Binder
 
     Private m_scope As BoundScope
+    Private ReadOnly m_function As FunctionSymbol
 
-    Public Sub New(parent As BoundScope)
+    Public Sub New(parent As BoundScope, [function] As FunctionSymbol)
+
       Me.m_scope = New BoundScope(parent)
+      Me.m_function = [function]
+
+      If [function] IsNot Nothing Then
+        For Each p In [function].Parameters
+          Me.m_scope.TryDeclareVariable(p)
+        Next
+      End If
+
     End Sub
 
     Public Shared Function BindGlobalScope(previous As BoundGlobalScope, syntax As CompilationUnitSyntax) As BoundGlobalScope
 
       Dim parentScope = CreateParentScopes(previous)
-      Dim binder = New Binder(parentScope)
-      Dim expression = binder.BindStatement(syntax.Statement)
+      Dim binder = New Binder(parentScope, Nothing)
+
+      'Dim statement = syntax.Members.OfType(Of GlobalStatementSyntax).FirstOrDefault
+      For Each func In syntax.Members.OfType(Of FunctionDeclarationSyntax)
+        binder.BindFunctionDeclaration(func)
+      Next
+
+      Dim statementBuilder = ImmutableArray.CreateBuilder(Of BoundStatement)
+
+      For Each globalStatement In syntax.Members.OfType(Of GlobalStatementSyntax)
+        Dim s = binder.BindStatement(globalStatement.Statement)
+        statementBuilder.Add(s)
+      Next
+
+      Dim statement = New BoundBlockStatement(statementBuilder.ToImmutable)
+
+      Dim functions = binder.m_scope.GetDeclaredFunctions
       Dim variables = binder.m_scope.GetDeclaredVariables
       Dim diagnostics = binder.Diagnostics.ToImmutableArray
 
@@ -28,9 +54,59 @@ Namespace Global.Basic.CodeAnalysis.Binding
         diagnostics = diagnostics.InsertRange(0, previous.Diagnostics)
       End If
 
-      Return New BoundGlobalScope(previous, diagnostics, variables, expression)
+      Return New BoundGlobalScope(previous, diagnostics, functions, variables, statement)
 
     End Function
+
+    Public Shared Function BindProgram(globalScope As BoundGlobalScope) As BoundProgram
+
+      Dim parentScope = CreateParentScopes(globalScope)
+
+      Dim functionBodies = ImmutableDictionary.CreateBuilder(Of FunctionSymbol, BoundBlockStatement)
+      Dim diagnostics = New DiagnosticBag
+
+      Dim scope = globalScope
+      While scope IsNot Nothing
+
+        For Each func In scope.Functions
+          Dim binder = New Binder(parentScope, func)
+          Dim body = binder.BindStatement(func.Declaration.Body)
+          Dim loweredBody = Lowerer.Lower(body)
+          functionBodies.Add(func, loweredBody)
+          diagnostics.AddRange(binder.Diagnostics)
+        Next
+
+        scope = scope.Previous
+
+      End While
+
+      Return New BoundProgram(globalScope, diagnostics, functionBodies.ToImmutable)
+
+    End Function
+
+
+    Private Sub BindFunctionDeclaration(syntax As FunctionDeclarationSyntax)
+      Dim parameters = ImmutableArray.CreateBuilder(Of ParameterSymbol)
+      Dim seenParameterNames = New HashSet(Of String)
+      For Each parameterSyntax In syntax.Parameters
+        Dim parameterName = parameterSyntax.Identifier.Text
+        Dim parameterType = Me.BindTypeClause(parameterSyntax.Type)
+        If Not seenParameterNames.Add(parameterName) Then
+          Me.Diagnostics.ReportParameterAlreadyDeclared(parameterSyntax.Span, parameterName)
+        Else
+          Dim parameter = New ParameterSymbol(parameterName, parameterType)
+          parameters.Add(parameter)
+        End If
+      Next
+      Dim type = If(Me.BindTypeClause(syntax.Type), TypeSymbol.Void)
+      If type IsNot TypeSymbol.Void Then
+        Me.Diagnostics.XXX_ReportFunctionsAreUnsupported(syntax.Type.Span)
+      End If
+      Dim func = New FunctionSymbol(syntax.Identifier.Text, parameters.ToImmutable, type, syntax)
+      If Not Me.m_scope.TryDeclareFunction(func) Then
+        Me.Diagnostics.ReportSymbolAlreadyDeclared(syntax.Identifier.Span, func.Name)
+      End If
+    End Sub
 
     Private Shared Function CreateParentScopes(previous As BoundGlobalScope) As BoundScope
 
@@ -46,6 +122,9 @@ Namespace Global.Basic.CodeAnalysis.Binding
       While stack.Count > 0
         previous = stack.Pop
         Dim scope = New BoundScope(parent)
+        For Each f In previous.Functions
+          scope.TryDeclareFunction(f)
+        Next
         For Each v In previous.Variables
           scope.TryDeclareVariable(v)
         Next
@@ -299,7 +378,8 @@ Namespace Global.Basic.CodeAnalysis.Binding
         Dim argument = boundArguments(i)
         Dim parameter = func.Parameters(i)
         If argument.Type IsNot parameter.Type Then
-          Me.Diagnostics.ReportWrongArgumentType(syntax.Span, parameter.Name, parameter.Type, argument.Type)
+          'Me.Diagnostics.ReportWrongArgumentType(syntax.Span, parameter.Name, parameter.Type, argument.Type)
+          Me.Diagnostics.ReportWrongArgumentType(syntax.Arguments(i).Span, parameter.Name, parameter.Type, argument.Type)
           Return New BoundErrorExpression
         End If
       Next
@@ -314,9 +394,9 @@ Namespace Global.Basic.CodeAnalysis.Binding
     End Function
 
     Private Function BindConversion(diagnosticSpan As Text.TextSpan,
-                                    expression As BoundExpression,
-                                    type As TypeSymbol,
-                                    Optional allowExplicit As Boolean = False) As BoundExpression
+                                        expression As BoundExpression,
+                                        type As TypeSymbol,
+                                        Optional allowExplicit As Boolean = False) As BoundExpression
       Dim c = Conversion.Classify(expression.Type, [type])
       If Not c.Exists Then
         If expression.Type IsNot TypeSymbol.Error AndAlso [type] IsNot TypeSymbol.Error Then
@@ -335,7 +415,9 @@ Namespace Global.Basic.CodeAnalysis.Binding
     Private Function BindVariable(identifier As SyntaxToken, isReadOnly As Boolean, type As TypeSymbol) As VariableSymbol
       Dim name = If(identifier.Text, "?")
       Dim [declare] = Not identifier.IsMissing
-      Dim variable = New VariableSymbol(name, isReadOnly, type)
+      Dim variable = If(Me.m_function Is Nothing,
+                              DirectCast(New GlobalVariableSymbol(name, isReadOnly, type), VariableSymbol),
+                              DirectCast(New LocalVariableSymbol(name, isReadOnly, type), VariableSymbol))
       If [declare] AndAlso Not Me.m_scope.TryDeclareVariable(variable) Then
         Me.Diagnostics.ReportSymbolAlreadyDeclared(identifier.Span, name)
       End If
