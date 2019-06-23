@@ -63,7 +63,7 @@ Namespace Global.Basic.CodeAnalysis.Syntax
 
     Friend Function GetKeywordKind(text As String) As SyntaxKind
 
-      Select Case text.ToLower
+      Select Case text
 
         Case "true"
           Return SyntaxKind.TrueKeyword
@@ -83,6 +83,10 @@ Namespace Global.Basic.CodeAnalysis.Syntax
           Return SyntaxKind.IfKeyword
         'Case "then"
         '  Return SyntaxKind.ThenKeyword
+        Case "break"
+          Return SyntaxKind.BreakKeyword
+        Case "continue"
+          Return SyntaxKind.ContinueKeyword
         Case "else"
           Return SyntaxKind.ElseKeyword
         'Case "elseif"
@@ -182,6 +186,8 @@ Namespace Global.Basic.CodeAnalysis.Syntax
         Case SyntaxKind.FunctionKeyword : Return "function"
         Case SyntaxKind.IfKeyword : Return "if"
         'Case SyntaxKind.ThenKeyword : Return "then"
+        Case SyntaxKind.BreakKeyword : Return "break"
+        Case SyntaxKind.ContinueKeyword : Return "continue"
         Case SyntaxKind.ElseKeyword : Return "else"
           'Case SyntaxKind.ElseIfKeyword : Return "elseif"
           'Case SyntaxKind.EndIfKeyword : Return "endif"

@@ -58,6 +58,8 @@ Namespace Global.Basic.CodeAnalysis.Syntax
 
     IfKeyword
     'ThenKeyword
+    BreakKeyword
+    ContinueKeyword
     ElseKeyword
     'ElseIfKeyword
     'EndIfKeyword
@@ -85,6 +87,8 @@ Namespace Global.Basic.CodeAnalysis.Syntax
     WhileStatement
     DoWhileStatement
     ForStatement
+    BreakStatement
+    ContinueStatement
     ExpressionStatement
 
     ' Expressions

@@ -74,7 +74,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
       If condition Is node.Condition AndAlso body Is node.Body Then
         Return node
       End If
-      Return New BoundWhileStatement(condition, body)
+      Return New BoundWhileStatement(condition, body, node.BreakLabel, node.ContinueLabel)
     End Function
 
     Protected Overridable Function RewriteDoWhileStatement(node As BoundDoWhileStatement) As BoundStatement
@@ -83,7 +83,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
       If body Is node.Body AndAlso condition Is node.Condition Then
         Return node
       End If
-      Return New BoundDoWhileStatement(body, condition)
+      Return New BoundDoWhileStatement(body, condition, node.BreakLabel, node.ContinueLabel)
     End Function
 
     Protected Overridable Function RewriteForStatement(node As BoundForStatement) As BoundStatement
@@ -95,7 +95,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
                body Is node.Body Then
         Return node
       End If
-      Return New BoundForStatement(node.Variable, lowerBound, upperBound, body)
+      Return New BoundForStatement(node.Variable, lowerBound, upperBound, body, node.BreakLabel, node.ContinueLabel)
     End Function
 
     Protected Overridable Function RewriteLabeltatement(node As BoundLabelStatement) As BoundStatement

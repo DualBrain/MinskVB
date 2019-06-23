@@ -161,6 +161,10 @@ Namespace Global.Basic.CodeAnalysis.Syntax
           Return Me.ParseDoWhileStatement
         Case SyntaxKind.ForKeyword
           Return Me.ParseForStatement
+        Case SyntaxKind.BreakKeyword
+          Return Me.ParseBreakStatement
+        Case SyntaxKind.ContinueKeyword
+          Return Me.ParseContinueStatement
         Case Else
           Return Me.ParseExpressionStatement
       End Select
@@ -274,6 +278,16 @@ Namespace Global.Basic.CodeAnalysis.Syntax
       Dim upperBound = Me.ParseExpression
       Dim body = Me.ParseStatement
       Return New ForStatementSyntax(keyword, identifier, equalsToken, lowerBound, toKeyword, upperBound, body)
+    End Function
+
+    Private Function ParseBreakStatement() As StatementSyntax
+      Dim keyword = Me.MatchToken(SyntaxKind.BreakKeyword)
+      Return New BreakStatementSyntax(keyword)
+    End Function
+
+    Private Function ParseContinueStatement() As StatementSyntax
+      Dim keyword = Me.MatchToken(SyntaxKind.ContinueKeyword)
+      Return New ContinueStatementSyntax(keyword)
     End Function
 
     Private Function ParseExpressionStatement() As ExpressionStatementSyntax

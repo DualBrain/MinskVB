@@ -102,6 +102,10 @@ Namespace Global.Basic.CodeAnalysis
       Me.Report(span, $"Parameter {name} requires a value of type '{expectedType}' but was given a value of type '{actualType}'.")
     End Sub
 
+    Public Sub ReportInvalidBreakOrContinue(span As TextSpan, text As String)
+      Me.Report(span, $"The keyword '{text}' can only be used inside of loops.")
+    End Sub
+
     Public Sub XXX_ReportFunctionsAreUnsupported(span As TextSpan)
       Me.Report(span, "Functions with return value are unsupported.")
     End Sub

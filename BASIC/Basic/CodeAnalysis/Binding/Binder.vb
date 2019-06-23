@@ -14,6 +14,9 @@ Namespace Global.Basic.CodeAnalysis.Binding
     Private m_scope As BoundScope
     Private ReadOnly m_function As FunctionSymbol
 
+    Private m_loopStack As New Stack(Of (BreakLabel As BoundLabel, ContinueLabel As BoundLabel))
+    Private m_labelCounter As Integer
+
     Public Sub New(parent As BoundScope, [function] As FunctionSymbol)
 
       Me.m_scope = New BoundScope(parent)
@@ -179,6 +182,10 @@ Namespace Global.Basic.CodeAnalysis.Binding
 
     End Function
 
+    Private Function BindErrorStatement() As BoundStatement
+      Return New BoundExpressionStatement(New BoundErrorExpression)
+    End Function
+
     Private Function BindStatement(syntax As StatementSyntax) As BoundStatement
 
       Select Case syntax.Kind
@@ -194,6 +201,10 @@ Namespace Global.Basic.CodeAnalysis.Binding
           Return Me.BindDoWhileStatement(DirectCast(syntax, DoWhileStatementSyntax))
         Case SyntaxKind.ForStatement
           Return Me.BindForStatement(DirectCast(syntax, ForStatementSyntax))
+        Case SyntaxKind.BreakStatement
+          Return Me.BindBreakStatement(DirectCast(syntax, BreakStatementSyntax))
+        Case SyntaxKind.ContinueStatement
+          Return Me.BindContinueStatement(DirectCast(syntax, ContinueStatementSyntax))
         Case SyntaxKind.ExpressionStatement
           Return Me.BindExpressionStatement(DirectCast(syntax, ExpressionStatementSyntax))
         Case Else
@@ -244,14 +255,18 @@ Namespace Global.Basic.CodeAnalysis.Binding
 
     Private Function BindWhileStatement(syntax As WhileStatementSyntax) As BoundStatement
       Dim condition = Me.BindExpression(syntax.Condition, TypeSymbol.Bool)
-      Dim body = Me.BindStatement(syntax.Body)
-      Return New BoundWhileStatement(condition, body)
+      Dim breakLabel As BoundLabel = Nothing
+      Dim continueLabel As BoundLabel = Nothing
+      Dim body = Me.BindLoopBody(syntax.Body, breakLabel, continueLabel)
+      Return New BoundWhileStatement(condition, body, breakLabel, continueLabel)
     End Function
 
     Private Function BindDoWhileStatement(syntax As DoWhileStatementSyntax) As BoundStatement
-      Dim body = Me.BindStatement(syntax.Body)
+      Dim breakLabel As BoundLabel = Nothing
+      Dim continueLabel As BoundLabel = Nothing
+      Dim body = Me.BindLoopBody(syntax.Body, breakLabel, continueLabel)
       Dim condition = Me.BindExpression(syntax.Condition, TypeSymbol.Bool)
-      Return New BoundDoWhileStatement(body, condition)
+      Return New BoundDoWhileStatement(body, condition, breakLabel, continueLabel)
     End Function
 
     Private Function BindForStatement(syntax As ForStatementSyntax) As BoundStatement
@@ -262,12 +277,49 @@ Namespace Global.Basic.CodeAnalysis.Binding
       Me.m_scope = New BoundScope(Me.m_scope)
 
       Dim variable = Me.BindVariable(syntax.Identifier, True, TypeSymbol.Int)
-      Dim body = Me.BindStatement(syntax.Body)
+      Dim breakLabel As BoundLabel = Nothing
+      Dim continueLabel As BoundLabel = Nothing
+      Dim body = Me.BindLoopBody(syntax.Body, breakLabel, continueLabel)
 
       Me.m_scope = Me.m_scope.Parent
 
-      Return New BoundForStatement(variable, lowerBound, upperBound, body)
+      Return New BoundForStatement(variable, lowerBound, upperBound, body, breakLabel, continueLabel)
 
+    End Function
+
+    Private Function BindLoopBody(body As StatementSyntax, ByRef breakLabel As BoundLabel, ByRef continueLabel As BoundLabel) As BoundStatement
+
+      Me.m_labelCounter += 1
+      breakLabel = New BoundLabel($"break{Me.m_labelCounter}")
+      continueLabel = New BoundLabel($"continue{Me.m_labelCounter}")
+
+      Me.m_loopStack.Push((breakLabel, continueLabel))
+      Dim boundBody = Me.BindStatement(body)
+      Me.m_loopStack.Pop()
+
+      Return boundBody
+
+    End Function
+
+    Private Function BindBreakStatement(syntax As BreakStatementSyntax) As BoundStatement
+
+      If Me.m_loopStack.Count = 0 Then
+        Me.Diagnostics.ReportInvalidBreakOrContinue(syntax.Keyword.Span, syntax.Keyword.Text)
+        Return Me.BindErrorStatement()
+      End If
+
+      Dim breakLabel = Me.m_loopStack.Peek().BreakLabel
+      Return New BoundGotoStatement(breakLabel)
+
+    End Function
+
+    Private Function BindContinueStatement(syntax As ContinueStatementSyntax) As BoundStatement
+      If Me.m_loopStack.Count = 0 Then
+        Me.Diagnostics.ReportInvalidBreakOrContinue(syntax.Keyword.Span, syntax.Keyword.Text)
+        Return Me.BindErrorStatement()
+      End If
+      Dim continueLabel = Me.m_loopStack.Peek().ContinueLabel
+      Return New BoundGotoStatement(continueLabel)
     End Function
 
     Private Function BindExpressionStatement(syntax As ExpressionStatementSyntax) As BoundStatement

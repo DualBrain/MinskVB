@@ -5,9 +5,10 @@ Option Infer On
 Namespace Global.Basic.CodeAnalysis.Binding
 
   Friend NotInheritable Class BoundDoWhileStatement
-    Inherits BoundStatement
+    Inherits BoundLoopStatement
 
-    Sub New(body As BoundStatement, condition As BoundExpression)
+    Sub New(body As BoundStatement, condition As BoundExpression, breakLabel As BoundLabel, continuelabel As BoundLabel)
+      MyBase.New(breakLabel, continuelabel)
       Me.Body = body
       Me.Condition = condition
     End Sub
@@ -19,9 +20,10 @@ Namespace Global.Basic.CodeAnalysis.Binding
   End Class
 
   Friend NotInheritable Class BoundWhileStatement
-    Inherits BoundStatement
+    Inherits BoundLoopStatement
 
-    Sub New(condition As BoundExpression, body As BoundStatement)
+    Sub New(condition As BoundExpression, body As BoundStatement, breakLabel As BoundLabel, continueLabel As BoundLabel)
+      MyBase.New(breakLabel, continueLabel)
       Me.Condition = condition
       Me.Body = body
     End Sub

@@ -7,9 +7,10 @@ Imports Basic.CodeAnalysis.Symbols
 Namespace Global.Basic.CodeAnalysis.Binding
 
   Friend NotInheritable Class BoundForStatement
-    Inherits BoundStatement
+    Inherits BoundLoopStatement
 
-    Sub New(variable As VariableSymbol, lowerBound As BoundExpression, upperBound As BoundExpression, body As BoundStatement)
+    Sub New(variable As VariableSymbol, lowerBound As BoundExpression, upperBound As BoundExpression, body As BoundStatement, breakLabel As BoundLabel, continueLabel As BoundLabel)
+      MyBase.New(breakLabel, continueLabel)
       Me.Variable = variable
       Me.LowerBound = lowerBound
       Me.UpperBound = upperBound

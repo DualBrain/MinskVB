@@ -70,6 +70,10 @@ Namespace Global.Basic.Tests.CodeAnalysis
     <InlineData("var a = 10", 10)>
     <InlineData(ChrW(34) + "test" + ChrW(34), "test")>
     <InlineData(ChrW(34) + "te" + ChrW(34) + ChrW(34) + "st" & ChrW(34), "te" & ChrW(34) & "st")>
+    <InlineData(ChrW(34) + "test" & ChrW(34) & " == " & ChrW(34) & "test" & ChrW(34), True)>
+    <InlineData(ChrW(34) + "test" & ChrW(34) & " != " & ChrW(34) & "test" & ChrW(34), False)>
+    <InlineData(ChrW(34) + "test" & ChrW(34) & " == " & ChrW(34) & "abc" & ChrW(34), False)>
+    <InlineData(ChrW(34) + "test" & ChrW(34) & " != " & ChrW(34) & "abc" & ChrW(34), True)>
     <InlineData("not false", True)>
     <InlineData("false || true", True)>
     <InlineData("false or true", True)>
