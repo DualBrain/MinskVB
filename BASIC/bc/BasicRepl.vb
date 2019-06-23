@@ -123,7 +123,7 @@ Friend NotInheritable Class BasicRepl
     Else
 
       ' We have errors, so don't try to evaluate (execute).
-      For Each diagnostic In result.Diagnostics
+      For Each diagnostic In result.Diagnostics.OrderBy(Function(diag) diag.Span, New TextSpanComparer())
 
         Dim lineIndex = tree.Text.GetLineIndex(diagnostic.Span.Start)
         Dim lineNumber = lineIndex + 1
@@ -162,5 +162,18 @@ Friend NotInheritable Class BasicRepl
     End If
 
   End Sub
+
+End Class
+
+Friend NotInheritable Class TextSpanComparer
+  Implements IComparer(Of TextSpan)
+
+  Public Function Compare(x As TextSpan, y As TextSpan) As Integer Implements IComparer(Of TextSpan).Compare
+    Dim cmp = x.Start - y.Start
+    If cmp = 0 Then
+      cmp = x.Length - y.Length
+    End If
+    Return cmp
+  End Function
 
 End Class

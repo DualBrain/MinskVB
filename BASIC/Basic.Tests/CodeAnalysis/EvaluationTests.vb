@@ -133,6 +133,45 @@ Namespace Global.Basic.Tests.CodeAnalysis
     End Sub
 
     <Fact>
+    Public Sub Evaluator_InvokeFunctionArguments_NoInfiniteLoop()
+
+      Dim text = "
+                print(""Hi""[[=]][)]
+            "
+
+      Dim diagnostics = "
+                Unexpected token <EqualsToken>, expected <CloseParenToken>.
+                Unexpected token <EqualsToken>, expected <IdentifierToken>.
+                Unexpected token <CloseParenToken>, expected <IdentifierToken>.
+            "
+
+      Me.AssertDiagnostics(text, diagnostics)
+
+    End Sub
+
+    <Fact>
+    Public Sub Evaluator_FunctionParameters_NoInfiniteLoop()
+
+      Dim text = "
+                function hi(name: string[[[=]]][)]
+                {
+                    print(""Hi "" + name + ""!"" )
+                }[]
+            "
+
+      Dim diagnostics = "
+                Unexpected token <EqualsToken>, expected <CloseParenToken>.
+                Unexpected token <EqualsToken>, expected <OpenBraceToken>.
+                Unexpected token <EqualsToken>, expected <IdentifierToken>.
+                Unexpected token <CloseParenToken>, expected <IdentifierToken>.
+                Unexpected token <EndOfFileToken>, expected <CloseBraceToken>.
+            "
+
+      Me.AssertDiagnostics(text, diagnostics)
+
+    End Sub
+
+    <Fact>
     Public Sub Evaluator_IfStatement_Reports_CannotConvert()
 
       Dim text = "
