@@ -117,7 +117,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
 
       For Each s In node.Statements
         s.WriteTo(writer)
-      Next s
+      Next
 
       writer.Indent -= 1
       writer.WritePunctuation("}")

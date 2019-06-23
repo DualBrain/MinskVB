@@ -63,7 +63,17 @@ Namespace Global.Basic.CodeAnalysis
 
     Public Sub EmitTree(writer As TextWriter)
       Dim program = Binder.BindProgram(Me.GlobalScope)
-      program.Statement.WriteTo(writer)
+      If program.Statement.Statements.Any() Then
+        program.Statement.WriteTo(writer)
+      Else
+        For Each functionBody In program.Functions
+          If Not Me.GlobalScope.Functions.Contains(functionBody.Key) Then
+            Continue For
+          End If
+          functionBody.Key.WriteTo(writer)
+          functionBody.Value.WriteTo(writer)
+        Next
+      End If
     End Sub
 
   End Class
