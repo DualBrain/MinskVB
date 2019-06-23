@@ -7,7 +7,7 @@ Imports System.Collections.Specialized
 Imports System.Console
 Imports System.ConsoleColor
 Imports System.Text
-Imports bc
+Imports bi
 
 Friend MustInherit Class Repl
 
@@ -173,8 +173,9 @@ Friend MustInherit Class Repl
   End Sub
 
   Private Sub HandleEscape(document As ObservableCollection(Of String), view As SubmissionView)
-    document(view.CurrentLine) = String.Empty
-    view.CurrentCharacter = 0
+    document.Clear()
+    document.Add(String.Empty)
+    view.CurrentLine = 0
   End Sub
 
   Private Sub HandleEnter(document As ObservableCollection(Of String), view As SubmissionView)

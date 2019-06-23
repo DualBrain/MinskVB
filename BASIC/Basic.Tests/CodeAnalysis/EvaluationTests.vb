@@ -68,6 +68,8 @@ Namespace Global.Basic.Tests.CodeAnalysis
     <InlineData("not true", False)>
     <InlineData("!false", True)>
     <InlineData("var a = 10", 10)>
+    <InlineData(ChrW(34) + "test" + ChrW(34), "test")>
+    <InlineData(ChrW(34) + "te" + ChrW(34) + ChrW(34) + "st" & ChrW(34), "te" & ChrW(34) & "st")>
     <InlineData("not false", True)>
     <InlineData("false || true", True)>
     <InlineData("false or true", True)>
@@ -271,7 +273,7 @@ Namespace Global.Basic.Tests.CodeAnalysis
     <Fact>
     Public Sub Evaluator_NameExpression_Reports_NoErrorForInsertedToken()
 
-      Dim text = "[]"
+      Dim text = "1 + []"
 
       Dim diagnostics = "Unexpected token <EndOfFileToken>, expected <IdentifierToken>."
 

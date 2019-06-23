@@ -10,22 +10,23 @@ Namespace Global.Basic.CodeAnalysis
   Friend NotInheritable Class Evaluator
 
     Private ReadOnly m_locals As New Stack(Of Dictionary(Of VariableSymbol, Object))
-    Private ReadOnly m_functionBodies As Immutable.ImmutableDictionary(Of FunctionSymbol, BoundBlockStatement)
+    'Private ReadOnly m_functionBodies As Immutable.ImmutableDictionary(Of FunctionSymbol, BoundBlockStatement)
     Private m_random As Random
 
     Private m_lastValue As Object
 
-    Sub New(functionBodies As Immutable.ImmutableDictionary(Of FunctionSymbol, BoundBlockStatement), root As BoundBlockStatement, variables As Dictionary(Of VariableSymbol, Object))
-      Me.m_functionBodies = functionBodies
-      Me.Root = root
+    Sub New(program As BoundProgram, variables As Dictionary(Of VariableSymbol, Object))
+      Me.Program = program
       Me.Globals = variables
+      m_locals.Push(New Dictionary(Of VariableSymbol, Object))
     End Sub
 
-    Public ReadOnly Property Root As BoundBlockStatement
+    Public ReadOnly Property Program As BoundProgram
+
     Public ReadOnly Property Globals As Dictionary(Of VariableSymbol, Object)
 
     Public Function Evaluate() As Object
-      Return Me.EvaluateStatement(Me.Root)
+      Return Me.EvaluateStatement(Me.Program.Statement)
     End Function
 
     Private Function EvaluateStatement(body As BoundBlockStatement) As Object
@@ -193,7 +194,7 @@ Namespace Global.Basic.CodeAnalysis
           locals.Add(parameter, value)
         Next
         Me.m_locals.Push(locals)
-        Dim statement = Me.m_functionBodies(node.Function)
+        Dim statement = Me.Program.Functions(node.Function)
         Dim result = Me.EvaluateStatement(statement)
         Me.m_locals.Pop()
         Return result

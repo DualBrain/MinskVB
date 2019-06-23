@@ -35,8 +35,8 @@ Namespace Global.Basic.CodeAnalysis.Syntax
     CloseParenToken
     OpenBraceToken
     CloseBraceToken
-    CommaToken
     ColonToken
+    CommaToken
     IdentifierToken
 
     ' Keywords
@@ -74,8 +74,8 @@ Namespace Global.Basic.CodeAnalysis.Syntax
     GlobalStatement
     FunctionDeclaration
     Parameter
-    TypeClause
     ElseClause
+    TypeClause
 
     ' Statements
 

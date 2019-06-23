@@ -9,16 +9,15 @@ Namespace Global.Basic.CodeAnalysis.Binding
 
   Friend NotInheritable Class BoundProgram
 
-    Public Sub New(globalScope As BoundGlobalScope, diagnostics As DiagnosticBag, functionBodies As ImmutableDictionary(Of FunctionSymbol, BoundBlockStatement))
-      Me.GlobalScope = globalScope
+    Public Sub New(diagnostics As ImmutableArray(Of Diagnostic), functions As ImmutableDictionary(Of FunctionSymbol, BoundBlockStatement), statement As BoundBlockStatement)
       Me.Diagnostics = diagnostics
-      Me.FunctionBodies = functionBodies
+      Me.Functions = functions
+      Me.Statement = statement
     End Sub
 
-    Public ReadOnly Property GlobalScope As BoundGlobalScope
-    Public ReadOnly Property Diagnostics As DiagnosticBag
-    Public ReadOnly Property FunctionBodies As ImmutableDictionary(Of FunctionSymbol, BoundBlockStatement)
-
+    Public ReadOnly Property Diagnostics As ImmutableArray(Of Diagnostic)
+    Public ReadOnly Property Functions As ImmutableDictionary(Of FunctionSymbol, BoundBlockStatement)
+    Public ReadOnly Property Statement As BoundBlockStatement
   End Class
 
 End Namespace

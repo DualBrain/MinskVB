@@ -54,8 +54,7 @@ Namespace Global.Basic.CodeAnalysis
         Return New EvaluationResult(program.Diagnostics.ToImmutableArray, Nothing)
       End If
 
-      Dim statement = Me.GetStatement()
-      Dim evaluator = New Evaluator(program.FunctionBodies, statement, variables)
+      Dim evaluator = New Evaluator(program, variables)
       Dim value = evaluator.Evaluate
 
       Return New EvaluationResult(ImmutableArray(Of Diagnostic).Empty, value)
@@ -63,14 +62,9 @@ Namespace Global.Basic.CodeAnalysis
     End Function
 
     Public Sub EmitTree(writer As TextWriter)
-      Dim statement = Me.GetStatement()
-      statement.WriteTo(writer)
+      Dim program = Binder.BindProgram(Me.GlobalScope)
+      program.Statement.WriteTo(writer)
     End Sub
-
-    Private Function GetStatement() As BoundBlockStatement
-      Dim result = Me.GlobalScope.Statement
-      Return Lowering.Lowerer.Lower(result)
-    End Function
 
   End Class
 

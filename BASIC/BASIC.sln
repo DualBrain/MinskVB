@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.28902.138
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{778DAE3C-4631-46EA-AA77-85C1314464D9}") = "bc", "bc\bc.vbproj", "{47CFB2C9-8AB8-408A-9054-03D06CFB076F}"
+Project("{778DAE3C-4631-46EA-AA77-85C1314464D9}") = "bi", "bi\bi.vbproj", "{47CFB2C9-8AB8-408A-9054-03D06CFB076F}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{515303F1-2911-4A6E-8B5F-04657D84CF71}"
 	ProjectSection(SolutionItems) = preProject
@@ -12,7 +12,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{778DAE3C-4631-46EA-AA77-85C1314464D9}") = "Basic", "Basic\Basic.vbproj", "{077A9524-79F4-4CA5-B7FA-3EFA632FEA30}"
 EndProject
-Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "Basic.Tests", "Basic.Tests\Basic.Tests.vbproj", "{B99FAB9D-4ECA-4AF9-B923-8D8C5480A22B}"
+Project("{778DAE3C-4631-46EA-AA77-85C1314464D9}") = "Basic.Tests", "Basic.Tests\Basic.Tests.vbproj", "{B99FAB9D-4ECA-4AF9-B923-8D8C5480A22B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

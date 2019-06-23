@@ -32,19 +32,16 @@ Namespace Global.Basic.CodeAnalysis.Binding
       Dim parentScope = CreateParentScopes(previous)
       Dim binder = New Binder(parentScope, Nothing)
 
-      'Dim statement = syntax.Members.OfType(Of GlobalStatementSyntax).FirstOrDefault
       For Each func In syntax.Members.OfType(Of FunctionDeclarationSyntax)
         binder.BindFunctionDeclaration(func)
       Next
 
-      Dim statementBuilder = ImmutableArray.CreateBuilder(Of BoundStatement)
+      Dim statements = ImmutableArray.CreateBuilder(Of BoundStatement)
 
       For Each globalStatement In syntax.Members.OfType(Of GlobalStatementSyntax)
-        Dim s = binder.BindStatement(globalStatement.Statement)
-        statementBuilder.Add(s)
+        Dim statement = binder.BindStatement(globalStatement.Statement)
+        statements.Add(statement)
       Next
-
-      Dim statement = New BoundBlockStatement(statementBuilder.ToImmutable)
 
       Dim functions = binder.m_scope.GetDeclaredFunctions
       Dim variables = binder.m_scope.GetDeclaredVariables
@@ -54,7 +51,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
         diagnostics = diagnostics.InsertRange(0, previous.Diagnostics)
       End If
 
-      Return New BoundGlobalScope(previous, diagnostics, functions, variables, statement)
+      Return New BoundGlobalScope(previous, diagnostics, functions, variables, statements.ToImmutable)
 
     End Function
 
@@ -63,7 +60,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
       Dim parentScope = CreateParentScopes(globalScope)
 
       Dim functionBodies = ImmutableDictionary.CreateBuilder(Of FunctionSymbol, BoundBlockStatement)
-      Dim diagnostics = New DiagnosticBag
+      Dim diagnostics = ImmutableArray.CreateBuilder(Of Diagnostic)
 
       Dim scope = globalScope
       While scope IsNot Nothing
@@ -80,7 +77,8 @@ Namespace Global.Basic.CodeAnalysis.Binding
 
       End While
 
-      Return New BoundProgram(globalScope, diagnostics, functionBodies.ToImmutable)
+      Dim statement = Lowerer.Lower(New BoundBlockStatement(globalScope.Statements))
+      Return New BoundProgram(diagnostics.ToImmutable, functionBodies.ToImmutable, statement)
 
     End Function
 
@@ -174,7 +172,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
         Case SyntaxKind.BinaryExpression
           Return Me.BindBinaryEpression(DirectCast(syntax, BinaryExpressionSyntax))
         Case SyntaxKind.CallExpression
-          Return Me.BindCallEpression(DirectCast(syntax, CallExpressionSyntax))
+          Return Me.BindCallExpression(DirectCast(syntax, CallExpressionSyntax))
         Case Else
           Throw New Exception($"Unexpected syntax {syntax.Kind}")
       End Select
@@ -349,7 +347,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
       Return New BoundBinaryExpression(boundLeft, boundOperator, boundRight)
     End Function
 
-    Private Function BindCallEpression(syntax As CallExpressionSyntax) As BoundExpression
+    Private Function BindCallExpression(syntax As CallExpressionSyntax) As BoundExpression
 
       Dim t = Me.LookupType(syntax.Identifier.Text)
       If syntax.Arguments.Count = 1 AndAlso TypeOf t Is TypeSymbol Then
@@ -394,9 +392,9 @@ Namespace Global.Basic.CodeAnalysis.Binding
     End Function
 
     Private Function BindConversion(diagnosticSpan As Text.TextSpan,
-                                        expression As BoundExpression,
-                                        type As TypeSymbol,
-                                        Optional allowExplicit As Boolean = False) As BoundExpression
+                                    expression As BoundExpression,
+                                    type As TypeSymbol,
+                                    Optional allowExplicit As Boolean = False) As BoundExpression
       Dim c = Conversion.Classify(expression.Type, [type])
       If Not c.Exists Then
         If expression.Type IsNot TypeSymbol.Error AndAlso [type] IsNot TypeSymbol.Error Then
