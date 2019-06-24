@@ -106,8 +106,16 @@ Namespace Global.Basic.CodeAnalysis
       Me.Report(span, $"The keyword '{text}' can only be used inside of loops.")
     End Sub
 
-    Public Sub XXX_ReportFunctionsAreUnsupported(span As TextSpan)
-      Me.Report(span, "Functions with return value are unsupported.")
+    Public Sub ReportInvalidReturn(span As TextSpan)
+      Me.Report(span, "The 'return' keyword can only be used inside of functions.")
+    End Sub
+
+    Public Sub ReportInvalidReturnExpression(span As TextSpan, functionName As String)
+      Me.Report(span, $"Since the function '{functionName}' does not return a value, the 'return' keyword cannot be followed by an expression.")
+    End Sub
+
+    Public Sub ReportMissingReturnExpression(span As TextSpan, returnType As TypeSymbol)
+      Me.Report(span, $"An expression of type '{returnType}' expected.")
     End Sub
 
   End Class

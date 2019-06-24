@@ -19,6 +19,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
         Case BoundNodeKind.LabelStatement : Return Me.RewriteLabeltatement(DirectCast(node, BoundLabelStatement))
         Case BoundNodeKind.GotoStatement : Return Me.RewriteGotoStatement(DirectCast(node, BoundGotoStatement))
         Case BoundNodeKind.ConditionalGotoStatement : Return Me.RewriteConditionalGotoStatement(DirectCast(node, BoundConditionalGotoStatement))
+        Case BoundNodeKind.ReturnStatement : Return Me.RewriteReturnStatement(DirectCast(node, BoundReturnStatement))
         Case BoundNodeKind.ExpressionStatement : Return Me.RewriteExpressionStatement(DirectCast(node, BoundExpressionStatement))
         Case Else
           Throw New Exception($"Unexpected node: {node.Kind}")
@@ -112,6 +113,14 @@ Namespace Global.Basic.CodeAnalysis.Binding
         Return node
       End If
       Return New BoundConditionalGotoStatement(node.Label, condition, node.JumpIfTrue)
+    End Function
+
+    Protected Overridable Function RewriteReturnStatement(node As BoundReturnStatement) As BoundStatement
+      Dim expression = If(node.Expression Is Nothing, Nothing, Me.RewriteExpression(node.Expression))
+      If expression Is node.Expression Then
+        Return node
+      End If
+      Return New BoundReturnStatement(expression)
     End Function
 
     Protected Overridable Function RewriteExpressionStatement(node As BoundExpressionStatement) As BoundStatement

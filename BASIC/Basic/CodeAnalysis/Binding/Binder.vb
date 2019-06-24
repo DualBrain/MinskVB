@@ -101,9 +101,6 @@ Namespace Global.Basic.CodeAnalysis.Binding
         End If
       Next
       Dim type = If(Me.BindTypeClause(syntax.Type), TypeSymbol.Void)
-      If type IsNot TypeSymbol.Void Then
-        Me.Diagnostics.XXX_ReportFunctionsAreUnsupported(syntax.Type.Span)
-      End If
       Dim func = New FunctionSymbol(syntax.Identifier.Text, parameters.ToImmutable, type, syntax)
       If Not Me.m_scope.TryDeclareFunction(func) Then
         Me.Diagnostics.ReportSymbolAlreadyDeclared(syntax.Identifier.Span, func.Name)
@@ -206,6 +203,8 @@ Namespace Global.Basic.CodeAnalysis.Binding
           Return Me.BindBreakStatement(DirectCast(syntax, BreakStatementSyntax))
         Case SyntaxKind.ContinueStatement
           Return Me.BindContinueStatement(DirectCast(syntax, ContinueStatementSyntax))
+        Case SyntaxKind.ReturnStatement
+          Return Me.BindReturnStatement(DirectCast(syntax, ReturnStatementSyntax))
         Case SyntaxKind.ExpressionStatement
           Return Me.BindExpressionStatement(DirectCast(syntax, ExpressionStatementSyntax))
         Case Else
@@ -321,6 +320,30 @@ Namespace Global.Basic.CodeAnalysis.Binding
       End If
       Dim continueLabel = Me.m_loopStack.Peek().ContinueLabel
       Return New BoundGotoStatement(continueLabel)
+    End Function
+
+    Private Function BindReturnStatement(syntax As ReturnStatementSyntax) As BoundStatement
+
+      Dim expression = If(syntax.Expression Is Nothing, Nothing, BindExpression(syntax.Expression))
+
+      If Me.m_function Is Nothing Then
+        Me.Diagnostics.ReportInvalidReturn(syntax.ReturnKeyword.Span)
+      Else
+        If Me.m_function.Type Is TypeSymbol.Void Then
+          If expression IsNot Nothing Then
+            Me.Diagnostics.ReportInvalidReturnExpression(syntax.Expression.Span, Me.m_function.Name)
+          End If
+        Else
+          If expression Is Nothing Then
+            Me.Diagnostics.ReportMissingReturnExpression(syntax.ReturnKeyword.Span, Me.m_function.Type)
+          Else
+            expression = BindConversion(syntax.Expression.Span, expression, Me.m_function.Type)
+          End If
+        End If
+      End If
+
+      Return New BoundReturnStatement(expression)
+
     End Function
 
     Private Function BindExpressionStatement(syntax As ExpressionStatementSyntax) As BoundStatement

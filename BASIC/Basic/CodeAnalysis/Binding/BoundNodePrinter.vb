@@ -217,6 +217,15 @@ Namespace Global.Basic.CodeAnalysis.Binding
       writer.WriteLine()
     End Sub
 
+    Private Sub WriteReturnStatement(node As BoundReturnStatement, writer As IndentedTextWriter)
+      writer.WriteKeyword(SyntaxKind.ReturnKeyword)
+      If node.Expression IsNot Nothing Then
+        writer.WriteSpace()
+        node.Expression.WriteTo(writer)
+      End If
+      writer.WriteLine()
+    End Sub
+
     Private Sub WriteExpressionStatement(node As BoundExpressionStatement, writer As IndentedTextWriter)
       node.Expression.WriteTo(writer)
       writer.WriteLine()

@@ -51,6 +51,7 @@ Namespace Global.Basic.CodeAnalysis.Syntax
     OrElseKeyword
 
     LetKeyword 'TODO: LET has a different behavior in BASIC.
+    ReturnKeyword
     VarKeyword
     DimKeyword
 
@@ -89,6 +90,7 @@ Namespace Global.Basic.CodeAnalysis.Syntax
     ForStatement
     BreakStatement
     ContinueStatement
+    ReturnStatement
     ExpressionStatement
 
     ' Expressions

@@ -72,6 +72,8 @@ Namespace Global.Basic.CodeAnalysis.Syntax
 
         Case "let"
           Return SyntaxKind.LetKeyword
+        Case "return"
+          Return SyntaxKind.ReturnKeyword
         Case "var"
           Return SyntaxKind.VarKeyword
         Case "dim"
@@ -180,6 +182,7 @@ Namespace Global.Basic.CodeAnalysis.Syntax
         Case SyntaxKind.OrKeyword : Return "or"
         Case SyntaxKind.OrElseKeyword : Return "orelse"
         Case SyntaxKind.LetKeyword : Return "let"
+        Case SyntaxKind.ReturnKeyword : Return "return"
         Case SyntaxKind.VarKeyword : Return "var"
         Case SyntaxKind.DimKeyword : Return "dim"
 

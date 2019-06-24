@@ -165,6 +165,8 @@ Namespace Global.Basic.CodeAnalysis.Syntax
           Return Me.ParseBreakStatement
         Case SyntaxKind.ContinueKeyword
           Return Me.ParseContinueStatement
+        Case SyntaxKind.ReturnKeyword
+          Return Me.ParseReturnStatement
         Case Else
           Return Me.ParseExpressionStatement
       End Select
@@ -288,6 +290,16 @@ Namespace Global.Basic.CodeAnalysis.Syntax
     Private Function ParseContinueStatement() As StatementSyntax
       Dim keyword = Me.MatchToken(SyntaxKind.ContinueKeyword)
       Return New ContinueStatementSyntax(keyword)
+    End Function
+
+    Private Function ParseReturnStatement() As StatementSyntax
+      Dim keyword = Me.MatchToken(SyntaxKind.ReturnKeyword)
+      Dim keywordLine = Me.Text.GetLineIndex(keyword.Span.Start)
+      Dim currentLine = Me.Text.GetLineIndex(Me.Current.Span.Start)
+      Dim isEof = (Me.Current.Kind = SyntaxKind.EndOfFileToken)
+      Dim sameLine = Not isEof AndAlso keywordLine = currentLine
+      Dim expression = If(sameLine, Me.ParseExpression, Nothing)
+      Return New ReturnStatementSyntax(keyword, expression)
     End Function
 
     Private Function ParseExpressionStatement() As ExpressionStatementSyntax
