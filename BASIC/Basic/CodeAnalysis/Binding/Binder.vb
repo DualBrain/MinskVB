@@ -6,6 +6,7 @@ Imports System.Collections.Immutable
 Imports Basic.CodeAnalysis.Lowering
 Imports Basic.CodeAnalysis.Symbols
 Imports Basic.CodeAnalysis.Syntax
+Imports Basic.CodeAnalysis.Text
 
 Namespace Global.Basic.CodeAnalysis.Binding
 
@@ -420,19 +421,38 @@ Namespace Global.Basic.CodeAnalysis.Binding
         Return New BoundErrorExpression
       End If
       If syntax.Arguments.Count <> func.Parameters.Length Then
-        Me.Diagnostics.ReportWrongArgumentCount(syntax.Span, func.Name, func.Parameters.Length, syntax.Arguments.Count)
+        'Me.Diagnostics.ReportWrongArgumentCount(syntax.Span, func.Name, func.Parameters.Length, syntax.Arguments.Count)
+        Dim span As TextSpan
+        If syntax.Arguments.Count > func.Parameters.Length Then
+          Dim firstExceedingNode As SyntaxNode
+          If func.Parameters.Length > 0 Then
+            firstExceedingNode = syntax.Arguments.GetSeparator(func.Parameters.Length - 1)
+          Else
+            firstExceedingNode = syntax.Arguments(0)
+          End If
+          Dim lastExceedingArgument = syntax.Arguments(syntax.Arguments.Count - 1)
+          span = TextSpan.FromBounds(firstExceedingNode.Span.Start, lastExceedingArgument.Span.End)
+        Else
+          span = syntax.CloseParen.Span
+        End If
+        Me.Diagnostics.ReportWrongArgumentCount(span, func.Name, func.Parameters.Length, syntax.Arguments.Count)
         Return New BoundErrorExpression
       End If
 
+      Dim hasErrors = False
       For i = 0 To syntax.Arguments.Count - 1
         Dim argument = boundArguments(i)
         Dim parameter = func.Parameters(i)
         If argument.Type IsNot parameter.Type Then
-          'Me.Diagnostics.ReportWrongArgumentType(syntax.Span, parameter.Name, parameter.Type, argument.Type)
-          Me.Diagnostics.ReportWrongArgumentType(syntax.Arguments(i).Span, parameter.Name, parameter.Type, argument.Type)
-          Return New BoundErrorExpression
+          If argument.Type IsNot TypeSymbol.Error Then
+            Me.Diagnostics.ReportWrongArgumentType(syntax.Arguments(i).Span, parameter.Name, parameter.Type, argument.Type)
+          End If
+          hasErrors = True
         End If
       Next
+      If hasErrors Then
+        Return New BoundErrorExpression
+      End If
 
       Return New BoundCallExpression(func, boundArguments.ToImmutableArray)
 
@@ -444,9 +464,9 @@ Namespace Global.Basic.CodeAnalysis.Binding
     End Function
 
     Private Function BindConversion(diagnosticSpan As Text.TextSpan,
-                                    expression As BoundExpression,
-                                    type As TypeSymbol,
-                                    Optional allowExplicit As Boolean = False) As BoundExpression
+                                        expression As BoundExpression,
+                                        type As TypeSymbol,
+                                        Optional allowExplicit As Boolean = False) As BoundExpression
       Dim c = Conversion.Classify(expression.Type, [type])
       If Not c.Exists Then
         If expression.Type IsNot TypeSymbol.Error AndAlso [type] IsNot TypeSymbol.Error Then
@@ -466,8 +486,8 @@ Namespace Global.Basic.CodeAnalysis.Binding
       Dim name = If(identifier.Text, "?")
       Dim [declare] = Not identifier.IsMissing
       Dim variable = If(Me.m_function Is Nothing,
-                              DirectCast(New GlobalVariableSymbol(name, isReadOnly, type), VariableSymbol),
-                              DirectCast(New LocalVariableSymbol(name, isReadOnly, type), VariableSymbol))
+                                    DirectCast(New GlobalVariableSymbol(name, isReadOnly, type), VariableSymbol),
+                                    DirectCast(New LocalVariableSymbol(name, isReadOnly, type), VariableSymbol))
       If [declare] AndAlso Not Me.m_scope.TryDeclareVariable(variable) Then
         Me.Diagnostics.ReportSymbolAlreadyDeclared(identifier.Span, name)
       End If

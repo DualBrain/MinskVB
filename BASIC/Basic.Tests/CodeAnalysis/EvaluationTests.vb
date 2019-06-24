@@ -140,6 +140,35 @@ Namespace Global.Basic.Tests.CodeAnalysis
 
     End Sub
 
+
+    <Fact>
+    Public Sub Evaluator_InvokeFunctionArguments_Missing()
+
+      Dim text = "
+        print([)]"
+
+      Dim diagnostics = "
+        Function 'print' requires 1 arguments but was given 0."
+
+      Me.AssertDiagnostics(text, diagnostics)
+
+    End Sub
+
+    <Fact>
+    Public Sub Evaluator_InvokeFunctionArguments_Exceeding()
+
+      Dim text = $"
+        print({ChrW(34)}Hello{ChrW(34)}[, {ChrW(34)} {ChrW(34)}, {ChrW(34)} world!{ChrW(34)}])"
+
+      Dim diagnostics = "
+        Function 'print' requires 1 arguments but was given 3."
+
+      Me.AssertDiagnostics(text, diagnostics)
+
+    End Sub
+
+
+
     <Fact>
     Public Sub Evaluator_InvokeFunctionArguments_NoInfiniteLoop()
 
