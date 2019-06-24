@@ -41,6 +41,8 @@ Namespace Global.Basic.CodeAnalysis.Binding
           WriteGotoStatement(CType(node, BoundGotoStatement), writer)
         Case BoundNodeKind.ConditionalGotoStatement
           WriteConditionalGotoStatement(CType(node, BoundConditionalGotoStatement), writer)
+        Case BoundNodeKind.ReturnStatement
+          WriteReturnStatement(CType(node, BoundReturnStatement), writer)
         Case BoundNodeKind.ExpressionStatement
           WriteExpressionStatement(CType(node, BoundExpressionStatement), writer)
         Case BoundNodeKind.ErrorExpression

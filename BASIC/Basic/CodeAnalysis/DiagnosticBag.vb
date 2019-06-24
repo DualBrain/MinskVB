@@ -106,6 +106,10 @@ Namespace Global.Basic.CodeAnalysis
       Me.Report(span, $"The keyword '{text}' can only be used inside of loops.")
     End Sub
 
+    Public Sub ReportAllPathsMustReturn(span As TextSpan)
+      Me.Report(span, "Not all code paths return a value.")
+    End Sub
+
     Public Sub ReportInvalidReturn(span As TextSpan)
       Me.Report(span, "The 'return' keyword can only be used inside of functions.")
     End Sub

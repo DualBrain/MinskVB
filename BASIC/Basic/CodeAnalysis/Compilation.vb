@@ -50,6 +50,16 @@ Namespace Global.Basic.CodeAnalysis
       End If
 
       Dim program = Binder.BindProgram(Me.GlobalScope)
+
+      Dim appPath = Environment.GetCommandLineArgs(0)
+      Dim appDirectory = Path.GetDirectoryName(appPath)
+      Dim cfgPath = Path.Combine(appDirectory, "cfg.dot")
+      Dim cfgStatement = If(Not program.Statement.Statements.Any AndAlso program.Functions.Any, program.Functions.Last.Value, program.Statement)
+      Dim cfg = ControlFlowGraph.Create(cfgStatement)
+      Using streamWriter As New StreamWriter(cfgPath)
+        cfg.WriteTo(streamWriter)
+      End Using
+
       If program.Diagnostics.Any Then
         Return New EvaluationResult(program.Diagnostics.ToImmutableArray, Nothing)
       End If

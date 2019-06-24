@@ -73,6 +73,9 @@ Namespace Global.Basic.CodeAnalysis.Binding
           Dim binder = New Binder(parentScope, func)
           Dim body = binder.BindStatement(func.Declaration.Body)
           Dim loweredBody = Lowerer.Lower(body)
+          If func.Type IsNot TypeSymbol.Void AndAlso Not ControlFlowGraph.AllPathsReturn(loweredBody) Then
+            binder.Diagnostics.ReportAllPathsMustReturn(func.Declaration.Identifier.Span)
+          End If
           functionBodies.Add(func, loweredBody)
           diagnostics.AddRange(binder.Diagnostics)
         Next
