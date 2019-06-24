@@ -5,13 +5,14 @@ Option Infer On
 Imports System.CodeDom.Compiler
 Imports System.IO
 Imports System.Runtime.CompilerServices
+Imports Basic.CodeAnalysis.Syntax
 
 Namespace Global.Basic.IO
 
   Friend Module TextWriterExtensions
 
     <Extension>
-    Public Function IsConsoleOut(writer As TextWriter) As Boolean
+    Private Function IsConsoleOut(writer As TextWriter) As Boolean
 
       If writer Is Console.Out Then
         Return True
@@ -29,17 +30,22 @@ Namespace Global.Basic.IO
     End Function
 
     <Extension>
-    Public Sub SetForeground(writer As TextWriter, color As ConsoleColor)
+    Private Sub SetForeground(writer As TextWriter, color As ConsoleColor)
       If writer.IsConsoleOut() Then
         Console.ForegroundColor = color
       End If
     End Sub
 
     <Extension>
-    Public Sub ResetColor(writer As TextWriter)
+    Private Sub ResetColor(writer As TextWriter)
       If writer.IsConsoleOut() Then
         Console.ResetColor()
       End If
+    End Sub
+
+    <Extension>
+    Public Sub WriteKeyword(writer As TextWriter, kind As SyntaxKind)
+      writer.WriteKeyword(SyntaxFacts.GetText(kind))
     End Sub
 
     <Extension>
@@ -68,6 +74,17 @@ Namespace Global.Basic.IO
       writer.SetForeground(ConsoleColor.Magenta)
       writer.Write(text)
       writer.ResetColor()
+    End Sub
+
+    <Extension>
+    Public Sub WriteSpace(writer As TextWriter)
+      writer.WritePunctuation(" ")
+    End Sub
+
+
+    <Extension>
+    Public Sub WritePunctuation(writer As TextWriter, kind As SyntaxKind)
+      writer.WritePunctuation(SyntaxFacts.GetText(kind))
     End Sub
 
     <Extension>

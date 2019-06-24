@@ -3,6 +3,7 @@ Option Strict On
 Option Infer On
 
 Imports System.IO
+Imports Basic.CodeAnalysis.Syntax
 Imports Basic.IO
 
 Namespace Global.Basic.CodeAnalysis.Symbols
@@ -23,39 +24,46 @@ Namespace Global.Basic.CodeAnalysis.Symbols
 
     Private Sub WriteFunctionTo(symbol As FunctionSymbol, writer As TextWriter)
 
-      writer.WriteKeyword("function ")
+      writer.WriteKeyword(SyntaxKind.FunctionKeyword)
+      writer.WriteSpace
       writer.WriteIdentifier(symbol.Name)
-      writer.WritePunctuation("(")
+      writer.WritePunctuation(SyntaxKind.OpenParenToken)
 
-      For i As Integer = 0 To symbol.Parameters.Length - 1
+      For i = 0 To symbol.Parameters.Length - 1
         If i > 0 Then
-          writer.WritePunctuation(", ")
+          writer.WritePunctuation(SyntaxKind.CommaToken)
+          writer.WriteSpace
         End If
         symbol.Parameters(i).WriteTo(writer)
       Next
 
-      writer.WritePunctuation(")")
+      writer.WritePunctuation(SyntaxKind.CloseParenToken)
       writer.WriteLine()
 
     End Sub
 
     Private Sub WriteGlobalVariableTo(symbol As GlobalVariableSymbol, writer As TextWriter)
-      writer.WriteKeyword(If(symbol.IsReadOnly, "let ", "var "))
+      writer.WriteKeyword(If(symbol.IsReadOnly, SyntaxKind.LetKeyword, SyntaxKind.VarKeyword))
+      writer.WriteSpace()
       writer.WriteIdentifier(symbol.Name)
-      writer.WritePunctuation(": ")
+      writer.WritePunctuation(SyntaxKind.ColonToken)
+      writer.WriteSpace
       symbol.Type.WriteTo(writer)
     End Sub
 
     Private Sub WriteLocalVariableTo(symbol As LocalVariableSymbol, writer As TextWriter)
-      writer.WriteKeyword(If(symbol.IsReadOnly, "let ", "var "))
+      writer.WriteKeyword(If(symbol.IsReadOnly, SyntaxKind.LetKeyword, SyntaxKind.VarKeyword))
+      writer.WriteSpace
       writer.WriteIdentifier(symbol.Name)
-      writer.WritePunctuation(": ")
+      writer.WritePunctuation(SyntaxKind.ColonToken)
+      writer.WriteSpace
       symbol.Type.WriteTo(writer)
     End Sub
 
     Private Sub WriteParameterTo(symbol As ParameterSymbol, writer As TextWriter)
       writer.WriteIdentifier(symbol.Name)
-      writer.WritePunctuation(": ")
+      writer.WritePunctuation(SyntaxKind.ColonToken)
+      writer.WriteSpace
       symbol.Type.WriteTo(writer)
     End Sub
 
