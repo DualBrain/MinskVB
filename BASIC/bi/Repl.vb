@@ -6,8 +6,6 @@ Imports System.Collections.ObjectModel
 Imports System.Collections.Specialized
 Imports System.Console
 Imports System.ConsoleColor
-Imports System.Text
-Imports bi
 
 Friend MustInherit Class Repl
 
@@ -176,6 +174,7 @@ Friend MustInherit Class Repl
     document.Clear()
     document.Add(String.Empty)
     view.CurrentLine = 0
+    view.CurrentCharacter = 0
   End Sub
 
   Private Sub HandleEnter(document As ObservableCollection(Of String), view As SubmissionView)

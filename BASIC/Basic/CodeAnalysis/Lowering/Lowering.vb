@@ -110,26 +110,25 @@ Namespace Global.Basic.CodeAnalysis.Lowering
       '
       ' ------->
       '
-      ' goto check
-      ' continue:
+      ' goto continue
+      ' body:
       ' <body>
-      ' check:
-      ' gotoTrue <condition> continue
+      ' continue:
+      ' gotoTrue <condition> body
       ' break:
 
-      Dim checkLabel = Me.GenerateLabel
-      'Dim endLabel = Me.GenerateLabel
+      Dim bodyLabel = Me.GenerateLabel
 
-      Dim gotoCheck = New BoundGotoStatement(checkLabel)
+      Dim gotoContinue = New BoundGotoStatement(node.ContinueLabel)
+      Dim bodyLabelStatement = New BoundLabelStatement(bodyLabel)
       Dim continueLabelStatement = New BoundLabelStatement(node.ContinueLabel)
-      Dim checkLabelStatement = New BoundLabelStatement(checkLabel)
-      Dim gotoTrue = New BoundConditionalGotoStatement(node.ContinueLabel, node.Condition)
+      Dim gotoTrue = New BoundConditionalGotoStatement(bodyLabel, node.Condition)
       Dim breakLabelStatement = New BoundLabelStatement(node.BreakLabel)
 
-      Dim result = New BoundBlockStatement(ImmutableArray.Create(Of BoundStatement)(gotoCheck,
-                                                                                    continueLabelStatement,
+      Dim result = New BoundBlockStatement(ImmutableArray.Create(Of BoundStatement)(gotoContinue,
+                                                                                    bodyLabelStatement,
                                                                                     node.Body,
-                                                                                    checkLabelStatement,
+                                                                                    continueLabelStatement,
                                                                                     gotoTrue,
                                                                                     breakLabelStatement))
 
@@ -145,19 +144,23 @@ Namespace Global.Basic.CodeAnalysis.Lowering
       '
       ' ------->
       '
-      ' continue:
+      ' body:
       ' <body>
       ' check:
-      ' gotoTrue <condition> continue
-      '
+      ' continue:
+      ' gotoTrue <condition> body
       ' break:
 
+      Dim bodyLabel = Me.GenerateLabel()
+
+      Dim bodyLabelStatement = New BoundLabelStatement(bodyLabel)
       Dim continueLabelStatement = New BoundLabelStatement(node.ContinueLabel)
-      Dim gotoTrue = New BoundConditionalGotoStatement(node.ContinueLabel, node.Condition)
+      Dim gotoTrue = New BoundConditionalGotoStatement(bodyLabel, node.Condition)
       Dim breakLabelStatement = New BoundLabelStatement(node.BreakLabel)
 
-      Dim result = New BoundBlockStatement(ImmutableArray.Create(Of BoundStatement)(continueLabelStatement,
+      Dim result = New BoundBlockStatement(ImmutableArray.Create(Of BoundStatement)(bodyLabelStatement,
                                                                                     node.Body,
+                                                                                    continueLabelStatement,
                                                                                     gotoTrue,
                                                                                     breakLabelStatement))
 
