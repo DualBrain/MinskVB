@@ -16,22 +16,22 @@ Namespace Global.Basic.CodeAnalysis
 
     Private m_globalScope As BoundGlobalScope = Nothing
 
-    Public Sub New(syntax As SyntaxTree)
-      Me.New(Nothing, syntax)
+    Public Sub New(ParamArray syntaxTrees() As SyntaxTree)
+      Me.New(Nothing, syntaxTrees)
     End Sub
 
-    Private Sub New(previous As Compilation, syntax As SyntaxTree)
+    Private Sub New(previous As Compilation, ParamArray syntaxTrees() As SyntaxTree)
       Me.Previous = previous
-      Me.Syntax = syntax
+      Me.SyntaxTrees = syntaxTrees.ToImmutableArray
     End Sub
 
     Public ReadOnly Property Previous As Compilation
-    Public ReadOnly Property Syntax As SyntaxTree
+    Public ReadOnly Property SyntaxTrees As ImmutableArray(Of SyntaxTree)
 
     Friend ReadOnly Property GlobalScope As BoundGlobalScope
       Get
         If m_globalScope Is Nothing Then
-          Dim g = Binder.BindGlobalScope(Previous?.GlobalScope, Syntax.Root)
+          Dim g = Binder.BindGlobalScope(Previous?.GlobalScope, SyntaxTrees)
           Interlocked.CompareExchange(m_globalScope, g, Nothing)
         End If
         Return m_globalScope
@@ -44,7 +44,9 @@ Namespace Global.Basic.CodeAnalysis
 
     Public Function Evaluate(variables As Dictionary(Of VariableSymbol, Object)) As EvaluationResult
 
-      Dim diagnostics = Syntax.Diagnostics.Concat(GlobalScope.Diagnostics).ToImmutableArray
+      Dim parseDiagnostics = SyntaxTrees.SelectMany(Function(st) st.Diagnostics)
+
+      Dim diagnostics = parseDiagnostics.Concat(GlobalScope.Diagnostics).ToImmutableArray
       If diagnostics.Any Then
         Return New EvaluationResult(diagnostics, Nothing)
       End If

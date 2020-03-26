@@ -99,35 +99,40 @@ Namespace Global.Basic.IO
     End Sub
 
     <Extension>
-    Public Sub WriteDiagnostics(writer As TextWriter, diagnostics As IEnumerable(Of Diagnostic), tree As SyntaxTree)
+    Public Sub WriteDiagnostics(writer As TextWriter, diagnostics As IEnumerable(Of Diagnostic))
 
       ' We have errors, so don't try to evaluate (execute).
       For Each diagnostic In diagnostics.OrderBy(Function(diag) diag.Location.FileName).
                                          ThenBy(Function(diag) diag.Location.Span).
                                          ThenBy(Function(diag) diag.Location.Span.Length)
 
+        Dim text = diagnostic.Location.Text
         Dim filename = diagnostic.Location.FileName
-        Dim span = diagnostic.Location.Span
+        Dim startLine = diagnostic.Location.StartLine + 1
+        Dim startCharacter = diagnostic.Location.StartCharacter + 1
+        Dim endLine = diagnostic.Location.EndLine + 1
+        Dim endCharacter = diagnostic.Location.EndCharacter + 1
 
-        Dim lineIndex = tree.Text.GetLineIndex(span.Start)
-        Dim lineNumber = lineIndex + 1
-        Dim line = tree.Text.Lines(lineIndex)
+        Dim span = diagnostic.Location.Span
+        Dim lineIndex = text.GetLineIndex(span.Start)
+        Dim line = text.Lines(lineIndex)
+
         Dim character = span.Start - line.Start + 1
 
         ' An extra line before for clarity...
         WriteLine()
 
         ForegroundColor = DarkRed
-        Write($"{filename}({lineNumber}, {character}): ")
+        Write($"{filename}({startLine},{startCharacter},{endLine},{endCharacter}): ")
         WriteLine(diagnostic)
         Console.ResetColor()
 
         Dim prefixSpan = TextSpan.FromBounds(line.Start, span.Start)
         Dim suffixSpan = TextSpan.FromBounds(span.End, line.End)
 
-        Dim prefix = tree.Text.ToString(prefixSpan)
-        Dim er = tree.Text.ToString(span)
-        Dim suffix = tree.Text.ToString(suffixSpan)
+        Dim prefix = text.ToString(prefixSpan)
+        Dim er = text.ToString(span)
+        Dim suffix = text.ToString(suffixSpan)
 
         ' Write the prefix in "normal" text...
         Write($"    {prefix}")

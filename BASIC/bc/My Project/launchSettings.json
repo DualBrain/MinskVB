@@ -2,7 +2,7 @@
   "profiles": {
     "bc": {
       "commandName": "Project",
-      "commandLineArgs": "D:\\GitHub\\BASIC\\BASIC\\Samples\\Hello\\HelloWorld.ms"
+      "commandLineArgs": "D:\\GitHub\\BASIC\\BASIC\\Samples\\Hello"
     }
   }
 }

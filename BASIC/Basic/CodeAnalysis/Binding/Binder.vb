@@ -31,18 +31,23 @@ Namespace Global.Basic.CodeAnalysis.Binding
 
     End Sub
 
-    Public Shared Function BindGlobalScope(previous As BoundGlobalScope, syntax As CompilationUnitSyntax) As BoundGlobalScope
+    'Public Shared Function BindGlobalScope(previous As BoundGlobalScope, syntax As CompilationUnitSyntax) As BoundGlobalScope
+    Public Shared Function BindGlobalScope(previous As BoundGlobalScope, syntaxTrees As ImmutableArray(Of SyntaxTree)) As BoundGlobalScope
 
       Dim parentScope = CreateParentScopes(previous)
       Dim binder = New Binder(parentScope, Nothing)
 
-      For Each func In syntax.Members.OfType(Of FunctionDeclarationSyntax)
+      Dim functionDeclarations = syntaxTrees.SelectMany(Function(st) st.Root.Members).OfType(Of FunctionDeclarationSyntax)
+
+      For Each func In functionDeclarations
         binder.BindFunctionDeclaration(func)
       Next
 
+      Dim globalStatements = syntaxTrees.SelectMany(Function(st) st.Root.Members).OfType(Of GlobalStatementSyntax)
+
       Dim statements = ImmutableArray.CreateBuilder(Of BoundStatement)
 
-      For Each globalStatement In syntax.Members.OfType(Of GlobalStatementSyntax)
+      For Each globalStatement In globalStatements
         Dim statement = binder.BindStatement(globalStatement.Statement)
         statements.Add(statement)
       Next

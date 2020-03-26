@@ -26,7 +26,7 @@ Namespace Global.Basic.CodeAnalysis.Text
       End Get
     End Property
 
-    Public ReadOnly Property EndLineLine As Integer
+    Public ReadOnly Property EndLine As Integer
       Get
         Return Text.GetLineIndex(Span.End)
       End Get

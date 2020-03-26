@@ -123,7 +123,7 @@ Friend NotInheritable Class BasicRepl
 
     Else
 
-      Console.Out.WriteDiagnostics(result.Diagnostics, tree)
+      Console.Out.WriteDiagnostics(result.Diagnostics)
 
     End If
 
