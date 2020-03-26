@@ -284,8 +284,10 @@ ScanAgain:
       Dim graph = Create(body)
 
       For Each branch In graph.End.Incoming
-        Dim lastStatement = branch.From.Statements.Last()
-        If lastStatement.Kind <> BoundNodeKind.ReturnStatement Then
+        'Dim lastStatement = branch.From.Statements.Last()
+        'If lastStatement.Kind <> BoundNodeKind.ReturnStatement Then
+        Dim lastStatement = branch.From.Statements.LastOrDefault
+        If lastStatement Is Nothing OrElse lastStatement.Kind <> BoundNodeKind.ReturnStatement Then
           Return False
         End If
       Next

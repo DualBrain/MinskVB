@@ -210,6 +210,21 @@ Namespace Global.Basic.Tests.CodeAnalysis
     End Sub
 
     <Fact>
+    Public Sub Evaluator_FunctionReturn_Missing()
+
+      Dim text = "
+        function [add](a: int, b: int): int
+        {
+        }"
+
+      Dim diagnostics = "
+        Not all code paths return a value."
+
+      AssertDiagnostics(text, diagnostics)
+
+    End Sub
+
+    <Fact>
     Public Sub Evaluator_IfStatement_Reports_CannotConvert()
 
       Dim text = "

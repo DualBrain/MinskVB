@@ -165,7 +165,8 @@ Friend MustInherit Class Repl
         Case Else
       End Select
     End If
-    If key.KeyChar >= " "c Then
+    'If key.KeyChar >= " "c Then
+    If key.Key <> ConsoleKey.Backspace AndAlso key.KeyChar >= " "c Then
       HandleTyping(document, view, key.KeyChar.ToString)
     End If
   End Sub
