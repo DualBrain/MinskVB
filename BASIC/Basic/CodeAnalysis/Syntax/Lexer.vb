@@ -13,14 +13,16 @@ Namespace Global.Basic.CodeAnalysis.Syntax
     Public ReadOnly Property Diagnostics As DiagnosticBag = New DiagnosticBag
 
     Private ReadOnly Property Text As SourceText
+    Private ReadOnly m_syntaxTree As SyntaxTree
 
     Private Property Position As Integer
     Private Property Start As Integer
     Private Property Kind As SyntaxKind
     Private Property Value As Object
 
-    Public Sub New(text As SourceText)
-      Me.Text = text
+    Public Sub New(tree As SyntaxTree)
+      m_syntaxTree = tree
+      Text = tree.Text
     End Sub
 
     Private ReadOnly Property Current As Char
@@ -115,7 +117,9 @@ Namespace Global.Basic.CodeAnalysis.Syntax
           ElseIf Char.IsWhiteSpace(Current) Then
             ReadWhiteSpace()
           Else
-            Diagnostics.ReportBadCharacter(Position, Current)
+            Dim span = New TextSpan(Position, 1)
+            Dim location = New TextLocation(Me.Text, span)
+            Diagnostics.ReportBadCharacter(location, Current)
             Position += 1
           End If
 
@@ -127,7 +131,7 @@ Namespace Global.Basic.CodeAnalysis.Syntax
         text = Me.Text.ToString(Start, length)
       End If
 
-      Return New SyntaxToken(Kind, Start, text, Value)
+      Return New SyntaxToken(m_syntaxTree, Kind, Start, text, Value)
 
     End Function
 
@@ -141,7 +145,8 @@ Namespace Global.Basic.CodeAnalysis.Syntax
       Dim text = Me.Text.ToString(Start, length)
       Dim value As Integer
       If Not Integer.TryParse(text, value) Then
-        Diagnostics.ReportInvalidNumber(New TextSpan(Start, length), text, TypeSymbol.Int)
+        Dim location = New TextLocation(Me.Text, New TextSpan(Start, length))
+        Diagnostics.ReportInvalidNumber(location, text, TypeSymbol.Int)
       End If
 
       Me.Value = value
@@ -164,7 +169,8 @@ Namespace Global.Basic.CodeAnalysis.Syntax
         Select Case Current
           Case ChrW(0), ChrW(13), ChrW(10)
             Dim span = New TextSpan(Start, 1)
-            Diagnostics.ReportUnterminatedString(span)
+            Dim location = New TextLocation(Me.Text, span)
+            Diagnostics.ReportUnterminatedString(location)
             done = True
           Case """"c
             If LookAhead = """"c Then

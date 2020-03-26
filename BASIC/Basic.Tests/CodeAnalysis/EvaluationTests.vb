@@ -642,7 +642,7 @@ Namespace Global.Basic.Tests.CodeAnalysis
         Assert.Equal(expectedMessage, actualMessage)
 
         Dim expectedSpan = at.Spans(i)
-        Dim actualSpan = result.Diagnostics(i).Span
+        Dim actualSpan = result.Diagnostics(i).Location.Span
         Assert.Equal(expectedSpan, actualSpan)
 
       Next

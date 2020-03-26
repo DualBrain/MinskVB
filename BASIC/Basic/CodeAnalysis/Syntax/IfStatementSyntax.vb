@@ -7,8 +7,9 @@ Namespace Global.Basic.CodeAnalysis.Syntax
   Public NotInheritable Class IfStatementSyntax
     Inherits StatementSyntax
 
-    Sub New(ifKeyword As SyntaxToken, condition As ExpressionSyntax, thenStatement As StatementSyntax,
+    Sub New(tree As SyntaxTree, ifKeyword As SyntaxToken, condition As ExpressionSyntax, thenStatement As StatementSyntax,
             elseClause As ElseClauseSyntax)
+      MyBase.New(tree)
       Me.IfKeyword = ifKeyword
       Me.Condition = condition
       Me.ThenStatement = thenStatement

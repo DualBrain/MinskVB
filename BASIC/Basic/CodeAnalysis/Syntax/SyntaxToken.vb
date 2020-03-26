@@ -9,7 +9,8 @@ Namespace Global.Basic.CodeAnalysis.Syntax
   Public NotInheritable Class SyntaxToken
     Inherits SyntaxNode
 
-    Sub New(kind As SyntaxKind, position As Integer, text As String, value As Object)
+    Sub New(tree As SyntaxTree, kind As SyntaxKind, position As Integer, text As String, value As Object)
+      MyBase.New(tree)
       Me.Kind = kind
       Me.Position = position
       Me.Text = text

@@ -7,7 +7,8 @@ Namespace Global.Basic.CodeAnalysis.Syntax
   Public NotInheritable Class GlobalStatementSyntax
     Inherits MemberSyntax
 
-    Sub New(statement As StatementSyntax)
+    Sub New(tree As SyntaxTree, statement As StatementSyntax)
+      MyBase.New(tree)
       Me.Statement = statement
     End Sub
 

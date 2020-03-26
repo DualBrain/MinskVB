@@ -7,7 +7,8 @@ Namespace Global.Basic.CodeAnalysis.Syntax
   Public NotInheritable Class ElseClauseSyntax
     Inherits SyntaxNode
 
-    Sub New(elseKeyword As SyntaxToken, elseStatement As StatementSyntax)
+    Sub New(tree As SyntaxTree, elseKeyword As SyntaxToken, elseStatement As StatementSyntax)
+      MyBase.New(tree)
       Me.ElseKeyword = elseKeyword
       Me.ElseStatement = elseStatement
     End Sub

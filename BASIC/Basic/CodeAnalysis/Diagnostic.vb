@@ -8,12 +8,12 @@ Namespace Global.Basic.CodeAnalysis
 
   Public NotInheritable Class Diagnostic
 
-    Sub New(span As TextSpan, message As String)
-      Me.Span = span
+    Sub New(location As TextLocation, message As String)
+      Me.Location = location
       Me.Message = message
     End Sub
 
-    Public ReadOnly Property Span As TextSpan
+    Public ReadOnly Property Location As TextLocation
     Public ReadOnly Property Message As String
 
     Public Overrides Function ToString() As String

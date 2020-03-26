@@ -7,7 +7,8 @@ Namespace Global.Basic.CodeAnalysis.Syntax
   Public NotInheritable Class ForStatementSyntax
     Inherits StatementSyntax
 
-    Sub New(keyword As SyntaxToken, identifier As SyntaxToken, equalsToken As SyntaxToken, lowerBound As ExpressionSyntax, toKeyword As SyntaxToken, upperBound As ExpressionSyntax, body As StatementSyntax)
+    Sub New(tree As SyntaxTree, keyword As SyntaxToken, identifier As SyntaxToken, equalsToken As SyntaxToken, lowerBound As ExpressionSyntax, toKeyword As SyntaxToken, upperBound As ExpressionSyntax, body As StatementSyntax)
+      MyBase.New(tree)
       Me.Keyword = keyword
       Me.Identifier = identifier
       Me.EqualsToken = equalsToken

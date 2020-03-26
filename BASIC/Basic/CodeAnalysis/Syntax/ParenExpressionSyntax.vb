@@ -7,7 +7,8 @@ Namespace Global.Basic.CodeAnalysis.Syntax
   Public NotInheritable Class ParenExpressionSyntax
     Inherits ExpressionSyntax
 
-    Sub New(openParenToken As SyntaxToken, expression As ExpressionSyntax, closeParenToken As SyntaxToken)
+    Sub New(tree As SyntaxTree, openParenToken As SyntaxToken, expression As ExpressionSyntax, closeParenToken As SyntaxToken)
+      MyBase.New(tree)
       Me.OpenParenToken = openParenToken
       Me.Expression = expression
       Me.CloseParenToken = closeParenToken

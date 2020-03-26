@@ -20,8 +20,12 @@ Module Program
 
     Dim path = args.Single
 
-    Dim text = IO.File.ReadAllText(path)
-    Dim tree = SyntaxTree.Parse(text)
+    If Not IO.File.Exists(path) Then
+      Console.WriteLine($"error: file '{path}' doesn't exist.")
+      Return
+    End If
+
+    Dim tree = SyntaxTree.Load(path)
     Dim c = New Compilation(tree)
 
     Dim result = c.Evaluate(New Dictionary(Of VariableSymbol, Object))

@@ -10,10 +10,17 @@ Namespace Global.Basic.CodeAnalysis.Text
 
     Private ReadOnly Text As String
 
-    Private Sub New(text As String)
-      Lines = ParseLines(Me, text)
+    Public ReadOnly Property FileName As String
+
+    Private Sub New(text As String, fileName As String)
       Me.Text = text
+      Me.FileName = fileName
+      Lines = ParseLines(Me, text)
     End Sub
+
+    Public Shared Function [From](text As String, Optional fileName As String = "") As SourceText
+      Return New SourceText(text, fileName)
+    End Function
 
     Public ReadOnly Property Lines As ImmutableArray(Of TextLine)
 
@@ -109,10 +116,6 @@ Namespace Global.Basic.CodeAnalysis.Text
 
       Return 0
 
-    End Function
-
-    Public Shared Function [From](text As String) As SourceText
-      Return New SourceText(text)
     End Function
 
     Public Overrides Function ToString() As String

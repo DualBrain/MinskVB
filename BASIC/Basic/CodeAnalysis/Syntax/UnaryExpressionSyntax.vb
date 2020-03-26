@@ -7,7 +7,8 @@ Namespace Global.Basic.CodeAnalysis.Syntax
   Public NotInheritable Class UnaryExpressionSyntax
     Inherits ExpressionSyntax
 
-    Sub New(operatorToken As SyntaxToken, operand As ExpressionSyntax)
+    Sub New(tree As SyntaxTree, operatorToken As SyntaxToken, operand As ExpressionSyntax)
+      MyBase.New(tree)
       Me.OperatorToken = operatorToken
       Me.Operand = operand
     End Sub

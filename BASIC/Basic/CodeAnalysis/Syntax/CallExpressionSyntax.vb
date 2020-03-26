@@ -7,7 +7,8 @@ Namespace Global.Basic.CodeAnalysis.Syntax
   Public NotInheritable Class CallExpressionSyntax
     Inherits ExpressionSyntax
 
-    Sub New(identifier As SyntaxToken, openParen As SyntaxToken, arguments As SeparatedSyntaxList(Of ExpressionSyntax), closeParen As SyntaxToken)
+    Sub New(tree As SyntaxTree, identifier As SyntaxToken, openParen As SyntaxToken, arguments As SeparatedSyntaxList(Of ExpressionSyntax), closeParen As SyntaxToken)
+      MyBase.New(tree)
       Me.Identifier = identifier
       Me.OpenParen = openParen
       Me.Arguments = arguments

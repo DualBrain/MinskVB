@@ -21,7 +21,7 @@ Namespace Global.Basic.Tests.CodeAnalysis.Syntax
       Assert.Equal(SyntaxKind.StringToken, token.Kind)
       Assert.Equal(text, token.Text)
       Dim diagnostic = Assert.Single(diagnostics)
-      Assert.Equal(New TextSpan(0, 1), diagnostic.Span)
+      Assert.Equal(New TextSpan(0, 1), diagnostic.Location.Span)
       Assert.Equal("Unterminated string literal.", diagnostic.Message)
     End Sub
 
@@ -74,8 +74,8 @@ Namespace Global.Basic.Tests.CodeAnalysis.Syntax
     <Theory>
     <MemberData(NameOf(GetTokenPairsWithSeparatorData))>
     Sub Lexer_Lexes_TokenPairWithSeparator(kind1 As SyntaxKind, text1 As String,
-                                                       separatorKind As SyntaxKind, separatorText As String,
-                                                       kind2 As SyntaxKind, text2 As String)
+                                           separatorKind As SyntaxKind, separatorText As String,
+                                           kind2 As SyntaxKind, text2 As String)
 
       Dim text = text1 & separatorText & text2
       Dim tokens = SyntaxTree.ParseTokens(text).ToArray

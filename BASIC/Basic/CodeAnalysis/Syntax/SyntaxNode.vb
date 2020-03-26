@@ -13,6 +13,12 @@ Namespace Global.Basic.CodeAnalysis.Syntax
 
   Public MustInherit Class SyntaxNode
 
+    Friend Sub New(tree As SyntaxTree)
+      SyntaxTree = tree
+    End Sub
+
+    Public ReadOnly Property SyntaxTree As SyntaxTree
+
     Public MustOverride ReadOnly Property Kind() As SyntaxKind
 
     Public Overridable ReadOnly Property Span() As TextSpan
@@ -20,6 +26,12 @@ Namespace Global.Basic.CodeAnalysis.Syntax
         Dim first = GetChildren.First.Span
         Dim last = GetChildren.Last.Span
         Return TextSpan.FromBounds(first.Start, last.End)
+      End Get
+    End Property
+
+    Public ReadOnly Property Location As TextLocation
+      Get
+        Return New TextLocation(SyntaxTree.Text, Span)
       End Get
     End Property
 

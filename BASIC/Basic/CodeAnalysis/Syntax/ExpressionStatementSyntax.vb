@@ -12,7 +12,8 @@ Namespace Global.Basic.CodeAnalysis.Syntax
     ' a++
     ' M()
 
-    Sub New(expression As ExpressionSyntax)
+    Sub New(tree As SyntaxTree, expression As ExpressionSyntax)
+      MyBase.New(tree)
       Me.Expression = expression
     End Sub
 

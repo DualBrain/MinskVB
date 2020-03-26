@@ -7,7 +7,8 @@ Namespace Global.Basic.CodeAnalysis.Syntax
   Public NotInheritable Class DoWhileStatementSyntax
     Inherits StatementSyntax
 
-    Sub New(doKeyword As SyntaxToken, body As StatementSyntax, whileKeyword As SyntaxToken, condition As ExpressionSyntax)
+    Sub New(tree As SyntaxTree, doKeyword As SyntaxToken, body As StatementSyntax, whileKeyword As SyntaxToken, condition As ExpressionSyntax)
+      MyBase.New(tree)
       Me.DoKeyword = doKeyword
       Me.Body = body
       Me.WhileKeyword = whileKeyword

@@ -7,13 +7,14 @@ Namespace Global.Basic.CodeAnalysis.Syntax
   Public NotInheritable Class FunctionDeclarationSyntax
     Inherits MemberSyntax
 
-    Sub New(functionKeyword As SyntaxToken,
+    Sub New(tree As SyntaxTree, functionKeyword As SyntaxToken,
                 identifier As SyntaxToken,
                 openParen As SyntaxToken,
                 parameters As SeparatedSyntaxList(Of ParameterSyntax),
                 closeParen As SyntaxToken,
                 type As TypeClauseSyntax,
                 body As StatementSyntax)
+      MyBase.New(tree)
       Me.FunctionKeyword = functionKeyword
       Me.Identifier = identifier
       Me.OpenParen = openParen

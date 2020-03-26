@@ -7,7 +7,8 @@ Namespace Global.Basic.CodeAnalysis.Syntax
   Public NotInheritable Class ParameterSyntax
     Inherits SyntaxNode
 
-    Sub New(identifier As SyntaxToken, type As TypeClauseSyntax)
+    Sub New(tree As SyntaxTree, identifier As SyntaxToken, type As TypeClauseSyntax)
+      MyBase.New(tree)
       Me.Identifier = identifier
       Me.Type = type
     End Sub

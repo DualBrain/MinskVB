@@ -102,28 +102,31 @@ Namespace Global.Basic.IO
     Public Sub WriteDiagnostics(writer As TextWriter, diagnostics As IEnumerable(Of Diagnostic), tree As SyntaxTree)
 
       ' We have errors, so don't try to evaluate (execute).
-      For Each diagnostic In diagnostics.OrderBy(Function(diag) diag.Span).
-                                         ThenBy(Function(diag) diag.Span.Length)
+      For Each diagnostic In diagnostics.OrderBy(Function(diag) diag.Location.FileName).
+                                         ThenBy(Function(diag) diag.Location.Span).
+                                         ThenBy(Function(diag) diag.Location.Span.Length)
 
+        Dim filename = diagnostic.Location.FileName
+        Dim span = diagnostic.Location.Span
 
-        Dim lineIndex = tree.Text.GetLineIndex(diagnostic.Span.Start)
+        Dim lineIndex = tree.Text.GetLineIndex(span.Start)
         Dim lineNumber = lineIndex + 1
         Dim line = tree.Text.Lines(lineIndex)
-        Dim character = diagnostic.Span.Start - line.Start + 1
+        Dim character = span.Start - line.Start + 1
 
         ' An extra line before for clarity...
         WriteLine()
 
         ForegroundColor = DarkRed
-        Write($"({lineNumber}, {character}): ")
+        Write($"{filename}({lineNumber}, {character}): ")
         WriteLine(diagnostic)
         Console.ResetColor()
 
-        Dim prefixSpan = TextSpan.FromBounds(line.Start, diagnostic.Span.Start)
-        Dim suffixSpan = TextSpan.FromBounds(diagnostic.Span.End, line.End)
+        Dim prefixSpan = TextSpan.FromBounds(line.Start, span.Start)
+        Dim suffixSpan = TextSpan.FromBounds(span.End, line.End)
 
         Dim prefix = tree.Text.ToString(prefixSpan)
-        Dim er = tree.Text.ToString(diagnostic.Span)
+        Dim er = tree.Text.ToString(span)
         Dim suffix = tree.Text.ToString(suffixSpan)
 
         ' Write the prefix in "normal" text...

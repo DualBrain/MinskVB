@@ -7,7 +7,8 @@ Namespace Global.Basic.CodeAnalysis.Syntax
   Public NotInheritable Class ReturnStatementSyntax
     Inherits StatementSyntax
 
-    Public Sub New(returnKeyword As SyntaxToken, expression As ExpressionSyntax)
+    Public Sub New(tree As SyntaxTree, returnKeyword As SyntaxToken, expression As ExpressionSyntax)
+      MyBase.New(tree)
       Me.ReturnKeyword = returnKeyword
       Me.Expression = expression
     End Sub

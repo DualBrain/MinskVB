@@ -10,7 +10,8 @@ Namespace Global.Basic.CodeAnalysis.Syntax
   Public NotInheritable Class VariableDeclarationSyntax
     Inherits StatementSyntax
 
-    Sub New(keyword As SyntaxToken, identifier As SyntaxToken, typeClause As TypeClauseSyntax, equalsToken As SyntaxToken, initializer As ExpressionSyntax)
+    Sub New(tree As SyntaxTree, keyword As SyntaxToken, identifier As SyntaxToken, typeClause As TypeClauseSyntax, equalsToken As SyntaxToken, initializer As ExpressionSyntax)
+      MyBase.New(tree)
       Me.Keyword = keyword
       Me.Identifier = identifier
       Me.TypeClause = typeClause

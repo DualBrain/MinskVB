@@ -7,7 +7,8 @@ Namespace Global.Basic.CodeAnalysis.Syntax
   Public NotInheritable Class NameExpressionSyntax
     Inherits ExpressionSyntax
 
-    Sub New(identifierToken As SyntaxToken)
+    Sub New(tree As SyntaxTree, identifierToken As SyntaxToken)
+      MyBase.New(tree)
       Me.IdentifierToken = identifierToken
     End Sub
 

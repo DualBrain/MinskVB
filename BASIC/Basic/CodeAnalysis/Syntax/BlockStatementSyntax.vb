@@ -9,7 +9,8 @@ Namespace Global.Basic.CodeAnalysis.Syntax
   Public NotInheritable Class BlockStatementSyntax
     Inherits StatementSyntax
 
-    Sub New(openBraceToken As SyntaxToken, statements As ImmutableArray(Of StatementSyntax), closeBraceToken As SyntaxToken)
+    Sub New(tree As SyntaxTree, openBraceToken As SyntaxToken, statements As ImmutableArray(Of StatementSyntax), closeBraceToken As SyntaxToken)
+      MyBase.New(tree)
       Me.OpenBraceToken = openBraceToken
       Me.Statements = statements
       Me.CloseBraceToken = closeBraceToken

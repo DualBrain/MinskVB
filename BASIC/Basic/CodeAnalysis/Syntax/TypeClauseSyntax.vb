@@ -7,7 +7,8 @@ Namespace Global.Basic.CodeAnalysis.Syntax
   Public NotInheritable Class TypeClauseSyntax
     Inherits SyntaxNode
 
-    Sub New(colonToken As SyntaxToken, identifier As SyntaxToken)
+    Sub New(tree As SyntaxTree, colonToken As SyntaxToken, identifier As SyntaxToken)
+      MyBase.New(tree)
       Me.ColonToken = colonToken
       Me.Identifier = identifier
     End Sub

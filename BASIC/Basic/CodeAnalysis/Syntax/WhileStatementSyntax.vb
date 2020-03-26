@@ -7,7 +7,8 @@ Namespace Global.Basic.CodeAnalysis.Syntax
   Public NotInheritable Class WhileStatementSyntax
     Inherits StatementSyntax
 
-    Sub New(whileKeyword As SyntaxToken, condition As ExpressionSyntax, body As StatementSyntax)
+    Sub New(tree As SyntaxTree, whileKeyword As SyntaxToken, condition As ExpressionSyntax, body As StatementSyntax)
+      MyBase.New(tree)
       Me.WhileKeyword = whileKeyword
       Me.Condition = condition
       Me.Body = body

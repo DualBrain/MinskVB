@@ -7,7 +7,8 @@ Namespace Global.Basic.CodeAnalysis.Syntax
   Friend Class BreakStatementSyntax
     Inherits StatementSyntax
 
-    Public Sub New(keyword As SyntaxToken)
+    Public Sub New(tree As SyntaxTree, keyword As SyntaxToken)
+      MyBase.New(tree)
       Me.Keyword = keyword
     End Sub
 
