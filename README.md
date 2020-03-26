@@ -29,7 +29,7 @@ Why not?
 
 ## Progress...
 
-So far I've worked through the first six episodes of the video series (see below)... only 8 more to go (as of 6/7/2019).
+So far I've worked through the all of the available episodes of the video series (see below)... until that series gets to the point of actually compiling to .NET (Core) I will be following along pretty closely with what is being done in [Minsk](https://github.com/terrajobst/minsk/).  Once we reach the compile milestone is when I plan to incorporate the work I did in my GW-BASIC project into the structure of this project; ultimately compiling to an executable.
 
 ## Additional Info
 
