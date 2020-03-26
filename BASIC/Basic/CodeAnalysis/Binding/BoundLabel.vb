@@ -13,7 +13,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
     Public ReadOnly Property Name As String
 
     Public Overrides Function ToString() As String
-      Return Me.Name
+      Return Name
     End Function
 
   End Class

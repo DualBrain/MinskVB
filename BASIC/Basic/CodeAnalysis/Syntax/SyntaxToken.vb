@@ -23,13 +23,13 @@ Namespace Global.Basic.CodeAnalysis.Syntax
 
     Public Overrides ReadOnly Property Span As TextSpan
       Get
-        Return New TextSpan(Me.Position, If(Me.Text?.Length, 0))
+        Return New TextSpan(Position, If(Text?.Length, 0))
       End Get
     End Property
 
     Public ReadOnly Property IsMissing As Boolean
       Get
-        Return Me.Text Is Nothing
+        Return Text Is Nothing
       End Get
     End Property
 

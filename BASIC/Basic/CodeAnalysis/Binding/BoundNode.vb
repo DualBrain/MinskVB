@@ -12,7 +12,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
 
     Public Overrides Function ToString() As String
       Using writer = New StringWriter
-        Me.WriteTo(writer)
+        WriteTo(writer)
         Return writer.ToString
       End Using
     End Function

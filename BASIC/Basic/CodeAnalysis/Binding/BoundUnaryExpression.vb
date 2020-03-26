@@ -17,7 +17,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
     Public Overrides ReadOnly Property Kind As BoundNodeKind = BoundNodeKind.UnaryExpression
     Public Overrides ReadOnly Property Type As TypeSymbol
       Get
-        Return Me.Op.Type
+        Return Op.Type
       End Get
     End Property
     Public ReadOnly Property Op As BoundUnaryOperator

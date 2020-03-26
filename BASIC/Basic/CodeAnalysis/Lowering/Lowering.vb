@@ -18,8 +18,8 @@ Namespace Global.Basic.CodeAnalysis.Lowering
     End Sub
 
     Private Function GenerateLabel() As BoundLabel
-      Me.m_labelCount += 1
-      Dim name = $"Label{Me.m_labelCount}"
+      m_labelCount += 1
+      Dim name = $"Label{m_labelCount}"
       Return New BoundLabel(name)
     End Function
 
@@ -59,11 +59,11 @@ Namespace Global.Basic.CodeAnalysis.Lowering
         ' <then>
         ' end:
 
-        Dim endLabel = Me.GenerateLabel()
+        Dim endLabel = GenerateLabel()
         Dim gotoFalse = New BoundConditionalGotoStatement(endLabel, node.Condition, False)
         Dim endLabelStatement = New BoundLabelStatement(endLabel)
         Dim result = New BoundBlockStatement(ImmutableArray.Create(Of BoundStatement)(gotoFalse, node.ThenStatement, endLabelStatement))
-        Return Me.RewriteStatement(result)
+        Return RewriteStatement(result)
 
       Else
 
@@ -82,8 +82,8 @@ Namespace Global.Basic.CodeAnalysis.Lowering
         ' <else>
         ' end:
 
-        Dim elseLabel = Me.GenerateLabel
-        Dim endLabel = Me.GenerateLabel
+        Dim elseLabel = GenerateLabel
+        Dim endLabel = GenerateLabel
 
         Dim gotoFalse = New BoundConditionalGotoStatement(elseLabel, node.Condition, False)
         Dim gotoEndStatement = New BoundGotoStatement(endLabel)
@@ -97,7 +97,7 @@ Namespace Global.Basic.CodeAnalysis.Lowering
                                                                                               elseLabelStatement,
                                                                                               node.ElseStatement,
                                                                                               endLabelStatement))
-        Return Me.RewriteStatement(result)
+        Return RewriteStatement(result)
 
       End If
 
@@ -117,7 +117,7 @@ Namespace Global.Basic.CodeAnalysis.Lowering
       ' gotoTrue <condition> body
       ' break:
 
-      Dim bodyLabel = Me.GenerateLabel
+      Dim bodyLabel = GenerateLabel
 
       Dim gotoContinue = New BoundGotoStatement(node.ContinueLabel)
       Dim bodyLabelStatement = New BoundLabelStatement(bodyLabel)
@@ -132,7 +132,7 @@ Namespace Global.Basic.CodeAnalysis.Lowering
                                                                                     gotoTrue,
                                                                                     breakLabelStatement))
 
-      Return Me.RewriteStatement(result)
+      Return RewriteStatement(result)
 
     End Function
 
@@ -151,7 +151,7 @@ Namespace Global.Basic.CodeAnalysis.Lowering
       ' gotoTrue <condition> body
       ' break:
 
-      Dim bodyLabel = Me.GenerateLabel()
+      Dim bodyLabel = GenerateLabel()
 
       Dim bodyLabelStatement = New BoundLabelStatement(bodyLabel)
       Dim continueLabelStatement = New BoundLabelStatement(node.ContinueLabel)
@@ -164,7 +164,7 @@ Namespace Global.Basic.CodeAnalysis.Lowering
                                                                                     gotoTrue,
                                                                                     breakLabelStatement))
 
-      Return Me.RewriteStatement(result)
+      Return RewriteStatement(result)
 
     End Function
 
@@ -208,13 +208,13 @@ Namespace Global.Basic.CodeAnalysis.Lowering
       Dim whileBody = New BoundBlockStatement(ImmutableArray.Create(Of BoundStatement)(node.Body,
                                                                                        continueLabelStatement,
                                                                                        increment))
-      Dim whileStatement = New BoundWhileStatement(condition, whileBody, node.BreakLabel, Me.GenerateLabel)
+      Dim whileStatement = New BoundWhileStatement(condition, whileBody, node.BreakLabel, GenerateLabel)
       Dim result = New BoundBlockStatement(ImmutableArray.Create(Of BoundStatement)(
               variableDeclaration,
               upperBoundDeclaration,
               whileStatement))
 
-      Return Me.RewriteStatement(result)
+      Return RewriteStatement(result)
 
     End Function
 

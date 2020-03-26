@@ -27,7 +27,7 @@ Namespace Global.Basic.CodeAnalysis.Symbols
 
     Sub New(name As String, paremeters As ImmutableArray(Of ParameterSymbol), type As TypeSymbol, Optional declaration As FunctionDeclarationSyntax = Nothing)
       MyBase.New(name)
-      Me.Parameters = paremeters
+      Parameters = paremeters
       Me.Type = type
       Me.Declaration = declaration
     End Sub

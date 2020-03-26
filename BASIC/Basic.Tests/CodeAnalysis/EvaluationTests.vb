@@ -74,6 +74,7 @@ Namespace Global.Basic.Tests.CodeAnalysis
     <InlineData(ChrW(34) + "test" & ChrW(34) & " != " & ChrW(34) & "test" & ChrW(34), False)>
     <InlineData(ChrW(34) + "test" & ChrW(34) & " == " & ChrW(34) & "abc" & ChrW(34), False)>
     <InlineData(ChrW(34) + "test" & ChrW(34) & " != " & ChrW(34) & "abc" & ChrW(34), True)>
+    <InlineData(ChrW(34) + "test" & ChrW(34) & " + " & ChrW(34) & "abc" & ChrW(34), "testabc")>
     <InlineData("not false", True)>
     <InlineData("false || true", True)>
     <InlineData("false or true", True)>
@@ -119,7 +120,7 @@ Namespace Global.Basic.Tests.CodeAnalysis
       Dim diagnostics = "
         'x' is already declared."
 
-      Me.AssertDiagnostics(text, diagnostics)
+      AssertDiagnostics(text, diagnostics)
 
     End Sub
 
@@ -136,7 +137,7 @@ Namespace Global.Basic.Tests.CodeAnalysis
         Unexpected token <CloseParenToken>, expected <IdentifierToken>.
         Unexpected token <EndOfFileToken>, expected <CloseBraceToken>."
 
-      Me.AssertDiagnostics(text, diagnostics)
+      AssertDiagnostics(text, diagnostics)
 
     End Sub
 
@@ -150,7 +151,7 @@ Namespace Global.Basic.Tests.CodeAnalysis
       Dim diagnostics = "
         Function 'print' requires 1 arguments but was given 0."
 
-      Me.AssertDiagnostics(text, diagnostics)
+      AssertDiagnostics(text, diagnostics)
 
     End Sub
 
@@ -163,7 +164,7 @@ Namespace Global.Basic.Tests.CodeAnalysis
       Dim diagnostics = "
         Function 'print' requires 1 arguments but was given 3."
 
-      Me.AssertDiagnostics(text, diagnostics)
+      AssertDiagnostics(text, diagnostics)
 
     End Sub
 
@@ -182,7 +183,7 @@ Namespace Global.Basic.Tests.CodeAnalysis
                 Unexpected token <CloseParenToken>, expected <IdentifierToken>.
             "
 
-      Me.AssertDiagnostics(text, diagnostics)
+      AssertDiagnostics(text, diagnostics)
 
     End Sub
 
@@ -204,7 +205,7 @@ Namespace Global.Basic.Tests.CodeAnalysis
                 Unexpected token <EndOfFileToken>, expected <CloseBraceToken>.
             "
 
-      Me.AssertDiagnostics(text, diagnostics)
+      AssertDiagnostics(text, diagnostics)
 
     End Sub
 
@@ -221,7 +222,7 @@ Namespace Global.Basic.Tests.CodeAnalysis
       Dim diagnostics = "
         Cannot convert type 'int' to 'bool'."
 
-      Me.AssertDiagnostics(text, diagnostics)
+      AssertDiagnostics(text, diagnostics)
 
     End Sub
 
@@ -238,7 +239,161 @@ Namespace Global.Basic.Tests.CodeAnalysis
       Dim diagnostics = "
         Cannot convert type 'int' to 'bool'."
 
-      Me.AssertDiagnostics(text, diagnostics)
+      AssertDiagnostics(text, diagnostics)
+
+    End Sub
+
+    <Fact>
+    Public Sub Evaluator_Void_Function_Should_Not_Return_Value()
+
+      Dim text = "
+        function test()
+        {
+          return [1]
+        }"
+
+      Dim diagnostics = "
+        Since the function 'test' does not return a value, the 'return' keyword cannot be followed by an expression."
+
+      AssertDiagnostics(text, diagnostics)
+
+    End Sub
+
+    <Fact>
+    Public Sub Evaluator_Function_With_ReturnValue_Should_Not_Return_Void()
+
+      Dim text = "
+        function test(): int
+        {
+          [return]
+        }"
+
+      Dim diagnostics = "
+        An expression of type 'int' is expected."
+
+      AssertDiagnostics(text, diagnostics)
+
+    End Sub
+
+    <Fact>
+    Public Sub Evaluator_Not_All_Code_Paths_Return_Value()
+
+      Dim text = "
+        function [test](n: int): bool
+        {
+          if (n > 10)
+            return true
+        }"
+
+      Dim diagnostics = "
+        Not all code paths return a value."
+
+      AssertDiagnostics(text, diagnostics)
+
+    End Sub
+
+    <Fact>
+    Public Sub Evaluator_Expression_Must_Have_Value()
+
+      Dim text = "
+        function test(n: int)
+        {
+          return
+        }
+        let value = [test(100)]"
+
+      Dim diagnostics = "
+        Expression must have a value."
+
+      AssertDiagnostics(text, diagnostics)
+
+    End Sub
+
+    <Theory, InlineData("[break]", "break"), InlineData("[continue]", "continue")>
+    Public Sub Evaluator_Invalid_Break_Or_Continue(ByVal text As String, ByVal keyword As String)
+
+      Dim diagnostics = $"
+        The keyword '{keyword}' can only be used inside of loops."
+
+      AssertDiagnostics(text, diagnostics)
+
+    End Sub
+
+    <Fact>
+    Public Sub Evaluator_Invalid_Return()
+
+      Dim text = "
+        [return]"
+
+      Dim diagnostics = "
+        The 'return' keyword can only be used inside of functions."
+
+      AssertDiagnostics(text, diagnostics)
+
+    End Sub
+
+    <Fact>
+    Public Sub Evaluator_Parameter_Already_Declared()
+
+      Dim text = "
+        function sum(a: int, b: int, [a: int]): int
+        {
+          return a + b + c
+        }"
+
+      Dim diagnostics = "
+        A parameter with the name 'a' already exists."
+
+      AssertDiagnostics(text, diagnostics)
+
+    End Sub
+
+    <Fact>
+    Public Sub Evaluator_Function_Must_Have_Name()
+
+      Dim text = "
+        function [(]a: int, b: int): int
+        {
+          return a + b
+        }"
+
+      Dim diagnostics = "
+        Unexpected token <OpenParenToken>, expected <IdentifierToken>."
+
+      AssertDiagnostics(text, diagnostics)
+
+    End Sub
+
+    <Fact>
+    Public Sub Evaluator_Wrong_Argument_Type()
+
+      Dim text = "
+        function test(n: int): bool
+        {
+          return n > 10
+        }
+        let t = ""string""
+        test([t])"
+
+      Dim diagnostics = "
+        Parameter 'n' requires a value of type 'int' but was given a value of type 'string'."
+
+      AssertDiagnostics(text, diagnostics)
+
+    End Sub
+
+    <Fact>
+    Public Sub Evaluator_Bad_Type()
+
+      Dim text = "
+        function test(n: [invalidtype])
+        {
+        }"
+
+      Dim diagnostics = "
+        Type 'invalidtype' doesn't exist."
+
+      AssertDiagnostics(text, diagnostics)
 
     End Sub
 
@@ -256,7 +411,7 @@ Namespace Global.Basic.Tests.CodeAnalysis
       Dim diagnostics = "
         Cannot convert type 'int' to 'bool'."
 
-      Me.AssertDiagnostics(text, diagnostics)
+      AssertDiagnostics(text, diagnostics)
 
     End Sub
 
@@ -273,7 +428,7 @@ Namespace Global.Basic.Tests.CodeAnalysis
       Dim diagnostics = "
         Cannot convert type 'bool' to 'int'."
 
-      Me.AssertDiagnostics(text, diagnostics)
+      AssertDiagnostics(text, diagnostics)
 
     End Sub
 
@@ -290,7 +445,7 @@ Namespace Global.Basic.Tests.CodeAnalysis
       Dim diagnostics = "
         Cannot convert type 'bool' to 'int'."
 
-      Me.AssertDiagnostics(text, diagnostics)
+      AssertDiagnostics(text, diagnostics)
 
     End Sub
 
@@ -301,7 +456,7 @@ Namespace Global.Basic.Tests.CodeAnalysis
 
       Dim diagnostics = "Variable 'x' doesn't exist."
 
-      Me.AssertDiagnostics(text, diagnostics)
+      AssertDiagnostics(text, diagnostics)
 
     End Sub
 
@@ -312,7 +467,7 @@ Namespace Global.Basic.Tests.CodeAnalysis
 
       Dim diagnostics = "Unexpected token <EndOfFileToken>, expected <IdentifierToken>."
 
-      Me.AssertDiagnostics(text, diagnostics)
+      AssertDiagnostics(text, diagnostics)
 
     End Sub
 
@@ -323,7 +478,7 @@ Namespace Global.Basic.Tests.CodeAnalysis
 
       Dim diagnostics = "Unary operator '+' is not defined for type 'bool'."
 
-      Me.AssertDiagnostics(text, diagnostics)
+      AssertDiagnostics(text, diagnostics)
 
     End Sub
 
@@ -334,7 +489,19 @@ Namespace Global.Basic.Tests.CodeAnalysis
 
       Dim diagnostics = "Binary operator '+' is not defined for type 'int' and 'bool'."
 
-      Me.AssertDiagnostics(text, diagnostics)
+      AssertDiagnostics(text, diagnostics)
+
+    End Sub
+
+    <Fact>
+    Public Sub Evaluator_AssignmentExpression_Reports_NotAVariable()
+
+      Dim text = "[print] = 42"
+
+      Dim diagnostics = "
+        'print' is not a variable."
+
+      AssertDiagnostics(text, diagnostics)
 
     End Sub
 
@@ -345,7 +512,7 @@ Namespace Global.Basic.Tests.CodeAnalysis
 
       Dim diagnostics = "Variable 'x' doesn't exist."
 
-      Me.AssertDiagnostics(text, diagnostics)
+      AssertDiagnostics(text, diagnostics)
 
     End Sub
 
@@ -360,7 +527,7 @@ Namespace Global.Basic.Tests.CodeAnalysis
 
       Dim diagnostics = "Variable 'x' is read-only and cannot be assigned to."
 
-      Me.AssertDiagnostics(text, diagnostics)
+      AssertDiagnostics(text, diagnostics)
 
     End Sub
 
@@ -377,7 +544,35 @@ Namespace Global.Basic.Tests.CodeAnalysis
         Variable 'x' is read-only and cannot be assigned to.
         Cannot convert type 'bool' to 'int'."
 
-      Me.AssertDiagnostics(text, diagnostics)
+      AssertDiagnostics(text, diagnostics)
+
+    End Sub
+
+    <Fact>
+    Public Sub Evaluator_CallExpression_Reports_Undefined()
+
+      Dim text = "[foo](42)"
+
+      Dim diagnostics = "
+        Function 'foo' doesn't exist."
+
+      AssertDiagnostics(text, diagnostics)
+
+    End Sub
+
+    <Fact>
+    Public Sub Evaluator_CallExpression_Reports_NotAFunction()
+
+      Dim text = "
+        {
+          let foo = 42
+          [foo](42)
+        }"
+
+      Dim diagnostics = "
+        'foo' is not a function."
+
+      AssertDiagnostics(text, diagnostics)
 
     End Sub
 
@@ -391,9 +586,9 @@ Namespace Global.Basic.Tests.CodeAnalysis
         }"
 
       Dim diagnostics = "
-        Function 'print' doesn't exist."
+        'print' is not a function."
 
-      Me.AssertDiagnostics(text, diagnostics)
+      AssertDiagnostics(text, diagnostics)
 
     End Sub
 

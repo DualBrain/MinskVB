@@ -24,7 +24,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
     Public ReadOnly Property IsImplicit As Boolean
     Public ReadOnly Property IsExplicit As Boolean
       Get
-        Return Me.Exists AndAlso Not Me.IsImplicit
+        Return Exists AndAlso Not IsImplicit
       End Get
     End Property
 

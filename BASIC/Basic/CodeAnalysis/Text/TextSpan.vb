@@ -16,7 +16,7 @@ Namespace Global.Basic.CodeAnalysis.Text
 
     Public ReadOnly Property [End] As Integer
       Get
-        Return Me.Start + Me.Length
+        Return Start + Length
       End Get
     End Property
 
@@ -26,7 +26,7 @@ Namespace Global.Basic.CodeAnalysis.Text
     End Function
 
     Public Overrides Function ToString() As String
-      Return $"{Me.Start}...{Me.End}"
+      Return $"{Start}...{[End]}"
     End Function
 
   End Structure

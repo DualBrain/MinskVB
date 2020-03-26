@@ -49,11 +49,11 @@ Friend NotInheritable Class BasicRepl
   Protected Overrides Sub EvaluateMetaCommand(input As String)
     Select Case input.ToLower
       Case "#new"
-        Me.m_previous = Nothing
+        m_previous = Nothing
       Case "#toggle tree"
-        Me.m_showTree = Not Me.m_showTree
+        m_showTree = Not m_showTree
       Case "#toggle program"
-        Me.m_showProgram = Not Me.m_showProgram
+        m_showProgram = Not m_showProgram
       Case "#cls"
         Clear()
       Case Else
@@ -94,21 +94,21 @@ Friend NotInheritable Class BasicRepl
     '  Continue Do
     'End If
 
-    Dim compilation = If(Me.m_previous Is Nothing, New Compilation(tree), Me.m_previous.ContinueWith(tree))
+    Dim compilation = If(m_previous Is Nothing, New Compilation(tree), m_previous.ContinueWith(tree))
 
-    If Me.m_showTree Then
+    If m_showTree Then
       Dim color = Console.ForegroundColor
       ForegroundColor = DarkGray
       tree.Root.WriteTo(Console.Out)
       ResetColor()
     End If
 
-    If Me.m_showProgram Then
+    If m_showProgram Then
       compilation.EmitTree(Console.Out)
       ResetColor()
     End If
 
-    Dim result = compilation.Evaluate(Me.m_variables)
+    Dim result = compilation.Evaluate(m_variables)
 
     If Not result.Diagnostics.Any Then
 
@@ -118,7 +118,7 @@ Friend NotInheritable Class BasicRepl
         ResetColor()
       End If
 
-      Me.m_previous = compilation
+      m_previous = compilation
 
     Else
 

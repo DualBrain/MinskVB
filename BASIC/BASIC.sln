@@ -14,6 +14,8 @@ Project("{778DAE3C-4631-46EA-AA77-85C1314464D9}") = "Basic", "Basic\Basic.vbproj
 EndProject
 Project("{778DAE3C-4631-46EA-AA77-85C1314464D9}") = "Basic.Tests", "Basic.Tests\Basic.Tests.vbproj", "{B99FAB9D-4ECA-4AF9-B923-8D8C5480A22B}"
 EndProject
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "bc", "bc\bc.vbproj", "{D8CDBECC-9D6F-4E37-9EE0-63FA0B7B7470}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -32,6 +34,10 @@ Global
 		{B99FAB9D-4ECA-4AF9-B923-8D8C5480A22B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B99FAB9D-4ECA-4AF9-B923-8D8C5480A22B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B99FAB9D-4ECA-4AF9-B923-8D8C5480A22B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D8CDBECC-9D6F-4E37-9EE0-63FA0B7B7470}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D8CDBECC-9D6F-4E37-9EE0-63FA0B7B7470}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D8CDBECC-9D6F-4E37-9EE0-63FA0B7B7470}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D8CDBECC-9D6F-4E37-9EE0-63FA0B7B7470}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

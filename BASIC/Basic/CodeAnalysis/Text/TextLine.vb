@@ -20,24 +20,24 @@ Namespace Global.Basic.CodeAnalysis.Text
 
     Public ReadOnly Property [End] As Integer
       Get
-        Return Me.Start + Me.Length
+        Return Start + Length
       End Get
     End Property
 
     Public ReadOnly Property Span As TextSpan
       Get
-        Return New TextSpan(Me.Start, Me.Length)
+        Return New TextSpan(Start, Length)
       End Get
     End Property
 
     Public ReadOnly Property SpanIncludingLineBreak As TextSpan
       Get
-        Return New TextSpan(Me.Start, Me.LengthIncludingLineBreak)
+        Return New TextSpan(Start, LengthIncludingLineBreak)
       End Get
     End Property
 
     Public Overrides Function ToString() As String
-      Return Me.Text.ToString(Me.Span)
+      Return Text.ToString(Span)
     End Function
 
   End Class

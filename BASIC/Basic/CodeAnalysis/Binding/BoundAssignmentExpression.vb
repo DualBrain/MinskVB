@@ -12,7 +12,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
     Sub New(variable As VariableSymbol, expression As BoundExpression)
       Me.Variable = variable
       Me.Expression = expression
-      Me.Type = expression.Type
+      Type = expression.Type
     End Sub
 
     Public Overrides ReadOnly Property Kind As BoundNodeKind = BoundNodeKind.AssignmentExpression

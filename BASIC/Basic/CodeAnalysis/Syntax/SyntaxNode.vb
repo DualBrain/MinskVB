@@ -17,15 +17,15 @@ Namespace Global.Basic.CodeAnalysis.Syntax
 
     Public Overridable ReadOnly Property Span() As TextSpan
       Get
-        Dim first = Me.GetChildren.First.Span
-        Dim last = Me.GetChildren.Last.Span
+        Dim first = GetChildren.First.Span
+        Dim last = GetChildren.Last.Span
         Return TextSpan.FromBounds(first.Start, last.End)
       End Get
     End Property
 
     Public Iterator Function GetChildren() As IEnumerable(Of SyntaxNode)
 
-      Dim properties = Me.GetType.GetProperties(BindingFlags.[Public] Or BindingFlags.Instance)
+      Dim properties = [GetType].GetProperties(BindingFlags.[Public] Or BindingFlags.Instance)
 
       For Each p In properties
         If GetType(SyntaxNode).IsAssignableFrom(p.PropertyType) Then
@@ -55,7 +55,7 @@ Namespace Global.Basic.CodeAnalysis.Syntax
         Return DirectCast(Me, SyntaxToken)
       End If
       ' A syntax node should always contain at least one token.
-      Return Me.GetChildren.Last.GetLastToken
+      Return GetChildren.Last.GetLastToken
     End Function
 
     Public Sub WriteTo(writer As TextWriter)
@@ -101,7 +101,7 @@ Namespace Global.Basic.CodeAnalysis.Syntax
 
     Public Overrides Function ToString() As String
       Using writer = New StringWriter
-        Me.WriteTo(writer)
+        WriteTo(writer)
         Return writer.ToString
       End Using
     End Function

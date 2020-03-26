@@ -17,7 +17,7 @@ Namespace Global.Basic.CodeAnalysis
     Public ReadOnly Property Message As String
 
     Public Overrides Function ToString() As String
-      Return Me.Message
+      Return Message
     End Function
 
   End Class

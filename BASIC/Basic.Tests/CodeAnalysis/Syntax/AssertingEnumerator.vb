@@ -14,7 +14,7 @@ Namespace Global.Basic.Tests.CodeAnalysis.Syntax
     Private m_hasErrors As Boolean
 
     Public Sub New(node As SyntaxNode)
-      Me.m_enumerator = Flatten(node).GetEnumerator
+      m_enumerator = Flatten(node).GetEnumerator
     End Sub
 
     Private Shared Iterator Function Flatten(node As SyntaxNode) As IEnumerable(Of SyntaxNode)
@@ -37,21 +37,21 @@ Namespace Global.Basic.Tests.CodeAnalysis.Syntax
 
     Public Sub AssertNode(kind As SyntaxKind)
       Try
-        Assert.True(Me.m_enumerator.MoveNext())
-        Assert.Equal(kind, Me.m_enumerator.Current.Kind)
-        Assert.IsNotType(Of SyntaxToken)(Me.m_enumerator.Current)
-      Catch When Me.MarkFailed()
+        Assert.True(m_enumerator.MoveNext())
+        Assert.Equal(kind, m_enumerator.Current.Kind)
+        Assert.IsNotType(Of SyntaxToken)(m_enumerator.Current)
+      Catch When MarkFailed()
         Throw
       End Try
     End Sub
 
     Public Sub AssertToken(kind As SyntaxKind, text As String)
       Try
-        Assert.True(Me.m_enumerator.MoveNext())
-        Assert.Equal(kind, Me.m_enumerator.Current.Kind)
-        Dim token = Assert.IsType(Of SyntaxToken)(Me.m_enumerator.Current)
+        Assert.True(m_enumerator.MoveNext())
+        Assert.Equal(kind, m_enumerator.Current.Kind)
+        Dim token = Assert.IsType(Of SyntaxToken)(m_enumerator.Current)
         Assert.Equal(text, token.Text)
-      Catch When Me.MarkFailed()
+      Catch When MarkFailed()
         Throw
       End Try
     End Sub
@@ -59,7 +59,7 @@ Namespace Global.Basic.Tests.CodeAnalysis.Syntax
 #Region "IDisposable Support"
 
     Private Function MarkFailed() As Boolean
-      Me.m_hasErrors = True
+      m_hasErrors = True
       Return False
     End Function
 
@@ -68,17 +68,17 @@ Namespace Global.Basic.Tests.CodeAnalysis.Syntax
     ' IDisposable
     Protected Sub Dispose(disposing As Boolean)
 
-      If Not Me.disposedValue Then
+      If Not disposedValue Then
 
         If disposing Then
 
           ' Dispose managed state (managed objects).
 
-          If Not Me.m_hasErrors Then
-            Assert.False(Me.m_enumerator.MoveNext)
+          If Not m_hasErrors Then
+            Assert.False(m_enumerator.MoveNext)
           End If
 
-          Me.m_enumerator.Dispose()
+          m_enumerator.Dispose()
 
         End If
 
@@ -87,7 +87,7 @@ Namespace Global.Basic.Tests.CodeAnalysis.Syntax
 
       End If
 
-      Me.disposedValue = True
+      disposedValue = True
 
     End Sub
 
@@ -101,7 +101,7 @@ Namespace Global.Basic.Tests.CodeAnalysis.Syntax
     ' This code added by Visual Basic to correctly implement the disposable pattern.
     Public Sub Dispose() Implements IDisposable.Dispose
       ' Do not change this code.  Put cleanup code in Dispose(disposing As Boolean) above.
-      Me.Dispose(True)
+      Dispose(True)
       ' TODO: uncomment the following line if Finalize() is overridden above.
       ' GC.SuppressFinalize(Me)
     End Sub

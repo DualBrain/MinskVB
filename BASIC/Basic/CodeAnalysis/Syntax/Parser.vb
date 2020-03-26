@@ -27,40 +27,40 @@ Namespace Global.Basic.CodeAnalysis.Syntax
         End If
       Loop While token.Kind <> SyntaxKind.EndOfFileToken
       Me.Text = text
-      Me.Diagnostics.AddRange(lexer.Diagnostics)
+      Diagnostics.AddRange(lexer.Diagnostics)
       Me.Tokens = tokens.ToImmutableArray
     End Sub
 
     Private Function Peek(offset As Integer) As SyntaxToken
-      Dim index = Me.Position + offset
-      If index >= Me.Tokens.Length Then
-        Return Me.Tokens(Me.Tokens.Length - 1)
+      Dim index = Position + offset
+      If index >= Tokens.Length Then
+        Return Tokens(Tokens.Length - 1)
       End If
-      Return Me.Tokens(index)
+      Return Tokens(index)
     End Function
 
     Private Function Current() As SyntaxToken
-      Return Me.Peek(0)
+      Return Peek(0)
     End Function
 
     Private Function NextToken() As SyntaxToken
       Dim current = Me.Current
-      Me.Position += 1
+      Position += 1
       Return current
     End Function
 
     Private Function MatchToken(kind As SyntaxKind) As SyntaxToken
-      If Me.Current.Kind = kind Then
-        Return Me.NextToken()
+      If Current.Kind = kind Then
+        Return NextToken()
       Else
-        Me.Diagnostics.ReportUnexpectedToken(Me.Current.Span, Me.Current.Kind, kind)
-        Return New SyntaxToken(kind, Me.Current.Position, Nothing, Nothing)
+        Diagnostics.ReportUnexpectedToken(Current.Span, Current.Kind, kind)
+        Return New SyntaxToken(kind, Current.Position, Nothing, Nothing)
       End If
     End Function
 
     Public Function ParseCompilationUnit() As CompilationUnitSyntax
-      Dim members = Me.ParseMembers
-      Dim endOfFileToken = Me.MatchToken(SyntaxKind.EndOfFileToken)
+      Dim members = ParseMembers
+      Dim endOfFileToken = MatchToken(SyntaxKind.EndOfFileToken)
       Return New CompilationUnitSyntax(members, endOfFileToken)
     End Function
 
@@ -68,11 +68,11 @@ Namespace Global.Basic.CodeAnalysis.Syntax
 
       Dim members = ImmutableArray.CreateBuilder(Of MemberSyntax)
 
-      While Me.Current.Kind <> SyntaxKind.EndOfFileToken
+      While Current.Kind <> SyntaxKind.EndOfFileToken
 
-        Dim startToken = Me.Current
+        Dim startToken = Current
 
-        Dim member = Me.ParseMember()
+        Dim member = ParseMember()
         members.Add(member)
 
         ' If ParseStatement() did not consume any tokens,
@@ -81,8 +81,8 @@ Namespace Global.Basic.CodeAnalysis.Syntax
         ' We don't need to report an error because we'll
         ' already tried to parse an expression statement
         ' and reported one.
-        If (Me.Current Is startToken) Then
-          Me.NextToken()
+        If (Current Is startToken) Then
+          NextToken()
         End If
 
       End While
@@ -93,19 +93,19 @@ Namespace Global.Basic.CodeAnalysis.Syntax
 
     Private Function ParseMember() As MemberSyntax
       If Me.Current.Kind = SyntaxKind.FunctionKeyword Then
-        Return Me.ParseFunctionDeclaration
+        Return ParseFunctionDeclaration
       End If
-      Return Me.ParseGlobalStatement
+      Return ParseGlobalStatement
     End Function
 
     Private Function ParseFunctionDeclaration() As MemberSyntax
-      Dim functionKeyword = Me.MatchToken(SyntaxKind.FunctionKeyword)
-      Dim identifier = Me.MatchToken(SyntaxKind.IdentifierToken)
-      Dim openParen = Me.MatchToken(SyntaxKind.OpenParenToken)
-      Dim parameters = Me.ParseParameterList
-      Dim closeParen = Me.MatchToken(SyntaxKind.CloseParenToken)
-      Dim type = Me.ParseOptionalTypeClause
-      Dim body = me.ParseBlockStatement()
+      Dim functionKeyword = MatchToken(SyntaxKind.FunctionKeyword)
+      Dim identifier = MatchToken(SyntaxKind.IdentifierToken)
+      Dim openParen = MatchToken(SyntaxKind.OpenParenToken)
+      Dim parameters = ParseParameterList
+      Dim closeParen = MatchToken(SyntaxKind.CloseParenToken)
+      Dim type = ParseOptionalTypeClause
+      Dim body = ParseBlockStatement()
       Return New FunctionDeclarationSyntax(functionKeyword, identifier, openParen, parameters, closeParen, type, body)
     End Function
 
@@ -115,14 +115,14 @@ Namespace Global.Basic.CodeAnalysis.Syntax
 
       Dim parseNextParameter = True
       While parseNextParameter AndAlso
-            Me.Current.Kind <> SyntaxKind.CloseParenToken AndAlso
-            Me.Current.Kind <> SyntaxKind.EndOfFileToken
+            Current.Kind <> SyntaxKind.CloseParenToken AndAlso
+            Current.Kind <> SyntaxKind.EndOfFileToken
 
-        Dim parameter = Me.ParseParameter
+        Dim parameter = ParseParameter
         nodesAndSeparators.Add(parameter)
 
         If Me.Current.Kind = SyntaxKind.CommaToken Then
-          Dim comma = Me.MatchToken(SyntaxKind.CommaToken)
+          Dim comma = MatchToken(SyntaxKind.CommaToken)
           nodesAndSeparators.Add(comma)
         Else
           parseNextParameter = False
@@ -135,40 +135,40 @@ Namespace Global.Basic.CodeAnalysis.Syntax
     End Function
 
     Private Function ParseParameter() As ParameterSyntax
-      Dim identifier = Me.MatchToken(SyntaxKind.IdentifierToken)
-      Dim type = Me.ParseTypeClause()
+      Dim identifier = MatchToken(SyntaxKind.IdentifierToken)
+      Dim type = ParseTypeClause()
       Return New ParameterSyntax(identifier, type)
     End Function
 
     Private Function ParseGlobalStatement() As MemberSyntax
-      Dim statement = Me.ParseStatement
+      Dim statement = ParseStatement
       Return New GlobalStatementSyntax(statement)
     End Function
 
     Private Function ParseStatement() As StatementSyntax
-      Select Case Me.Current.Kind
+      Select Case Current.Kind
         Case SyntaxKind.OpenBraceToken
-          Return Me.ParseBlockStatement
+          Return ParseBlockStatement
         Case SyntaxKind.LetKeyword,
              SyntaxKind.VarKeyword,
              SyntaxKind.LetKeyword
-          Return Me.ParseVariableDeclaration
+          Return ParseVariableDeclaration
         Case SyntaxKind.IfKeyword
-          Return Me.ParseIfStatement
+          Return ParseIfStatement
         Case SyntaxKind.WhileKeyword
-          Return Me.ParseWhileStatement
+          Return ParseWhileStatement
         Case SyntaxKind.DoKeyword
-          Return Me.ParseDoWhileStatement
+          Return ParseDoWhileStatement
         Case SyntaxKind.ForKeyword
-          Return Me.ParseForStatement
+          Return ParseForStatement
         Case SyntaxKind.BreakKeyword
-          Return Me.ParseBreakStatement
+          Return ParseBreakStatement
         Case SyntaxKind.ContinueKeyword
-          Return Me.ParseContinueStatement
+          Return ParseContinueStatement
         Case SyntaxKind.ReturnKeyword
-          Return Me.ParseReturnStatement
+          Return ParseReturnStatement
         Case Else
-          Return Me.ParseExpressionStatement
+          Return ParseExpressionStatement
       End Select
     End Function
 
@@ -176,14 +176,14 @@ Namespace Global.Basic.CodeAnalysis.Syntax
 
       Dim statements = ImmutableArray.CreateBuilder(Of StatementSyntax)
 
-      Dim openBraceToken = Me.MatchToken(SyntaxKind.OpenBraceToken)
+      Dim openBraceToken = MatchToken(SyntaxKind.OpenBraceToken)
 
-      While Me.Current.Kind <> SyntaxKind.EndOfFileToken AndAlso
-            Me.Current.Kind <> SyntaxKind.CloseBraceToken
+      While Current.Kind <> SyntaxKind.EndOfFileToken AndAlso
+            Current.Kind <> SyntaxKind.CloseBraceToken
 
-        Dim startToken = Me.Current
+        Dim startToken = Current
 
-        Dim statement = Me.ParseStatement()
+        Dim statement = ParseStatement()
         statements.Add(statement)
 
         ' If ParseStatement() did not consume any tokens,
@@ -192,12 +192,12 @@ Namespace Global.Basic.CodeAnalysis.Syntax
         ' We don't need to report an error because we'll
         ' already tried to parse an expression statement
         ' and reported one.
-        If (Me.Current Is startToken) Then
-          Me.NextToken()
+        If (Current Is startToken) Then
+          NextToken()
         End If
 
       End While
-      Dim closeBraceToken = Me.MatchToken(SyntaxKind.CloseBraceToken)
+      Dim closeBraceToken = MatchToken(SyntaxKind.CloseBraceToken)
 
       Return New BlockStatementSyntax(openBraceToken, statements.ToImmutable, closeBraceToken)
 
@@ -210,105 +210,105 @@ Namespace Global.Basic.CodeAnalysis.Syntax
       'Dim expected = If(Me.Current.Kind = SyntaxKind.LetKeyword, SyntaxKind.LetKeyword, SyntaxKind.VarKeyword)
       Dim expected = SyntaxKind.VarKeyword
       ' If LET or DIM, set... otherwise, default to VAR (whether it's VAR or not).
-      Select Case Me.Current.Kind
+      Select Case Current.Kind
         Case SyntaxKind.LetKeyword : expected = SyntaxKind.LetKeyword
         Case SyntaxKind.DimKeyword : expected = SyntaxKind.DimKeyword
         Case Else
       End Select
 
-      Dim keyword = Me.MatchToken(expected)
-      Dim identifier = Me.MatchToken(SyntaxKind.IdentifierToken)
-      Dim typeClause = Me.ParseOptionalTypeClause()
-      Dim equals = Me.MatchToken(SyntaxKind.EqualsToken)
-      Dim initializer = Me.ParseExpression()
+      Dim keyword = MatchToken(expected)
+      Dim identifier = MatchToken(SyntaxKind.IdentifierToken)
+      Dim typeClause = ParseOptionalTypeClause()
+      Dim equals = MatchToken(SyntaxKind.EqualsToken)
+      Dim initializer = ParseExpression()
 
       Return New VariableDeclarationSyntax(keyword, identifier, typeClause, equals, initializer)
 
     End Function
 
     Private Function ParseOptionalTypeClause() As TypeClauseSyntax
-      If Me.Current.Kind <> SyntaxKind.ColonToken Then
+      If Current.Kind <> SyntaxKind.ColonToken Then
         Return Nothing
       End If
-      Return Me.ParseTypeClause()
+      Return ParseTypeClause()
     End Function
 
     Private Function ParseTypeClause() As TypeClauseSyntax
-      Dim colonToken = Me.MatchToken(SyntaxKind.ColonToken)
-      Dim identifier = Me.MatchToken(SyntaxKind.IdentifierToken)
+      Dim colonToken = MatchToken(SyntaxKind.ColonToken)
+      Dim identifier = MatchToken(SyntaxKind.IdentifierToken)
       Return New TypeClauseSyntax(colonToken, identifier)
     End Function
 
     Private Function ParseIfStatement() As StatementSyntax
-      Dim keyword = Me.MatchToken(SyntaxKind.IfKeyword)
-      Dim condition = Me.ParseExpression
-      Dim statement = Me.ParseStatement()
-      Dim elseClause = Me.ParseElseClause()
+      Dim keyword = MatchToken(SyntaxKind.IfKeyword)
+      Dim condition = ParseExpression
+      Dim statement = ParseStatement()
+      Dim elseClause = ParseElseClause()
       Return New IfStatementSyntax(keyword, condition, statement, elseClause)
     End Function
 
     Private Function ParseElseClause() As ElseClauseSyntax
-      If Me.Current.Kind <> SyntaxKind.ElseKeyword Then
+      If Current.Kind <> SyntaxKind.ElseKeyword Then
         Return Nothing
       End If
-      Dim keyword = Me.NextToken
-      Dim statement = Me.ParseStatement
+      Dim keyword = NextToken
+      Dim statement = ParseStatement
       Return New ElseClauseSyntax(keyword, statement)
     End Function
 
     Private Function ParseWhileStatement() As StatementSyntax
-      Dim keyword = Me.MatchToken(SyntaxKind.WhileKeyword)
-      Dim condition = Me.ParseExpression
-      Dim body = Me.ParseStatement
+      Dim keyword = MatchToken(SyntaxKind.WhileKeyword)
+      Dim condition = ParseExpression
+      Dim body = ParseStatement
       Return New WhileStatementSyntax(keyword, condition, body)
     End Function
 
     Private Function ParseDoWhileStatement() As StatementSyntax
-      Dim doKeyword = Me.MatchToken(SyntaxKind.DoKeyword)
-      Dim body = Me.ParseStatement
-      Dim whileKeyword = Me.MatchToken(SyntaxKind.WhileKeyword)
-      Dim condition = Me.ParseExpression
+      Dim doKeyword = MatchToken(SyntaxKind.DoKeyword)
+      Dim body = ParseStatement
+      Dim whileKeyword = MatchToken(SyntaxKind.WhileKeyword)
+      Dim condition = ParseExpression
       Return New DoWhileStatementSyntax(doKeyword, body, whileKeyword, condition)
     End Function
 
     Private Function ParseForStatement() As StatementSyntax
-      Dim keyword = Me.MatchToken(SyntaxKind.ForKeyword)
-      Dim identifier = Me.MatchToken(SyntaxKind.IdentifierToken)
-      Dim equalsToken = Me.MatchToken(SyntaxKind.EqualsToken)
-      Dim lowerBound = Me.ParseExpression
-      Dim toKeyword = Me.MatchToken(SyntaxKind.ToKeyword)
-      Dim upperBound = Me.ParseExpression
-      Dim body = Me.ParseStatement
+      Dim keyword = MatchToken(SyntaxKind.ForKeyword)
+      Dim identifier = MatchToken(SyntaxKind.IdentifierToken)
+      Dim equalsToken = MatchToken(SyntaxKind.EqualsToken)
+      Dim lowerBound = ParseExpression
+      Dim toKeyword = MatchToken(SyntaxKind.ToKeyword)
+      Dim upperBound = ParseExpression
+      Dim body = ParseStatement
       Return New ForStatementSyntax(keyword, identifier, equalsToken, lowerBound, toKeyword, upperBound, body)
     End Function
 
     Private Function ParseBreakStatement() As StatementSyntax
-      Dim keyword = Me.MatchToken(SyntaxKind.BreakKeyword)
+      Dim keyword = MatchToken(SyntaxKind.BreakKeyword)
       Return New BreakStatementSyntax(keyword)
     End Function
 
     Private Function ParseContinueStatement() As StatementSyntax
-      Dim keyword = Me.MatchToken(SyntaxKind.ContinueKeyword)
+      Dim keyword = MatchToken(SyntaxKind.ContinueKeyword)
       Return New ContinueStatementSyntax(keyword)
     End Function
 
     Private Function ParseReturnStatement() As StatementSyntax
-      Dim keyword = Me.MatchToken(SyntaxKind.ReturnKeyword)
-      Dim keywordLine = Me.Text.GetLineIndex(keyword.Span.Start)
-      Dim currentLine = Me.Text.GetLineIndex(Me.Current.Span.Start)
+      Dim keyword = MatchToken(SyntaxKind.ReturnKeyword)
+      Dim keywordLine = Text.GetLineIndex(keyword.Span.Start)
+      Dim currentLine = Text.GetLineIndex(Current.Span.Start)
       Dim isEof = (Me.Current.Kind = SyntaxKind.EndOfFileToken)
       Dim sameLine = Not isEof AndAlso keywordLine = currentLine
-      Dim expression = If(sameLine, Me.ParseExpression, Nothing)
+      Dim expression = If(sameLine, ParseExpression, Nothing)
       Return New ReturnStatementSyntax(keyword, expression)
     End Function
 
     Private Function ParseExpressionStatement() As ExpressionStatementSyntax
-      Dim expression = Me.ParseExpression()
+      Dim expression = ParseExpression()
       Return New ExpressionStatementSyntax(expression)
     End Function
 
     Private Function ParseExpression() As ExpressionSyntax
-      Return Me.ParseAssignmentExpression
+      Return ParseAssignmentExpression
     End Function
 
     Private Function ParseAssignmentExpression() As ExpressionSyntax
@@ -316,37 +316,37 @@ Namespace Global.Basic.CodeAnalysis.Syntax
       If (Me.Peek(0).Kind = SyntaxKind.IdentifierToken AndAlso
           Me.Peek(1).Kind = SyntaxKind.EqualsToken) Then
 
-        Dim identifierToken = Me.NextToken
-        Dim operatorToken = Me.NextToken
+        Dim identifierToken = NextToken
+        Dim operatorToken = NextToken
         Dim right = Me.ParseAssignmentExpression
         Return New AssignmentExpressionSyntax(identifierToken, operatorToken, right)
 
       End If
 
-      Return Me.ParseBinaryExpression
+      Return ParseBinaryExpression
 
     End Function
 
     Private Function ParseBinaryExpression(Optional parentPrecedence As Integer = 0) As ExpressionSyntax
 
       Dim left As ExpressionSyntax
-      Dim unaryOperatorPrecedence = Me.Current.Kind.GetUnaryOperatorPrecedence
+      Dim unaryOperatorPrecedence = Current.Kind.GetUnaryOperatorPrecedence
       If unaryOperatorPrecedence <> 0 AndAlso unaryOperatorPrecedence >= parentPrecedence Then
-        Dim operatorToken = Me.NextToken()
-        Dim operand = Me.ParseBinaryExpression(unaryOperatorPrecedence)
+        Dim operatorToken = NextToken()
+        Dim operand = ParseBinaryExpression(unaryOperatorPrecedence)
         left = New UnaryExpressionSyntax(operatorToken, operand)
       Else
-        left = Me.ParsePrimaryExpression
+        left = ParsePrimaryExpression
       End If
 
       While True
 
-        Dim precedence = Me.Current.Kind.GetBinaryOperatorPrecedence
+        Dim precedence = Current.Kind.GetBinaryOperatorPrecedence
         If precedence = 0 OrElse precedence <= parentPrecedence Then
           Exit While
         End If
-        Dim operatorToken = Me.NextToken()
-        Dim right = Me.ParseBinaryExpression(precedence)
+        Dim operatorToken = NextToken()
+        Dim right = ParseBinaryExpression(precedence)
         left = New BinaryExpressionSyntax(left, operatorToken, right)
 
       End While
@@ -357,57 +357,57 @@ Namespace Global.Basic.CodeAnalysis.Syntax
 
     Private Function ParsePrimaryExpression() As ExpressionSyntax
 
-      Select Case Me.Current.Kind
-        Case SyntaxKind.OpenParenToken : Return Me.ParseParenExpression
-        Case SyntaxKind.FalseKeyword : Return Me.ParseBooleanLiteral
-        Case SyntaxKind.TrueKeyword : Return Me.ParseBooleanLiteral
-        Case SyntaxKind.NumberToken : Return Me.ParseNumberLiteral
-        Case SyntaxKind.StringToken : Return Me.ParseStringLiteral
-        Case SyntaxKind.IdentifierToken : Return Me.ParseNameorCallExpression
+      Select Case Current.Kind
+        Case SyntaxKind.OpenParenToken : Return ParseParenExpression
+        Case SyntaxKind.FalseKeyword : Return ParseBooleanLiteral
+        Case SyntaxKind.TrueKeyword : Return ParseBooleanLiteral
+        Case SyntaxKind.NumberToken : Return ParseNumberLiteral
+        Case SyntaxKind.StringToken : Return ParseStringLiteral
+        Case SyntaxKind.IdentifierToken : Return ParseNameorCallExpression
         Case Else
           ' Default to parsing a name expression if we reach this far.
-          Return Me.ParseNameOrCallExpression
+          Return ParseNameOrCallExpression
       End Select
 
     End Function
 
     Private Function ParseParenExpression() As ExpressionSyntax
-      Dim left = Me.MatchToken(SyntaxKind.OpenParenToken)
-      Dim expression = Me.ParseExpression
-      Dim right = Me.MatchToken(SyntaxKind.CloseParenToken)
+      Dim left = MatchToken(SyntaxKind.OpenParenToken)
+      Dim expression = ParseExpression
+      Dim right = MatchToken(SyntaxKind.CloseParenToken)
       Return New ParenExpressionSyntax(left, expression, right)
     End Function
 
     Private Function ParseBooleanLiteral() As ExpressionSyntax
       Dim isTrue = (Me.Current.Kind = SyntaxKind.TrueKeyword)
-      Dim keywordToken = Me.MatchToken(If(isTrue, SyntaxKind.TrueKeyword, SyntaxKind.FalseKeyword))
+      Dim keywordToken = MatchToken(If(isTrue, SyntaxKind.TrueKeyword, SyntaxKind.FalseKeyword))
       Return New LiteralExpressionSyntax(keywordToken, isTrue)
     End Function
 
     Private Function ParseNumberLiteral() As ExpressionSyntax
-      Dim numberToken = Me.MatchToken(SyntaxKind.NumberToken)
+      Dim numberToken = MatchToken(SyntaxKind.NumberToken)
       Return New LiteralExpressionSyntax(numberToken)
     End Function
 
     Private Function ParseStringLiteral() As ExpressionSyntax
-      Dim stringToken = Me.MatchToken(SyntaxKind.StringToken)
+      Dim stringToken = MatchToken(SyntaxKind.StringToken)
       Return New LiteralExpressionSyntax(stringToken)
     End Function
 
     Private Function ParseNameOrCallExpression() As ExpressionSyntax
       If Me.Peek(0).Kind = SyntaxKind.IdentifierToken AndAlso
          Me.Peek(1).Kind = SyntaxKind.OpenParenToken Then
-        Return Me.ParseCallExpression
+        Return ParseCallExpression
       Else
-        Return Me.ParseNameExpression
+        Return ParseNameExpression
       End If
     End Function
 
     Private Function ParseCallExpression() As ExpressionSyntax
-      Dim identifier = Me.MatchToken(SyntaxKind.IdentifierToken)
-      Dim openParen = Me.MatchToken(SyntaxKind.OpenParenToken)
-      Dim arguments = Me.ParseArguments
-      Dim closeParen = Me.MatchToken(SyntaxKind.CloseParenToken)
+      Dim identifier = MatchToken(SyntaxKind.IdentifierToken)
+      Dim openParen = MatchToken(SyntaxKind.OpenParenToken)
+      Dim arguments = ParseArguments
+      Dim closeParen = MatchToken(SyntaxKind.CloseParenToken)
       Return New CallExpressionSyntax(identifier, openParen, arguments, closeParen)
     End Function
 
@@ -417,14 +417,14 @@ Namespace Global.Basic.CodeAnalysis.Syntax
 
       Dim parseNextArgument = True
       While parseNextArgument AndAlso
-            Me.Current.Kind <> SyntaxKind.CloseParenToken AndAlso
-            Me.Current.Kind <> SyntaxKind.EndOfFileToken
+            Current.Kind <> SyntaxKind.CloseParenToken AndAlso
+            Current.Kind <> SyntaxKind.EndOfFileToken
 
-        Dim expression = Me.ParseExpression
+        Dim expression = ParseExpression
         nodesAndSeparators.Add(expression)
 
         If Me.Current.Kind = SyntaxKind.CommaToken Then
-          Dim comma = Me.MatchToken(SyntaxKind.CommaToken)
+          Dim comma = MatchToken(SyntaxKind.CommaToken)
           nodesAndSeparators.Add(comma)
         Else
           parseNextArgument = False
@@ -437,7 +437,7 @@ Namespace Global.Basic.CodeAnalysis.Syntax
     End Function
 
     Private Function ParseNameExpression() As ExpressionSyntax
-      Dim identifierToken = Me.MatchToken(SyntaxKind.IdentifierToken)
+      Dim identifierToken = MatchToken(SyntaxKind.IdentifierToken)
       Return New NameExpressionSyntax(identifierToken)
     End Function
 

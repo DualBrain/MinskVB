@@ -11,7 +11,7 @@ Namespace Global.Basic.CodeAnalysis.Text
     Private ReadOnly Text As String
 
     Private Sub New(text As String)
-      Me.Lines = ParseLines(Me, text)
+      Lines = ParseLines(Me, text)
       Me.Text = text
     End Sub
 
@@ -19,13 +19,13 @@ Namespace Global.Basic.CodeAnalysis.Text
 
     Default Public ReadOnly Property Item(index As Integer) As Char
       Get
-        Return Me.Text(index)
+        Return Text(index)
       End Get
     End Property
 
     Public ReadOnly Property Length As Integer
       Get
-        Return Me.Text.Length
+        Return Text.Length
       End Get
     End Property
 
@@ -34,12 +34,12 @@ Namespace Global.Basic.CodeAnalysis.Text
       ' Implementing a "Binary Search".
 
       Dim lower = 0
-      Dim upper = Me.Lines.Length - 1
+      Dim upper = Lines.Length - 1
 
       While lower <= upper
 
         Dim index = lower + ((upper - lower) \ 2)
-        Dim start = Me.Lines(index).Start
+        Dim start = Lines(index).Start
 
         If position = start Then
           ' Found it!
@@ -116,15 +116,15 @@ Namespace Global.Basic.CodeAnalysis.Text
     End Function
 
     Public Overrides Function ToString() As String
-      Return Me.Text
+      Return Text
     End Function
 
     Public Overloads Function ToString(start As Integer, length As Integer) As String
-      Return Me.Text.Substring(start, length)
+      Return Text.Substring(start, length)
     End Function
 
     Public Overloads Function ToString(span As TextSpan) As String
-      Return Me.Text.Substring(span.Start, span.Length)
+      Return Text.Substring(span.Start, span.Length)
     End Function
 
   End Class

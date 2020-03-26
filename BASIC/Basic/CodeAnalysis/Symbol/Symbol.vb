@@ -21,7 +21,7 @@ Namespace Global.Basic.CodeAnalysis.Symbols
 
     Public Overrides Function ToString() As String
       Using writer = New StringWriter()
-        Me.WriteTo(writer)
+        WriteTo(writer)
         Return writer.ToString()
       End Using
     End Function

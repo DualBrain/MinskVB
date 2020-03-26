@@ -206,15 +206,19 @@ Namespace Global.Basic.CodeAnalysis.Binding
     End Sub
 
     Private Sub WriteGotoStatement(node As BoundGotoStatement, writer As IndentedTextWriter)
-      writer.WriteKeyword("goto ")
+      writer.WriteKeyword("goto") ' There is no SyntaxKind for goto
+      writer.WriteSpace()
       writer.WriteIdentifier(node.Label.Name)
       writer.WriteLine()
     End Sub
 
     Private Sub WriteConditionalGotoStatement(node As BoundConditionalGotoStatement, writer As IndentedTextWriter)
-      writer.WriteKeyword("goto ")
+      writer.WriteKeyword("goto") ' There is no SyntaxKind for goto
+      writer.WriteSpace()
       writer.WriteIdentifier(node.Label.Name)
-      writer.WriteKeyword(If(node.JumpIfTrue, " if ", " unless "))
+      writer.WriteSpace()
+      writer.WriteKeyword(If(node.JumpIfTrue, "if", "unless"))
+      writer.WriteSpace()
       node.Condition.WriteTo(writer)
       writer.WriteLine()
     End Sub

@@ -30,11 +30,11 @@ Namespace Global.Basic.CodeAnalysis
 
     Friend ReadOnly Property GlobalScope As BoundGlobalScope
       Get
-        If Me.m_globalScope Is Nothing Then
-          Dim g = Binder.BindGlobalScope(Me.Previous?.GlobalScope, Me.Syntax.Root)
-          Interlocked.CompareExchange(Me.m_globalScope, g, Nothing)
+        If m_globalScope Is Nothing Then
+          Dim g = Binder.BindGlobalScope(Previous?.GlobalScope, Syntax.Root)
+          Interlocked.CompareExchange(m_globalScope, g, Nothing)
         End If
-        Return Me.m_globalScope
+        Return m_globalScope
       End Get
     End Property
 
@@ -44,12 +44,12 @@ Namespace Global.Basic.CodeAnalysis
 
     Public Function Evaluate(variables As Dictionary(Of VariableSymbol, Object)) As EvaluationResult
 
-      Dim diagnostics = Me.Syntax.Diagnostics.Concat(Me.GlobalScope.Diagnostics).ToImmutableArray
+      Dim diagnostics = Syntax.Diagnostics.Concat(GlobalScope.Diagnostics).ToImmutableArray
       If diagnostics.Any Then
         Return New EvaluationResult(diagnostics, Nothing)
       End If
 
-      Dim program = Binder.BindProgram(Me.GlobalScope)
+      Dim program = Binder.BindProgram(GlobalScope)
 
       Dim appPath = Environment.GetCommandLineArgs(0)
       Dim appDirectory = Path.GetDirectoryName(appPath)
@@ -72,12 +72,12 @@ Namespace Global.Basic.CodeAnalysis
     End Function
 
     Public Sub EmitTree(writer As TextWriter)
-      Dim program = Binder.BindProgram(Me.GlobalScope)
+      Dim program = Binder.BindProgram(GlobalScope)
       If program.Statement.Statements.Any() Then
         program.Statement.WriteTo(writer)
       Else
         For Each functionBody In program.Functions
-          If Not Me.GlobalScope.Functions.Contains(functionBody.Key) Then
+          If Not GlobalScope.Functions.Contains(functionBody.Key) Then
             Continue For
           End If
           functionBody.Key.WriteTo(writer)

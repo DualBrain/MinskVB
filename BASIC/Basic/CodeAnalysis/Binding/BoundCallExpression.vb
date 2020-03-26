@@ -18,7 +18,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
     Public Overrides ReadOnly Property Kind As BoundNodeKind = BoundNodeKind.CallExpression
     Public Overrides ReadOnly Property Type As TypeSymbol
       Get
-        Return Me.Function.Type
+        Return [Function].Type
       End Get
     End Property
     Public ReadOnly Property [Function] As FunctionSymbol

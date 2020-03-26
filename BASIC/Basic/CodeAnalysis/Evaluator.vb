@@ -17,7 +17,7 @@ Namespace Global.Basic.CodeAnalysis
 
     Sub New(program As BoundProgram, variables As Dictionary(Of VariableSymbol, Object))
       Me.Program = program
-      Me.Globals = variables
+      Globals = variables
       m_locals.Push(New Dictionary(Of VariableSymbol, Object))
     End Sub
 
@@ -26,7 +26,7 @@ Namespace Global.Basic.CodeAnalysis
     Public ReadOnly Property Globals As Dictionary(Of VariableSymbol, Object)
 
     Public Function Evaluate() As Object
-      Return Me.EvaluateStatement(Me.Program.Statement)
+      Return EvaluateStatement(Program.Statement)
     End Function
 
     Private Function EvaluateStatement(body As BoundBlockStatement) As Object
@@ -42,14 +42,14 @@ Namespace Global.Basic.CodeAnalysis
       While index < body.Statements.Length
         Dim s = body.Statements(index)
         Select Case s.Kind
-          Case BoundNodeKind.VariableDeclaration : Me.EvaluateVariableDeclaration(DirectCast(s, BoundVariableDeclaration)) : index += 1
-          Case BoundNodeKind.ExpressionStatement : Me.EvaluateExpressionStatement(DirectCast(s, BoundExpressionStatement)) : index += 1
+          Case BoundNodeKind.VariableDeclaration : EvaluateVariableDeclaration(DirectCast(s, BoundVariableDeclaration)) : index += 1
+          Case BoundNodeKind.ExpressionStatement : EvaluateExpressionStatement(DirectCast(s, BoundExpressionStatement)) : index += 1
           Case BoundNodeKind.GotoStatement
             Dim gs As BoundGotoStatement = DirectCast(s, BoundGotoStatement)
             index = labelToIndex(gs.Label)
           Case BoundNodeKind.ConditionalGotoStatement
             Dim cgs = DirectCast(s, BoundConditionalGotoStatement)
-            Dim condition = CBool(Me.EvaluateExpression(cgs.Condition))
+            Dim condition = CBool(EvaluateExpression(cgs.Condition))
             'If (condition AndAlso Not cgs.JumpIfFalse) OrElse
             '   (Not condition AndAlso cgs.JumpIfFalse) Then
             If condition = cgs.JumpIfTrue Then
@@ -60,37 +60,37 @@ Namespace Global.Basic.CodeAnalysis
           Case BoundNodeKind.LabelStatement : index += 1
           Case BoundNodeKind.ReturnStatement
             Dim rs = CType(s, BoundReturnStatement)
-            Me.m_lastValue = If(rs.Expression Is Nothing, Nothing, Me.EvaluateExpression(rs.Expression))
-            Return Me.m_lastValue
+            m_lastValue = If(rs.Expression Is Nothing, Nothing, EvaluateExpression(rs.Expression))
+            Return m_lastValue
           Case Else
             Throw New Exception($"Unexpected statement {s.Kind}")
         End Select
       End While
 
-      Return Me.m_lastValue
+      Return m_lastValue
 
     End Function
 
     Private Sub EvaluateVariableDeclaration(node As BoundVariableDeclaration)
-      Dim value = Me.EvaluateExpression(node.Initializer)
-      Me.m_lastValue = value
-      Me.Assign(node.Variable, value)
+      Dim value = EvaluateExpression(node.Initializer)
+      m_lastValue = value
+      Assign(node.Variable, value)
     End Sub
 
     Private Sub EvaluateExpressionStatement(node As BoundExpressionStatement)
-      Me.m_lastValue = Me.EvaluateExpression(node.Expression)
+      m_lastValue = EvaluateExpression(node.Expression)
     End Sub
 
     Private Function EvaluateExpression(node As BoundExpression) As Object
 
       Select Case node.Kind
-        Case BoundNodeKind.LiteralExpression : Return Me.EvaluateLiteralExpression(node)
-        Case BoundNodeKind.VariableExpression : Return Me.EvaluateVariableExpression(DirectCast(node, BoundVariableExpression))
-        Case BoundNodeKind.AssignmentExpression : Return Me.EvaluateAssignmentExpression(DirectCast(node, BoundAssignmentExpression))
-        Case BoundNodeKind.UnaryExpression : Return Me.EvaluateUnaryExpression(node)
-        Case BoundNodeKind.BinaryExpression : Return Me.EvaluateBinaryExpression(node)
-        Case BoundNodeKind.CallExpression : Return Me.EvaluateCallExpression(DirectCast(node, BoundCallExpression))
-        Case BoundNodeKind.ConversionExpression : Return Me.EvaluateConversionExpression(DirectCast(node, BoundConversionExpression))
+        Case BoundNodeKind.LiteralExpression : Return EvaluateLiteralExpression(node)
+        Case BoundNodeKind.VariableExpression : Return EvaluateVariableExpression(DirectCast(node, BoundVariableExpression))
+        Case BoundNodeKind.AssignmentExpression : Return EvaluateAssignmentExpression(DirectCast(node, BoundAssignmentExpression))
+        Case BoundNodeKind.UnaryExpression : Return EvaluateUnaryExpression(node)
+        Case BoundNodeKind.BinaryExpression : Return EvaluateBinaryExpression(node)
+        Case BoundNodeKind.CallExpression : Return EvaluateCallExpression(DirectCast(node, BoundCallExpression))
+        Case BoundNodeKind.ConversionExpression : Return EvaluateConversionExpression(DirectCast(node, BoundConversionExpression))
         Case Else
           Throw New Exception($"Unexpected node {node.Kind}")
       End Select
@@ -103,22 +103,22 @@ Namespace Global.Basic.CodeAnalysis
 
     Private Function EvaluateVariableExpression(v As BoundVariableExpression) As Object
       If v.Variable.Kind = SymbolKind.GlobalVariable Then
-        Return Me.Globals(v.Variable)
+        Return Globals(v.Variable)
       Else
-        Dim locals = Me.m_locals.Peek()
+        Dim locals = m_locals.Peek()
         Return locals(v.Variable)
       End If
     End Function
 
     Private Function EvaluateAssignmentExpression(a As BoundAssignmentExpression) As Object
-      Dim value = Me.EvaluateExpression(a.Expression)
-      Me.Assign(a.Variable, value)
+      Dim value = EvaluateExpression(a.Expression)
+      Assign(a.Variable, value)
       Return value
     End Function
 
     Private Function EvaluateUnaryExpression(node As BoundExpression) As Object
       Dim u = DirectCast(node, BoundUnaryExpression)
-      Dim operand = Me.EvaluateExpression(u.Operand)
+      Dim operand = EvaluateExpression(u.Operand)
       Select Case u.Op.Kind
         Case BoundUnaryOperatorKind.Identity
           Return CInt(operand)
@@ -135,8 +135,8 @@ Namespace Global.Basic.CodeAnalysis
 
     Private Function EvaluateBinaryExpression(node As BoundExpression) As Object
       Dim b = DirectCast(node, BoundBinaryExpression)
-      Dim left = Me.EvaluateExpression(b.Left)
-      Dim right = Me.EvaluateExpression(b.Right)
+      Dim left = EvaluateExpression(b.Left)
+      Dim right = EvaluateExpression(b.Right)
       Select Case b.Op.Kind
         Case BoundBinaryOperatorKind.Addition
           If b.Type Is TypeSymbol.Int Then
@@ -183,31 +183,31 @@ Namespace Global.Basic.CodeAnalysis
       If node.Function Is BuiltinFunctions.Input Then
         Return Console.ReadLine()
       ElseIf node.Function Is BuiltinFunctions.Print Then
-        Dim message = CStr(Me.EvaluateExpression(node.Arguments(0)))
+        Dim message = CStr(EvaluateExpression(node.Arguments(0)))
         Console.WriteLine(message)
         Return Nothing
       ElseIf node.Function Is BuiltinFunctions.Rnd Then
-        Dim max = CInt(Me.EvaluateExpression(node.Arguments(0)))
-        If Me.m_random Is Nothing Then Me.m_random = New Random
-        Return Me.m_random.Next(max)
+        Dim max = CInt(EvaluateExpression(node.Arguments(0)))
+        If m_random Is Nothing Then m_random = New Random
+        Return m_random.Next(max)
       Else
         Dim locals = New Dictionary(Of VariableSymbol, Object)
         For i = 0 To node.Arguments.Length - 1
           Dim parameter = node.Function.Parameters(i)
-          Dim value = Me.EvaluateExpression(node.Arguments(i))
+          Dim value = EvaluateExpression(node.Arguments(i))
           locals.Add(parameter, value)
         Next
-        Me.m_locals.Push(locals)
-        Dim statement = Me.Program.Functions(node.Function)
-        Dim result = Me.EvaluateStatement(statement)
-        Me.m_locals.Pop()
+        m_locals.Push(locals)
+        Dim statement = Program.Functions(node.Function)
+        Dim result = EvaluateStatement(statement)
+        m_locals.Pop()
         Return result
       End If
 
     End Function
 
     Private Function EvaluateConversionExpression(node As BoundConversionExpression) As Object
-      Dim value = Me.EvaluateExpression(node.Expression)
+      Dim value = EvaluateExpression(node.Expression)
       If node.Type Is TypeSymbol.Bool Then
         Return Convert.ToBoolean(value)
       ElseIf node.Type Is TypeSymbol.Int Then
@@ -221,9 +221,9 @@ Namespace Global.Basic.CodeAnalysis
 
     Private Sub Assign(variable As VariableSymbol, value As Object)
       If variable.Kind = SymbolKind.GlobalVariable Then
-        Me.Globals(variable) = value
+        Globals(variable) = value
       Else
-        Dim locals = Me.m_locals.Peek()
+        Dim locals = m_locals.Peek()
         locals(variable) = value
       End If
     End Sub

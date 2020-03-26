@@ -15,15 +15,15 @@ Friend MustInherit Class Repl
 
   Public Sub Run()
     Do
-      Dim text = Me.EditSubmission()
+      Dim text = EditSubmission()
       If String.IsNullOrEmpty(text) Then Return
       If Not text.Contains(Environment.NewLine) AndAlso text.StartsWith("#") Then
-        Me.EvaluateMetaCommand(text)
+        EvaluateMetaCommand(text)
       Else
-        Me.EvaluateSubmission(text)
+        EvaluateSubmission(text)
       End If
-      Me.m_submissionHistory.Add(text)
-      Me.m_submissionHistoryIndex = 0
+      m_submissionHistory.Add(text)
+      m_submissionHistoryIndex = 0
     Loop
   End Sub
 
@@ -37,14 +37,14 @@ Friend MustInherit Class Repl
     Private m_currentCharacter As Integer
 
     Sub New(lineRenderer As Action(Of String), submissionDocument As ObservableCollection(Of String))
-      Me.m_lineRenderer = lineRenderer
+      m_lineRenderer = lineRenderer
       Me.SubmissionDocument = submissionDocument
-      Me.m_cursorTop = CursorTop
-      Me.Render()
+      m_cursorTop = CursorTop
+      Render()
     End Sub
 
     Private Sub CollectionChanged(sender As Object, e As NotifyCollectionChangedEventArgs) Handles SubmissionDocument.CollectionChanged
-      Me.Render()
+      Render()
     End Sub
 
     Private Sub Render()
@@ -54,9 +54,9 @@ Friend MustInherit Class Repl
 
       Dim lineCount = 0
 
-      For Each line In Me.SubmissionDocument
+      For Each line In SubmissionDocument
 
-        SetCursorPosition(0, Me.m_cursorTop + lineCount)
+        SetCursorPosition(0, m_cursorTop + lineCount)
         ForegroundColor = Green
 
         If lineCount = 0 Then
@@ -66,54 +66,54 @@ Friend MustInherit Class Repl
         End If
 
         ResetColor()
-        Me.m_lineRenderer(line)
+        m_lineRenderer(line)
         'Write(line)
         Write(New String(" "c, WindowWidth - line.Length))
         lineCount += 1
 
       Next
 
-      Dim numberOfBlankLines = Me.m_renderedLineCount - lineCount
+      Dim numberOfBlankLines = m_renderedLineCount - lineCount
       If numberOfBlankLines > 0 Then
         Dim blankLine = New String(" "c, WindowWidth)
         For i = 0 To numberOfBlankLines - 1
-          SetCursorPosition(0, Me.m_cursorTop + lineCount + i)
+          SetCursorPosition(0, m_cursorTop + lineCount + i)
           WriteLine(blankLine)
           'numberOfBlankLines -= 1
         Next
       End If
 
-      Me.m_renderedLineCount = lineCount
+      m_renderedLineCount = lineCount
       CursorVisible = True
-      Me.UpdateCursorPosition()
+      UpdateCursorPosition()
 
     End Sub
 
     Private Sub UpdateCursorPosition()
-      SetCursorPosition(2 + Me.CurrentCharacter, Me.m_cursorTop + Me.CurrentLine)
+      SetCursorPosition(2 + CurrentCharacter, m_cursorTop + CurrentLine)
     End Sub
 
     Public Property CurrentLine As Integer
       Get
-        Return Me.m_currentLine
+        Return m_currentLine
       End Get
       Set
-        If Me.m_currentLine <> Value Then
-          Me.m_currentLine = Value
-          Me.m_currentCharacter = Math.Min(Me.SubmissionDocument(Me.m_currentLine).Length, Me.m_currentCharacter)
-          Me.UpdateCursorPosition()
+        If m_currentLine <> Value Then
+          m_currentLine = Value
+          m_currentCharacter = Math.Min(SubmissionDocument(m_currentLine).Length, m_currentCharacter)
+          UpdateCursorPosition()
         End If
       End Set
     End Property
 
     Public Property CurrentCharacter As Integer
       Get
-        Return Me.m_currentCharacter
+        Return m_currentCharacter
       End Get
       Set
-        If Me.m_currentCharacter <> Value Then
-          Me.m_currentCharacter = Value
-          Me.UpdateCursorPosition()
+        If m_currentCharacter <> Value Then
+          m_currentCharacter = Value
+          UpdateCursorPosition()
         End If
       End Set
     End Property
@@ -122,14 +122,14 @@ Friend MustInherit Class Repl
 
   Private Function EditSubmission() As String
 
-    Me.m_done = False
+    m_done = False
 
     Dim document = New ObservableCollection(Of String) From {""}
-    Dim view = New SubmissionView(AddressOf Me.RenderLine, document)
+    Dim view = New SubmissionView(AddressOf RenderLine, document)
 
-    While Not Me.m_done
+    While Not m_done
       Dim key = ReadKey(True)
-      Me.HandleKey(key, document, view)
+      HandleKey(key, document, view)
     End While
 
     view.CurrentLine = document.Count - 1
@@ -143,30 +143,30 @@ Friend MustInherit Class Repl
   Private Sub HandleKey(key As ConsoleKeyInfo, document As ObservableCollection(Of String), view As SubmissionView)
     If key.Modifiers = 0 Then
       Select Case key.Key
-        Case ConsoleKey.Escape : Me.HandleEscape(document, view)
-        Case ConsoleKey.Enter : Me.HandleEnter(document, view)
-        Case ConsoleKey.LeftArrow : Me.HandleLeftArrow(document, view)
-        Case ConsoleKey.RightArrow : Me.HandleRightArrow(document, view)
-        Case ConsoleKey.UpArrow : Me.HandleUpArrow(document, view)
-        Case ConsoleKey.DownArrow : Me.HandleDownArrow(document, view)
-        Case ConsoleKey.Backspace : Me.HandleBackspace(document, view)
-        Case ConsoleKey.Delete : Me.HandleDelete(document, view)
-        Case ConsoleKey.Home : Me.HandleHome(document, view)
-        Case ConsoleKey.End : Me.HandleEnd(document, view)
-        Case ConsoleKey.Tab : Me.HandleTab(document, view)
-        Case ConsoleKey.PageUp : Me.HandlePageUp(document, view)
-        Case ConsoleKey.PageDown : Me.HandlePageDown(document, view)
+        Case ConsoleKey.Escape : HandleEscape(document, view)
+        Case ConsoleKey.Enter : HandleEnter(document, view)
+        Case ConsoleKey.LeftArrow : HandleLeftArrow(document, view)
+        Case ConsoleKey.RightArrow : HandleRightArrow(document, view)
+        Case ConsoleKey.UpArrow : HandleUpArrow(document, view)
+        Case ConsoleKey.DownArrow : HandleDownArrow(document, view)
+        Case ConsoleKey.Backspace : HandleBackspace(document, view)
+        Case ConsoleKey.Delete : HandleDelete(document, view)
+        Case ConsoleKey.Home : HandleHome(document, view)
+        Case ConsoleKey.End : HandleEnd(document, view)
+        Case ConsoleKey.Tab : HandleTab(document, view)
+        Case ConsoleKey.PageUp : HandlePageUp(document, view)
+        Case ConsoleKey.PageDown : HandlePageDown(document, view)
         Case Else
       End Select
     ElseIf key.Modifiers = ConsoleModifiers.Control Then
       Select Case key.Key
         Case ConsoleKey.Enter
-          Me.HandleControlEnter(document, view)
+          HandleControlEnter(document, view)
         Case Else
       End Select
     End If
     If key.KeyChar >= " "c Then
-      Me.HandleTyping(document, view, key.KeyChar.ToString)
+      HandleTyping(document, view, key.KeyChar.ToString)
     End If
   End Sub
 
@@ -179,8 +179,8 @@ Friend MustInherit Class Repl
 
   Private Sub HandleEnter(document As ObservableCollection(Of String), view As SubmissionView)
     Dim submissionText = String.Join(Environment.NewLine, document)
-    If submissionText.StartsWith("#") OrElse Me.IsCompleteSubmission(submissionText) Then
-      Me.m_done = True
+    If submissionText.StartsWith("#") OrElse IsCompleteSubmission(submissionText) Then
+      m_done = True
       Return
     End If
     InsertLine(document, view)
@@ -271,26 +271,26 @@ Friend MustInherit Class Repl
   End Sub
 
   Private Sub HandlePageUp(document As ObservableCollection(Of String), view As SubmissionView)
-    Me.m_submissionHistoryIndex -= 1
-    If Me.m_submissionHistoryIndex < 0 Then
-      Me.m_submissionHistoryIndex = Me.m_submissionHistory.Count - 1
+    m_submissionHistoryIndex -= 1
+    If m_submissionHistoryIndex < 0 Then
+      m_submissionHistoryIndex = m_submissionHistory.Count - 1
     End If
-    Me.UpdateDocumentFromHistory(document, view)
+    UpdateDocumentFromHistory(document, view)
   End Sub
 
   Private Sub HandlePageDown(document As ObservableCollection(Of String), view As SubmissionView)
-    If Me.m_submissionHistory.Count = 0 Then Return
-    Me.m_submissionHistoryIndex += 1
-    If Me.m_submissionHistoryIndex > Me.m_submissionHistory.Count - 1 Then
-      Me.m_submissionHistoryIndex = 0
+    If m_submissionHistory.Count = 0 Then Return
+    m_submissionHistoryIndex += 1
+    If m_submissionHistoryIndex > m_submissionHistory.Count - 1 Then
+      m_submissionHistoryIndex = 0
     End If
-    Me.UpdateDocumentFromHistory(document, view)
+    UpdateDocumentFromHistory(document, view)
   End Sub
 
   Private Sub UpdateDocumentFromHistory(document As ObservableCollection(Of String), view As SubmissionView)
-    If Me.m_submissionHistory.Count = 0 Then Return
+    If m_submissionHistory.Count = 0 Then Return
     document.Clear()
-    Dim historyItem = Me.m_submissionHistory(Me.m_submissionHistoryIndex)
+    Dim historyItem = m_submissionHistory(m_submissionHistoryIndex)
     Dim lines = historyItem.Split(Environment.NewLine)
     For Each line In lines
       document.Add(line)
@@ -322,7 +322,7 @@ Friend MustInherit Class Repl
   End Sub
 
   Protected Sub ClearHistory()
-    Me.m_submissionHistory.Clear()
+    m_submissionHistory.Clear()
   End Sub
 
   Protected Overridable Sub RenderLine(line As String)

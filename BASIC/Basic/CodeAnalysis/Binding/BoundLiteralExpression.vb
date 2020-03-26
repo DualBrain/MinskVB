@@ -12,11 +12,11 @@ Namespace Global.Basic.CodeAnalysis.Binding
     Sub New(value As Object)
       Me.Value = value
       If TypeOf Me.Value Is Boolean Then
-        Me.Type = TypeSymbol.Bool
+        Type = TypeSymbol.Bool
       ElseIf TypeOf Me.Value Is Integer Then
-        Me.Type = TypeSymbol.Int
+        Type = TypeSymbol.Int
       ElseIf TypeOf value Is String Then
-        Me.Type = TypeSymbol.String
+        Type = TypeSymbol.String
       Else
         Throw New Exception($"Unexpected literal '{value}' of type {value.GetType}.")
       End If

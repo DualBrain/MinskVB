@@ -15,7 +15,7 @@ Namespace Global.Basic.CodeAnalysis.Syntax
       Dim root = parser.ParseCompilationUnit()
 
       Me.Text = text
-      Me.Diagnostics = parser.Diagnostics.ToImmutableArray
+      Diagnostics = parser.Diagnostics.ToImmutableArray
       Me.Root = root
 
     End Sub

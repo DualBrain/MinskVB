@@ -22,7 +22,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
       Me.Kind = kind
       Me.LeftType = leftType
       Me.RightType = rightType
-      Me.Type = resultType
+      Type = resultType
     End Sub
 
     Public ReadOnly Property SyntaxKind As SyntaxKind

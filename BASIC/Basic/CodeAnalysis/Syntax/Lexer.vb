@@ -25,127 +25,127 @@ Namespace Global.Basic.CodeAnalysis.Syntax
 
     Private ReadOnly Property Current As Char
       Get
-        Return Me.Peek(0)
+        Return Peek(0)
       End Get
     End Property
 
     Private ReadOnly Property LookAhead As Char
       Get
-        Return Me.Peek(1)
+        Return Peek(1)
       End Get
     End Property
 
     Private ReadOnly Property Peek(offset As Integer) As Char
       Get
-        Dim index = Me.Position + offset
-        If index >= Me.Text.Length Then
+        Dim index = Position + offset
+        If index >= Text.Length Then
           Return ChrW(0)
         End If
-        Return Me.Text(index)
+        Return Text(index)
       End Get
     End Property
 
     Public Function Lex() As SyntaxToken
 
-      Me.Start = Me.Position
-      Me.Kind = SyntaxKind.BadToken
-      Me.Value = Nothing
+      Start = Position
+      Kind = SyntaxKind.BadToken
+      Value = Nothing
 
-      Select Case Me.Current
-        Case ChrW(0) : Me.Kind = SyntaxKind.EndOfFileToken ': Me.Position += 1
-        Case "+"c : Me.Kind = SyntaxKind.PlusToken : Me.Position += 1
-        Case "-"c : Me.Kind = SyntaxKind.MinusToken : Me.Position += 1
-        Case "*"c : Me.Kind = SyntaxKind.StarToken : Me.Position += 1
-        Case "/"c : Me.Kind = SyntaxKind.SlashToken : Me.Position += 1
-        Case "("c : Me.Kind = SyntaxKind.OpenParenToken : Me.Position += 1
-        Case ")"c : Me.Kind = SyntaxKind.CloseParenToken : Me.Position += 1
-        Case "{"c : Me.Kind = SyntaxKind.OpenBraceToken : Me.Position += 1
-        Case "}"c : Me.Kind = SyntaxKind.CloseBraceToken : Me.Position += 1
-        Case ":"c : Me.Kind = SyntaxKind.ColonToken : Me.Position += 1
-        Case ","c : Me.Kind = SyntaxKind.CommaToken : Me.Position += 1
-        Case "~"c : Me.Kind = SyntaxKind.TildeToken : Me.Position += 1
-        Case "^"c : Me.Kind = SyntaxKind.HatToken : Me.Position += 1
+      Select Case Current
+        Case ChrW(0) : Kind = SyntaxKind.EndOfFileToken ': Me.Position += 1
+        Case "+"c : Kind = SyntaxKind.PlusToken : Position += 1
+        Case "-"c : Kind = SyntaxKind.MinusToken : Position += 1
+        Case "*"c : Kind = SyntaxKind.StarToken : Position += 1
+        Case "/"c : Kind = SyntaxKind.SlashToken : Position += 1
+        Case "("c : Kind = SyntaxKind.OpenParenToken : Position += 1
+        Case ")"c : Kind = SyntaxKind.CloseParenToken : Position += 1
+        Case "{"c : Kind = SyntaxKind.OpenBraceToken : Position += 1
+        Case "}"c : Kind = SyntaxKind.CloseBraceToken : Position += 1
+        Case ":"c : Kind = SyntaxKind.ColonToken : Position += 1
+        Case ","c : Kind = SyntaxKind.CommaToken : Position += 1
+        Case "~"c : Kind = SyntaxKind.TildeToken : Position += 1
+        Case "^"c : Kind = SyntaxKind.HatToken : Position += 1
         Case "&"c
-          If Me.LookAhead = "&"c Then
-            Me.Kind = SyntaxKind.AmpersandAmpersandToken : Me.Position += 2
+          If LookAhead = "&"c Then
+            Kind = SyntaxKind.AmpersandAmpersandToken : Position += 2
           Else
-            Me.Kind = SyntaxKind.AmpersandToken : Me.Position += 1
+            Kind = SyntaxKind.AmpersandToken : Position += 1
           End If
         Case "|"c
-          If Me.LookAhead = "|"c Then
-            Me.Kind = SyntaxKind.PipePipeToken : Me.Position += 2
+          If LookAhead = "|"c Then
+            Kind = SyntaxKind.PipePipeToken : Position += 2
           Else
-            Me.Kind = SyntaxKind.PipeToken : Me.Position += 1
+            Kind = SyntaxKind.PipeToken : Position += 1
           End If
         Case "="c
-          If Me.LookAhead = "="c Then
-            Me.Kind = SyntaxKind.EqualsEqualsToken : Me.Position += 2
+          If LookAhead = "="c Then
+            Kind = SyntaxKind.EqualsEqualsToken : Position += 2
           Else
-            Me.Kind = SyntaxKind.EqualsToken : Me.Position += 1
+            Kind = SyntaxKind.EqualsToken : Position += 1
           End If
         Case "!"c
-          If Me.LookAhead = "="c Then
-            Me.Kind = SyntaxKind.BangEqualsToken : Me.Position += 2
+          If LookAhead = "="c Then
+            Kind = SyntaxKind.BangEqualsToken : Position += 2
           Else
-            Me.Kind = SyntaxKind.BangToken : Me.Position += 1
+            Kind = SyntaxKind.BangToken : Position += 1
           End If
         Case "<"c
-          If Me.LookAhead = ">"c Then
-            Me.Kind = SyntaxKind.LessThanGreaterThanToken : Me.Position += 2
-          ElseIf Me.LookAhead = "="c Then
-            Me.Kind = SyntaxKind.LessThanEqualsToken : Me.Position += 2
+          If LookAhead = ">"c Then
+            Kind = SyntaxKind.LessThanGreaterThanToken : Position += 2
+          ElseIf LookAhead = "="c Then
+            Kind = SyntaxKind.LessThanEqualsToken : Position += 2
           Else
-            Me.Kind = SyntaxKind.LessThanToken : Me.Position += 1
+            Kind = SyntaxKind.LessThanToken : Position += 1
           End If
         Case ">"c
-          If Me.LookAhead = "="c Then
-            Me.Kind = SyntaxKind.GreaterThanEqualsToken : Me.Position += 2
+          If LookAhead = "="c Then
+            Kind = SyntaxKind.GreaterThanEqualsToken : Position += 2
           Else
-            Me.Kind = SyntaxKind.GreaterThanToken : Me.Position += 1
+            Kind = SyntaxKind.GreaterThanToken : Position += 1
           End If
         Case ChrW(34)
-          Me.ReadString()
+          ReadString()
         Case "0"c, "1"c, "2"c, "3"c, "4"c, "5"c, "6"c, "7"c, "8"c, "9"c
-          Me.ReadNumberToken()
+          ReadNumberToken()
         Case " "c, ChrW(10), ChrW(13), ChrW(9) ' Short-circuit whitespace checking (common).
-          Me.ReadWhiteSpace()
+          ReadWhiteSpace()
         Case Else
-          If Char.IsLetter(Me.Current) Then
-            Me.ReadIdentifierOrKeyword()
-          ElseIf Char.IsWhiteSpace(Me.Current) Then
-            Me.ReadWhiteSpace()
+          If Char.IsLetter(Current) Then
+            ReadIdentifierOrKeyword()
+          ElseIf Char.IsWhiteSpace(Current) Then
+            ReadWhiteSpace()
           Else
-            Me.Diagnostics.ReportBadCharacter(Me.Position, Me.Current)
-            Me.Position += 1
+            Diagnostics.ReportBadCharacter(Position, Current)
+            Position += 1
           End If
 
       End Select
 
-      Dim length = Me.Position - Me.Start
-      Dim text = SyntaxFacts.GetText(Me.Kind)
+      Dim length = Position - Start
+      Dim text = SyntaxFacts.GetText(Kind)
       If text Is Nothing Then
-        text = Me.Text.ToString(Me.Start, length)
+        text = Me.Text.ToString(Start, length)
       End If
 
-      Return New SyntaxToken(Me.Kind, Me.Start, text, Me.Value)
+      Return New SyntaxToken(Kind, Start, text, Value)
 
     End Function
 
     Private Sub ReadNumberToken()
 
-      While Char.IsDigit(Me.Current)
-        Me.Position += 1
+      While Char.IsDigit(Current)
+        Position += 1
       End While
 
-      Dim length = Me.Position - Me.Start
-      Dim text = Me.Text.ToString(Me.Start, length)
+      Dim length = Position - Start
+      Dim text = Me.Text.ToString(Start, length)
       Dim value As Integer
       If Not Integer.TryParse(text, value) Then
-        Me.Diagnostics.ReportInvalidNumber(New TextSpan(Me.Start, length), text, TypeSymbol.Int)
+        Diagnostics.ReportInvalidNumber(New TextSpan(Start, length), text, TypeSymbol.Int)
       End If
 
       Me.Value = value
-      Me.Kind = SyntaxKind.NumberToken
+      Kind = SyntaxKind.NumberToken
 
     End Sub
 
@@ -155,56 +155,56 @@ Namespace Global.Basic.CodeAnalysis.Syntax
       ' "Test "" dddd"
 
       ' skip the current quote
-      Me.Position += 1
+      Position += 1
 
       Dim sb = New StringBuilder
       Dim done = False
 
       While Not done
-        Select Case Me.Current
+        Select Case Current
           Case ChrW(0), ChrW(13), ChrW(10)
-            Dim span = New TextSpan(Me.Start, 1)
-            Me.Diagnostics.ReportUnterminatedString(span)
+            Dim span = New TextSpan(Start, 1)
+            Diagnostics.ReportUnterminatedString(span)
             done = True
           Case """"c
-            If Me.LookAhead = """"c Then
-              sb.Append(Me.Current)
-              Me.Position += 2
+            If LookAhead = """"c Then
+              sb.Append(Current)
+              Position += 2
             Else
-              Me.Position += 1
+              Position += 1
               done = True
             End If
           Case Else
-            sb.Append(Me.Current)
-            Me.Position += 1
+            sb.Append(Current)
+            Position += 1
         End Select
       End While
 
-      Me.Kind = SyntaxKind.StringToken
-      Me.Value = sb.ToString
+      Kind = SyntaxKind.StringToken
+      Value = sb.ToString
 
     End Sub
 
     Private Sub ReadWhiteSpace()
 
-      While Char.IsWhiteSpace(Me.Current)
-        Me.Position += 1
+      While Char.IsWhiteSpace(Current)
+        Position += 1
       End While
 
-      Me.Kind = SyntaxKind.WhitespaceToken
+      Kind = SyntaxKind.WhitespaceToken
 
     End Sub
 
     Private Sub ReadIdentifierOrKeyword()
 
-      While Char.IsLetter(Me.Current)
-        Me.Position += 1
+      While Char.IsLetter(Current)
+        Position += 1
       End While
 
-      Dim length = Me.Position - Me.Start
-      Dim text = Me.Text.ToString(Me.Start, length)
+      Dim length = Position - Start
+      Dim text = Me.Text.ToString(Start, length)
 
-      Me.Kind = SyntaxFacts.GetKeywordKind(text)
+      Kind = SyntaxFacts.GetKeywordKind(text)
 
     End Sub
 

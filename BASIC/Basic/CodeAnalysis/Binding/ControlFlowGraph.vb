@@ -5,6 +5,7 @@ Option Infer On
 Imports System.IO
 Imports Basic.CodeAnalysis.Symbols
 Imports Basic.CodeAnalysis.Syntax
+Imports System.CodeDom.Compiler
 
 Namespace Global.Basic.CodeAnalysis.Binding
 
@@ -29,7 +30,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
 
       Public Sub New(isStart As Boolean)
         Me.IsStart = isStart
-        Me.IsEnd = Not isStart
+        IsEnd = Not isStart
       End Sub
 
       Public ReadOnly Property IsStart() As Boolean
@@ -40,19 +41,21 @@ Namespace Global.Basic.CodeAnalysis.Binding
 
       Public Overrides Function ToString() As String
 
-        If Me.IsStart Then
+        If IsStart Then
           Return "<Start>"
         End If
 
-        If Me.IsEnd Then
+        If IsEnd Then
           Return "<End>"
         End If
 
         Using writer = New StringWriter()
-          For Each statement In Me.Statements
-            statement.WriteTo(writer)
-          Next
-          Return writer.ToString()
+          Using indentedWriter = New IndentedTextWriter(writer)
+            For Each statement In Statements
+              statement.WriteTo(indentedWriter)
+            Next
+            Return writer.ToString()
+          End Using
         End Using
 
       End Function
@@ -72,10 +75,10 @@ Namespace Global.Basic.CodeAnalysis.Binding
       Public ReadOnly Property Condition() As BoundExpression
 
       Public Overrides Function ToString() As String
-        If Me.Condition Is Nothing Then
+        If Condition Is Nothing Then
           Return String.Empty
         End If
-        Return Me.Condition.ToString()
+        Return Condition.ToString()
       End Function
 
     End Class
@@ -89,31 +92,31 @@ Namespace Global.Basic.CodeAnalysis.Binding
         For Each statement In block.Statements
           Select Case statement.Kind
             Case BoundNodeKind.LabelStatement
-              Me.StartBlock()
-              Me.m_statements.Add(statement)
+              StartBlock()
+              m_statements.Add(statement)
             Case BoundNodeKind.GotoStatement, BoundNodeKind.ConditionalGotoStatement, BoundNodeKind.ReturnStatement
-              Me.m_statements.Add(statement)
-              Me.StartBlock()
+              m_statements.Add(statement)
+              StartBlock()
             Case BoundNodeKind.VariableDeclaration, BoundNodeKind.ExpressionStatement
-              Me.m_statements.Add(statement)
+              m_statements.Add(statement)
             Case Else
               Throw New Exception($"Unexpected statement: {statement.Kind}")
           End Select
         Next
-        Me.EndBlock()
-        Return Me.m_blocks.ToList()
+        EndBlock()
+        Return m_blocks.ToList()
       End Function
 
       Private Sub StartBlock()
-        Me.EndBlock()
+        EndBlock()
       End Sub
 
       Private Sub EndBlock()
-        If Me.m_statements.Count > 0 Then
+        If m_statements.Count > 0 Then
           Dim block = New BasicBlock()
-          block.Statements.AddRange(Me.m_statements)
-          Me.m_blocks.Add(block)
-          Me.m_statements.Clear()
+          block.Statements.AddRange(m_statements)
+          m_blocks.Add(block)
+          m_statements.Clear()
         End If
       End Sub
 
@@ -121,53 +124,53 @@ Namespace Global.Basic.CodeAnalysis.Binding
 
     Public NotInheritable Class GraphBuilder
 
-      Private m_blockFromStatement As New Dictionary(Of BoundStatement, BasicBlock)()
-      Private m_blockFromLabel As New Dictionary(Of BoundLabel, BasicBlock)()
-      Private m_branches As New List(Of BasicBlockBranch)()
-      Private m_start As New BasicBlock(isStart:=True)
-      Private m_end As New BasicBlock(isStart:=False)
+      Private ReadOnly m_blockFromStatement As New Dictionary(Of BoundStatement, BasicBlock)()
+      Private ReadOnly m_blockFromLabel As New Dictionary(Of BoundLabel, BasicBlock)()
+      Private ReadOnly m_branches As New List(Of BasicBlockBranch)()
+      Private ReadOnly m_start As New BasicBlock(isStart:=True)
+      Private ReadOnly m_end As New BasicBlock(isStart:=False)
 
       Public Function Build(blocks As List(Of BasicBlock)) As ControlFlowGraph
         If Not blocks.Any() Then
-          Me.Connect(Me.m_start, Me.m_end)
+          Connect(m_start, m_end)
         Else
-          Me.Connect(Me.m_start, blocks.First())
+          Connect(m_start, blocks.First())
         End If
 
         For Each block In blocks
           For Each statement In block.Statements
-            Me.m_blockFromStatement.Add(statement, block)
+            m_blockFromStatement.Add(statement, block)
             If TypeOf statement Is BoundLabelStatement Then
               Dim labelStatement = CType(statement, BoundLabelStatement)
-              Me.m_blockFromLabel.Add(labelStatement.Label, block)
+              m_blockFromLabel.Add(labelStatement.Label, block)
             End If
           Next
         Next
 
         For i = 0 To blocks.Count - 1
           Dim current = blocks(i)
-          Dim [next] = If(i = blocks.Count - 1, Me.m_end, blocks(i + 1))
+          Dim [next] = If(i = blocks.Count - 1, m_end, blocks(i + 1))
           For Each statement In current.Statements
             Dim isLastStatementInBlock = statement Is current.Statements.Last()
             Select Case statement.Kind
               Case BoundNodeKind.GotoStatement
                 Dim gs = CType(statement, BoundGotoStatement)
-                Dim toBlock = Me.m_blockFromLabel(gs.Label)
-                Me.Connect(current, toBlock)
+                Dim toBlock = m_blockFromLabel(gs.Label)
+                Connect(current, toBlock)
               Case BoundNodeKind.ConditionalGotoStatement
                 Dim cgs = CType(statement, BoundConditionalGotoStatement)
-                Dim thenBlock = Me.m_blockFromLabel(cgs.Label)
+                Dim thenBlock = m_blockFromLabel(cgs.Label)
                 Dim elseBlock = [next]
-                Dim negatedCondition = Me.Negate(cgs.Condition)
+                Dim negatedCondition = Negate(cgs.Condition)
                 Dim thenCondition = If(cgs.JumpIfTrue, cgs.Condition, negatedCondition)
                 Dim elseCondition = If(cgs.JumpIfTrue, negatedCondition, cgs.Condition)
-                Me.Connect(current, thenBlock, thenCondition)
-                Me.Connect(current, elseBlock, elseCondition)
+                Connect(current, thenBlock, thenCondition)
+                Connect(current, elseBlock, elseCondition)
               Case BoundNodeKind.ReturnStatement
-                Me.Connect(current, Me.m_end)
+                Connect(current, m_end)
               Case BoundNodeKind.VariableDeclaration, BoundNodeKind.LabelStatement, BoundNodeKind.ExpressionStatement
                 If isLastStatementInBlock Then
-                  Me.Connect(current, [next])
+                  Connect(current, [next])
                 End If
               Case Else
                 Throw New Exception($"Unexpected statement: {statement.Kind}")
@@ -178,15 +181,15 @@ Namespace Global.Basic.CodeAnalysis.Binding
 ScanAgain:
         For Each block In blocks
           If Not block.Incoming.Any() Then
-            Me.RemoveBlock(blocks, block)
+            RemoveBlock(blocks, block)
             GoTo ScanAgain
           End If
         Next block
 
-        blocks.Insert(0, Me.m_start)
-        blocks.Add(Me.m_end)
+        blocks.Insert(0, m_start)
+        blocks.Add(m_end)
 
-        Return New ControlFlowGraph(Me.m_start, Me.m_end, blocks, Me.m_branches)
+        Return New ControlFlowGraph(m_start, m_end, blocks, m_branches)
 
       End Function
 
@@ -205,7 +208,7 @@ ScanAgain:
         Dim branch = New BasicBlockBranch(from, [to], condition)
         from.Outgoing.Add(branch)
         [to].Incoming.Add(branch)
-        Me.m_branches.Add(branch)
+        m_branches.Add(branch)
 
       End Sub
 
@@ -213,12 +216,12 @@ ScanAgain:
 
         For Each branch In block.Incoming
           branch.From.Outgoing.Remove(branch)
-          Me.m_branches.Remove(branch)
+          m_branches.Remove(branch)
         Next
 
         For Each branch In block.Outgoing
           branch.To.Incoming.Remove(branch)
-          Me.m_branches.Remove(branch)
+          m_branches.Remove(branch)
         Next
 
         blocks.Remove(block)
@@ -238,6 +241,7 @@ ScanAgain:
 
     Private Function Quote(text As String) As String
       Return """" & text.Replace("""", "\""") & """"
+      Return """" & text.TrimEnd().Replace("\", "\\").Replace("""", "\""").Replace(Environment.NewLine, "\l") & """"
     End Function
 
     Public Sub WriteTo(writer As TextWriter)
@@ -246,21 +250,21 @@ ScanAgain:
 
       Dim blockIds = New Dictionary(Of BasicBlock, String)()
 
-      For i = 0 To Me.Blocks.Count - 1
+      For i = 0 To Blocks.Count - 1
         Dim id = $"N{i}"
-        blockIds.Add(Me.Blocks(i), id)
+        blockIds.Add(Blocks(i), id)
       Next
 
-      For Each block In Me.Blocks
+      For Each block In Blocks
         Dim id = blockIds(block)
-        Dim label = Me.Quote(block.ToString().Replace(Environment.NewLine, "\l"))
+        Dim label = Quote(block.ToString().Replace(Environment.NewLine, "\l"))
         writer.WriteLine($"    {id} [label = {label} shape = box]")
       Next
 
-      For Each branch In Me.Branches
+      For Each branch In Branches
         Dim fromId = blockIds(branch.From)
         Dim toId = blockIds(branch.To)
-        Dim label = Me.Quote(branch.ToString())
+        Dim label = Quote(branch.ToString())
         writer.WriteLine($"    {fromId} -> {toId} [label = {label}]")
       Next
 

@@ -17,7 +17,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
       Me.SyntaxKind = syntaxKind
       Me.Kind = kind
       Me.OperandType = operandType
-      Me.Type = resultType
+      Type = resultType
     End Sub
 
     Public ReadOnly Property SyntaxKind As SyntaxKind
