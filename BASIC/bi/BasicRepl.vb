@@ -66,19 +66,19 @@ Friend NotInheritable Class BasicRepl
   End Sub
 
   <MetaCommand("showTree", "Shows the parse tree")>
-  Private Sub EvaluateShowTree()
+  Protected Sub EvaluateShowTree()
     m_showTree = Not m_showTree
     Console.WriteLine(If(m_showTree, "Showing parse trees.", "Now showing parse trees."))
   End Sub
 
   <MetaCommand("showProgram", "Shows the bound tree")>
-  Private Sub EvaluateShowProgram()
+  Protected Sub EvaluateShowProgram()
     m_showProgram = Not m_showProgram
     Console.WriteLine(If(m_showProgram, "Showing bound tree.", "Now showing bound tree."))
   End Sub
 
   <MetaCommand("load", "Loads a script file")>
-  Private Sub EvaluateLoad(path As String)
+  Protected Sub EvaluateLoad(path As String)
 
     path = IO.Path.GetFullPath(path)
     If Not System.IO.File.Exists(path) Then
@@ -94,7 +94,7 @@ Friend NotInheritable Class BasicRepl
   End Sub
 
   <MetaCommand("ls", "Lists all symbols")>
-  Private Sub EvaluateLs()
+  Protected Sub EvaluateLs()
 
     If m_previous Is Nothing Then
       Return
@@ -110,7 +110,7 @@ Friend NotInheritable Class BasicRepl
   End Sub
 
   <MetaCommand("dump", "Shows bound tree of a given function")>
-  Private Sub EvaluateDump(functionName As String)
+  Protected Sub EvaluateDump(functionName As String)
 
     If m_previous Is Nothing Then
       Return
@@ -129,7 +129,6 @@ Friend NotInheritable Class BasicRepl
 
 
   End Sub
-
 
   Protected Overrides Function IsCompleteSubmission(text As String) As Boolean
 
