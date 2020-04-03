@@ -4,14 +4,45 @@ Option Infer On
 
 Imports System.Collections.ObjectModel
 Imports System.Collections.Specialized
+Imports System.ComponentModel
 Imports System.Console
 Imports System.ConsoleColor
+Imports System.Reflection
+Imports System.Security.Cryptography
+Imports System.Text
+Imports Basic.IO
 
 Friend MustInherit Class Repl
 
+  Private ReadOnly m_metaCommands As New List(Of MetaCommand)
   Private ReadOnly m_submissionHistory As New List(Of String)
   Private m_submissionHistoryIndex As Integer
   Private m_done As Boolean = False
+
+  Friend Sub New()
+    InitializeMetaCommands()
+  End Sub
+
+  Private Sub InitializeMetaCommands()
+
+    Dim methods = Me.GetType().GetMethods(BindingFlags.Public Or
+                                          BindingFlags.NonPublic Or
+                                          BindingFlags.Static Or
+                                          BindingFlags.Instance Or
+                                          BindingFlags.FlattenHierarchy)
+
+    For Each method In methods
+
+      Dim attribute = CType(method.GetCustomAttribute(GetType(MetaCommandAttribute)), MetaCommandAttribute)
+
+      If attribute Is Nothing Then Continue For
+
+      Dim metaCommand = New MetaCommand(attribute.Name, attribute.Description, method)
+      m_metaCommands.Add(metaCommand)
+
+    Next
+
+  End Sub
 
   Public Sub Run()
     Do
@@ -316,10 +347,84 @@ Friend MustInherit Class Repl
     view.CurrentCharacter += text.Length
   End Sub
 
-  Protected Overridable Sub EvaluateMetaCommand(input As String)
-    ForegroundColor = Red
-    WriteLine($"Invalid command {input}.")
-    ResetColor()
+  Protected Sub EvaluateMetaCommand(input As String)
+
+    ' Parse arguments
+
+    Dim args = New List(Of String)
+    Dim inQuotes = False
+    Dim position = 1
+    Dim sb = New StringBuilder
+    While position < input.Length
+
+      Dim c = input(position)
+      Dim l = If(position + 1 >= input.Length, Chr(0), input(position + 1))
+
+      If Char.IsWhiteSpace(c) Then
+        If Not inQuotes Then
+          CommitPendingArgument(args, sb)
+        Else
+          sb.Append(c)
+        End If
+      ElseIf c = Chr(34) Then
+        If Not inQuotes Then
+          inQuotes = True
+        ElseIf l = Chr(34) Then
+          sb.Append(c)
+          position += 1
+        Else
+          inQuotes = False
+        End If
+      Else
+        sb.Append(c)
+      End If
+
+      position += 1
+
+    End While
+
+    CommitPendingArgument(args, sb)
+
+    Dim commandName = args.FirstOrDefault
+
+    If args.Count > 0 Then
+      args.RemoveAt(0)
+    End If
+
+    Dim command = m_metaCommands.SingleOrDefault(Function(mc) mc.Name = commandName)
+
+    If command Is Nothing Then
+      ForegroundColor = Red
+      WriteLine($"Invalid command {input}.")
+      ResetColor()
+      Return
+    End If
+
+    Dim parameters = command.Method.GetParameters
+
+    If args.Count <> parameters.Length Then
+      Dim parameterNames = String.Join(", ", parameters.Select(Function(p) $"<{p.Name}>"))
+      ForegroundColor = Red
+      WriteLine($"error: invalid number of arguments")
+      WriteLine($"usage: #{command.Name} {parameterNames}")
+      ResetColor()
+      Return
+    End If
+
+    command.Method.Invoke(Me, args.ToArray)
+
+  End Sub
+
+  Private Shared Sub CommitPendingArgument(args As List(Of String), sb As StringBuilder)
+
+    Dim arg = sb.ToString
+
+    If Not String.IsNullOrWhiteSpace(arg) Then
+      args.Add(arg)
+    End If
+
+    sb.Clear()
+
   End Sub
 
   Protected Sub ClearHistory()
@@ -333,5 +438,53 @@ Friend MustInherit Class Repl
   Protected MustOverride Function IsCompleteSubmission(text As String) As Boolean
 
   Protected MustOverride Sub EvaluateSubmission(text As String)
+
+  <AttributeUsage(AttributeTargets.Method, AllowMultiple:=False)>
+  Protected NotInheritable Class MetaCommandAttribute
+    Inherits Attribute
+
+    Sub New(name As String, description As String)
+      Me.Name = name
+      Me.Description = description
+    End Sub
+
+    Public ReadOnly Property Name As String
+    Public ReadOnly Property Description As String
+
+  End Class
+
+  Private Class MetaCommand
+
+    Public Sub New(name As String, description As String, method As MethodInfo)
+      Me.Name = name
+      Me.Description = description
+      Me.Method = method
+    End Sub
+
+    Public ReadOnly Property Name As String
+    Public ReadOnly Property Description As String
+    Public ReadOnly Property Method As MethodInfo
+
+  End Class
+
+  <MetaCommand("help", "Shows help")>
+  Protected Sub EvaluateHelp()
+
+    Dim maxNameLength = m_metaCommands.Max(Function(mc) mc.Name.Length)
+
+    For Each metaCommand In m_metaCommands.OrderBy(Function(mc) mc.Name)
+      Dim paddedName = metaCommand.Name.PadRight(maxNameLength)
+
+      Console.Out.WritePunctuation("#")
+      Console.Out.WriteIdentifier(paddedName)
+      Console.Out.WriteSpace()
+      Console.Out.WriteSpace()
+      Console.Out.WriteSpace()
+      Console.Out.WritePunctuation(metaCommand.Description)
+      Console.Out.WriteLine()
+
+    Next
+
+  End Sub
 
 End Class

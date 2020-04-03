@@ -47,19 +47,27 @@ Friend NotInheritable Class BasicRepl
 
   End Sub
 
-  Protected Overrides Sub EvaluateMetaCommand(input As String)
-    Select Case input.ToLower
-      Case "#new"
-        m_previous = Nothing
-      Case "#toggle tree"
-        m_showTree = Not m_showTree
-      Case "#toggle program"
-        m_showProgram = Not m_showProgram
-      Case "#cls"
-        Clear()
-      Case Else
-        MyBase.EvaluateMetaCommand(input)
-    End Select
+  <MetaCommand("showTree", "Shows the parse tree")>
+  Private Sub EvaluateShowTree()
+    m_showTree = Not m_showTree
+    Console.WriteLine(If(m_showTree, "Showing parse trees.", "Now showing parse trees."))
+  End Sub
+
+  <MetaCommand("showProgram", "Shows the bound tree")>
+  Private Sub EvaluateShowProgram()
+    m_showProgram = Not m_showProgram
+    Console.WriteLine(If(m_showProgram, "Showing bound tree.", "Now showing bound tree."))
+  End Sub
+
+  <MetaCommand("cls", "Clears the screen")>
+  Protected Sub EvaluateCls()
+    Clear()
+  End Sub
+
+  <MetaCommand("reset", "Clears all previous submissions")>
+  Protected Sub EvaluateReset()
+    m_previous = Nothing
+    m_variables.Clear()
   End Sub
 
   Protected Overrides Function IsCompleteSubmission(text As String) As Boolean
