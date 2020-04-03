@@ -16,15 +16,19 @@ Namespace Global.Basic.IO
   Public Module TextWriterExtensions
 
     <Extension>
-    Private Function IsConsoleOut(writer As TextWriter) As Boolean
+    Private Function IsConsole(writer As TextWriter) As Boolean
 
       If writer Is Console.Out Then
-        Return True
+        Return Not Console.IsOutputRedirected
+      End If
+
+      If writer Is Console.Error Then
+        Return Not Console.IsErrorRedirected And Not Console.IsOutputRedirected ' Color codes are always output to Console.Out
       End If
 
       If TypeOf writer Is IndentedTextWriter Then
         Dim iw = DirectCast(writer, IndentedTextWriter)
-        If iw.InnerWriter.IsConsoleOut() Then
+        If iw.InnerWriter.IsConsole() Then
           Return True
         End If
       End If
@@ -35,14 +39,14 @@ Namespace Global.Basic.IO
 
     <Extension>
     Private Sub SetForeground(writer As TextWriter, color As ConsoleColor)
-      If writer.IsConsoleOut() Then
+      If writer.IsConsole() Then
         Console.ForegroundColor = color
       End If
     End Sub
 
     <Extension>
     Private Sub ResetColor(writer As TextWriter)
-      If writer.IsConsoleOut() Then
+      If writer.IsConsole() Then
         Console.ResetColor()
       End If
     End Sub
@@ -120,12 +124,12 @@ Namespace Global.Basic.IO
         Dim character = span.Start - line.Start + 1
 
         ' An extra line before for clarity...
-        WriteLine()
+        writer.WriteLine()
 
-        ForegroundColor = DarkRed
-        Write($"{filename}({startLine},{startCharacter},{endLine},{endCharacter}): ")
-        WriteLine(diagnostic)
-        Console.ResetColor()
+        writer.SetForeground(DarkRed)
+        writer.Write($"{filename}({startLine},{startCharacter},{endLine},{endCharacter}): ")
+        writer.WriteLine(diagnostic)
+        writer.ResetColor()
 
         Dim prefixSpan = TextSpan.FromBounds(line.Start, span.Start)
         Dim suffixSpan = TextSpan.FromBounds(span.End, line.End)
@@ -135,18 +139,18 @@ Namespace Global.Basic.IO
         Dim suffix = text.ToString(suffixSpan)
 
         ' Write the prefix in "normal" text...
-        Write($"    {prefix}")
+        writer.Write($"    {prefix}")
         ' Write the error portion in red...
-        ForegroundColor = DarkRed
-        Write(er)
-        Console.ResetColor()
+        writer.SetForeground(DarkRed)
+        writer.Write(er)
+        writer.ResetColor()
         ' Write the rest of the line.
-        WriteLine(suffix)
+        writer.WriteLine(suffix)
 
       Next
 
       ' An extra line at the end for clarity.
-      WriteLine()
+      writer.WriteLine()
 
     End Sub
 

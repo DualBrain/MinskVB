@@ -8,11 +8,11 @@ Imports Basic.IO
 
 Module Program
 
-  Sub Main(args As String())
+  Function Main(args As String()) As Integer
 
     If args.Length = 0 Then
       Console.WriteLine("usage: bc <source-paths>")
-      Return
+      Return 1
     End If
 
     Dim paths = GetFilePaths(args)
@@ -22,7 +22,7 @@ Module Program
     For Each path In paths
 
       If Not IO.File.Exists(path) Then
-        Console.WriteLine($"error: file '{path}' doesn't exist.")
+        Console.Error.WriteLine($"error: file '{path}' doesn't exist.")
         hasErrors = True
         Continue For
       End If
@@ -34,7 +34,7 @@ Module Program
     Next
 
     If hasErrors Then
-      Return
+      Return 1
     End If
 
     Dim c = New Compilation(syntaxTrees.ToArray)
@@ -47,9 +47,12 @@ Module Program
       End If
     Else
       Console.Error.WriteDiagnostics(result.Diagnostics)
+      Return 1
     End If
 
-  End Sub
+    Return 0
+
+  End Function
 
   Private Function GetFilePaths(paths As IEnumerable(Of String)) As IEnumerable(Of String)
     Dim result = New SortedSet(Of String)
