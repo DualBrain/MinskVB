@@ -38,7 +38,14 @@ Namespace Global.Basic.CodeAnalysis.Symbols
       Next
 
       writer.WritePunctuation(SyntaxKind.CloseParenToken)
-      writer.WriteLine()
+
+      If symbol.Type IsNot TypeSymbol.Void Then
+        writer.WritePunctuation(SyntaxKind.ColonToken)
+        writer.WriteSpace
+        symbol.Type.WriteTo(writer)
+      End If
+
+      'writer.WriteLine()
 
     End Sub
 

@@ -27,6 +27,16 @@ Namespace Global.Basic.CodeAnalysis
 
     Public ReadOnly Property Previous As Compilation
     Public ReadOnly Property SyntaxTrees As ImmutableArray(Of SyntaxTree)
+    Public ReadOnly Property Functions As ImmutableArray(Of FunctionSymbol)
+      Get
+        Return GlobalScope.Functions
+      End Get
+    End Property
+    Public ReadOnly Property Variables As ImmutableArray(Of VariableSymbol)
+      Get
+        Return GlobalScope.Variables
+      End Get
+    End Property
 
     Friend ReadOnly Property GlobalScope As BoundGlobalScope
       Get
@@ -37,6 +47,32 @@ Namespace Global.Basic.CodeAnalysis
         Return m_globalScope
       End Get
     End Property
+
+    Public Iterator Function GetSymbols() As IEnumerable(Of Symbol)
+
+      Dim submission = Me
+      Dim seeSymbolNames = New HashSet(Of String)
+
+      While submission IsNot Nothing
+
+        For Each f In submission.Functions
+          If (seeSymbolNames.Add(f.Name)) Then
+            Yield f
+          End If
+        Next
+
+        For Each v In submission.Variables
+          If (seeSymbolNames.Add(v.Name)) Then
+            Yield v
+          End If
+        Next
+
+        submission = submission.Previous
+
+      End While
+
+
+    End Function
 
     Public Function ContinueWith(syntax As SyntaxTree) As Compilation
       Return New Compilation(Me, syntax)
@@ -83,9 +119,24 @@ Namespace Global.Basic.CodeAnalysis
             Continue For
           End If
           functionBody.Key.WriteTo(writer)
+          writer.WriteLine()
           functionBody.Value.WriteTo(writer)
         Next
       End If
+    End Sub
+
+    Public Sub EmitTree(symbol As FunctionSymbol, writer As TextWriter)
+
+      Dim program = Binder.BindProgram(GlobalScope)
+      Dim body As BoundBlockStatement
+      If Not program.Functions.TryGetValue(symbol, body) Then
+        Return
+      End If
+
+      symbol.WriteTo(writer)
+      writer.WriteLine()
+      body.WriteTo(writer)
+
     End Sub
 
   End Class

@@ -9,14 +9,20 @@ Imports Basic.CodeAnalysis.Text
 Imports Basic.IO
 Imports System.Console
 Imports System.ConsoleColor
+Imports System.IO
 
 Friend NotInheritable Class BasicRepl
   Inherits Repl
 
+  Private m_loadingSubmission As Boolean
   Private m_previous As Compilation = Nothing
   Private m_showTree As Boolean = False
   Private m_showProgram As Boolean = False
   Private ReadOnly m_variables As New Dictionary(Of VariableSymbol, Object)
+
+  Sub New()
+    LoadSubmissions()
+  End Sub
 
   Protected Overrides Sub RenderLine(line As String)
 
@@ -47,6 +53,18 @@ Friend NotInheritable Class BasicRepl
 
   End Sub
 
+  <MetaCommand("cls", "Clears the screen")>
+  Protected Sub EvaluateCls()
+    Clear()
+  End Sub
+
+  <MetaCommand("reset", "Clears all previous submissions")>
+  Protected Sub EvaluateReset()
+    m_previous = Nothing
+    m_variables.Clear()
+    ClearSubmissions()
+  End Sub
+
   <MetaCommand("showTree", "Shows the parse tree")>
   Private Sub EvaluateShowTree()
     m_showTree = Not m_showTree
@@ -59,16 +77,59 @@ Friend NotInheritable Class BasicRepl
     Console.WriteLine(If(m_showProgram, "Showing bound tree.", "Now showing bound tree."))
   End Sub
 
-  <MetaCommand("cls", "Clears the screen")>
-  Protected Sub EvaluateCls()
-    Clear()
+  <MetaCommand("load", "Loads a script file")>
+  Private Sub EvaluateLoad(path As String)
+
+    path = IO.Path.GetFullPath(path)
+    If Not System.IO.File.Exists(path) Then
+      Console.ForegroundColor = ConsoleColor.Red
+      Console.WriteLine($"error: file does not exist '{path}'")
+      Console.ResetColor()
+      Return
+    End If
+
+    Dim text = IO.File.ReadAllText(path)
+    EvaluateSubmission(text)
+
   End Sub
 
-  <MetaCommand("reset", "Clears all previous submissions")>
-  Protected Sub EvaluateReset()
-    m_previous = Nothing
-    m_variables.Clear()
+  <MetaCommand("ls", "Lists all symbols")>
+  Private Sub EvaluateLs()
+
+    If m_previous Is Nothing Then
+      Return
+    End If
+
+    Dim symbols = m_previous.GetSymbols.OrderBy(Function(s) s.Kind).ThenBy(Function(s) s.Name)
+
+    For Each symbol In symbols
+      symbol.WriteTo(Console.Out)
+      Console.WriteLine()
+    Next
+
   End Sub
+
+  <MetaCommand("dump", "Shows bound tree of a given function")>
+  Private Sub EvaluateDump(functionName As String)
+
+    If m_previous Is Nothing Then
+      Return
+    End If
+
+    Dim symbol = m_previous.GetSymbols.OfType(Of FunctionSymbol).SingleOrDefault(Function(f) f.Name = functionName)
+
+    If symbol Is Nothing Then
+      Console.ForegroundColor = ConsoleColor.Red
+      Console.WriteLine($"error: function '{functionName}' does not exist")
+      Console.ResetColor()
+      Return
+    End If
+
+    m_previous.EmitTree(symbol, Console.Out)
+
+
+  End Sub
+
 
   Protected Overrides Function IsCompleteSubmission(text As String) As Boolean
 
@@ -129,6 +190,8 @@ Friend NotInheritable Class BasicRepl
 
       m_previous = compilation
 
+      SaveSubmission(text)
+
     Else
 
       Console.Out.WriteDiagnostics(result.Diagnostics)
@@ -137,17 +200,46 @@ Friend NotInheritable Class BasicRepl
 
   End Sub
 
+  Private Shared Function GetSubmissionsDirectory() As String
+    Dim localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)
+    Dim submissionsDirectory = Path.Combine(localAppData, "Minsk", "Submissions")
+    Return submissionsDirectory
+  End Function
+
+  Private Sub LoadSubmissions()
+
+    Dim submissionsDirectory = GetSubmissionsDirectory()
+    If Not Directory.Exists(submissionsDirectory) Then Return
+    Dim files = Directory.GetFiles(submissionsDirectory).OrderBy(Function(f) f).ToArray
+    If files.Length = 0 Then Return
+
+    Console.ForegroundColor = ConsoleColor.DarkGray
+    Console.WriteLine($"Loaded {files.Length} submission(s)")
+    Console.ResetColor()
+
+    m_loadingSubmission = True
+
+    For Each File In files
+      Dim text = IO.File.ReadAllText(File)
+      EvaluateSubmission(text)
+    Next
+
+    m_loadingSubmission = False
+
+  End Sub
+
+  Private Sub ClearSubmissions()
+    Directory.Delete(GetSubmissionsDirectory, recursive:=True)
+  End Sub
+
+  Private Sub SaveSubmission(text As String)
+    If m_loadingSubmission Then Return
+    Dim submissionsDirectory = GetSubmissionsDirectory()
+    Directory.CreateDirectory(submissionsDirectory)
+    Dim count = Directory.GetFiles(submissionsDirectory).Length
+    Dim name = $"submission{count:0000}"
+    Dim fileName = Path.Combine(submissionsDirectory, name)
+    File.WriteAllText(fileName, text)
+  End Sub
+
 End Class
-
-'Friend NotInheritable Class TextSpanComparer
-'  Implements IComparer(Of TextSpan)
-
-'  Public Function Compare(x As TextSpan, y As TextSpan) As Integer Implements IComparer(Of TextSpan).Compare
-'    Dim cmp = x.Start - y.Start
-'    If cmp = 0 Then
-'      cmp = x.Length - y.Length
-'    End If
-'    Return cmp
-'  End Function
-
-'End Class
