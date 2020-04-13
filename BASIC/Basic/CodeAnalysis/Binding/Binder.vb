@@ -507,20 +507,30 @@ Namespace Global.Basic.CodeAnalysis.Binding
         Return New BoundErrorExpression
       End If
 
-      Dim hasErrors = False
+      'Dim hasErrors = False
       For i = 0 To syntax.Arguments.Count - 1
+
+        Dim argumentLocation = syntax.Arguments(i).Location
         Dim argument = boundArguments(i)
         Dim parameter = func.Parameters(i)
-        If argument.Type IsNot parameter.Type Then
-          If argument.Type IsNot TypeSymbol.Error Then
-            m_diagnostics.ReportWrongArgumentType(syntax.Arguments(i).Location, parameter.Name, parameter.Type, argument.Type)
-          End If
-          hasErrors = True
-        End If
+
+        boundArguments(i) = BindConversion(argumentLocation, argument, parameter.Type)
+
+        'Dim conv = Conversion.Classify(argument.Type, parameter.Type)
+        'If Not conv.IsImplicit Then
+
+        'End If
+
+        'If argument.Type IsNot parameter.Type Then
+        '  If argument.Type IsNot TypeSymbol.Error Then
+        '    m_diagnostics.ReportWrongArgumentType(syntax.Arguments(i).Location, parameter.Name, parameter.Type, argument.Type)
+        '  End If
+        '  hasErrors = True
+        'End If
       Next
-      If hasErrors Then
-        Return New BoundErrorExpression
-      End If
+      'If hasErrors Then
+      '  Return New BoundErrorExpression
+      'End If
 
       Return New BoundCallExpression(func, boundArguments.ToImmutableArray)
 
@@ -590,6 +600,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
         Case "DOUBLE" : Return TypeSymbol.Int
         Case "STRING" : Return TypeSymbol.String
 #End If
+        Case "any" : Return TypeSymbol.Any
         Case "bool" : Return TypeSymbol.Bool
         Case "int" : Return TypeSymbol.Int
         Case "string" : Return TypeSymbol.String

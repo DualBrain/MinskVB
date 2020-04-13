@@ -34,7 +34,15 @@ Namespace Global.Basic.CodeAnalysis.Binding
         Return Conversion.Identity
       End If
 
-      If [from] Is TypeSymbol.Int OrElse [from] Is TypeSymbol.Bool Then
+      If [from] IsNot TypeSymbol.Void AndAlso [to] Is TypeSymbol.Any Then
+        Return Conversion.Implicit
+      End If
+
+      If [from] Is TypeSymbol.Any AndAlso [to] IsNot TypeSymbol.Void Then
+        Return Conversion.Explicit
+      End If
+
+      If [from] Is TypeSymbol.Bool OrElse [from] Is TypeSymbol.Int Then
         If [to] Is TypeSymbol.String Then
           Return Conversion.Explicit
         End If

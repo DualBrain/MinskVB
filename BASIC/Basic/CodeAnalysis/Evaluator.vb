@@ -266,7 +266,9 @@ Namespace Global.Basic.CodeAnalysis
 
     Private Function EvaluateConversionExpression(node As BoundConversionExpression) As Object
       Dim value = EvaluateExpression(node.Expression)
-      If node.Type Is TypeSymbol.Bool Then
+      If node.Type Is TypeSymbol.Any Then
+        Return value
+      ElseIf node.Type Is TypeSymbol.Bool Then
         Return Convert.ToBoolean(value)
       ElseIf node.Type Is TypeSymbol.Int Then
         Return Convert.ToInt32(value)
