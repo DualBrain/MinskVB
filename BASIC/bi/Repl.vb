@@ -99,8 +99,7 @@ Friend MustInherit Class Repl
 
         ResetColor()
         m_lineRenderer(line)
-        'Write(line)
-        Write(New String(" "c, WindowWidth - line.Length))
+        Write(New String(" "c, WindowWidth - line.Length - 2))
         lineCount += 1
 
       Next
