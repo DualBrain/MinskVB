@@ -31,7 +31,6 @@ Namespace Global.Basic.CodeAnalysis.Binding
 
     End Sub
 
-    'Public Shared Function BindGlobalScope(previous As BoundGlobalScope, syntax As CompilationUnitSyntax) As BoundGlobalScope
     Public Shared Function BindGlobalScope(previous As BoundGlobalScope, syntaxTrees As ImmutableArray(Of SyntaxTree)) As BoundGlobalScope
 
       Dim parentScope = CreateParentScopes(previous)
@@ -64,33 +63,33 @@ Namespace Global.Basic.CodeAnalysis.Binding
 
     End Function
 
-    Public Shared Function BindProgram(globalScope As BoundGlobalScope) As BoundProgram
+    Public Shared Function BindProgram(previous As BoundProgram, globalScope As BoundGlobalScope) As BoundProgram
 
       Dim parentScope = CreateParentScopes(globalScope)
 
       Dim functionBodies = ImmutableDictionary.CreateBuilder(Of FunctionSymbol, BoundBlockStatement)
       Dim diagnostics = ImmutableArray.CreateBuilder(Of Diagnostic)
 
-      Dim scope = globalScope
-      While scope IsNot Nothing
+      'Dim scope = globalScope
+      'While scope IsNot Nothing
 
-        For Each func In scope.Functions
-          Dim binder = New Binder(parentScope, func)
-          Dim body = binder.BindStatement(func.Declaration.Body)
-          Dim loweredBody = Lowerer.Lower(body)
-          If func.Type IsNot TypeSymbol.Void AndAlso Not ControlFlowGraph.AllPathsReturn(loweredBody) Then
-            binder.Diagnostics.ReportAllPathsMustReturn(func.Declaration.Identifier.Location)
-          End If
-          functionBodies.Add(func, loweredBody)
-          diagnostics.AddRange(binder.Diagnostics)
-        Next
+      For Each func In globalScope.Functions
+        Dim binder = New Binder(parentScope, func)
+        Dim body = binder.BindStatement(func.Declaration.Body)
+        Dim loweredBody = Lowerer.Lower(body)
+        If func.Type IsNot TypeSymbol.Void AndAlso Not ControlFlowGraph.AllPathsReturn(loweredBody) Then
+          binder.Diagnostics.ReportAllPathsMustReturn(func.Declaration.Identifier.Location)
+        End If
+        functionBodies.Add(func, loweredBody)
+        diagnostics.AddRange(binder.Diagnostics)
+      Next
 
-        scope = scope.Previous
+      '  scope = scope.Previous
 
-      End While
+      'End While
 
       Dim statement = Lowerer.Lower(New BoundBlockStatement(globalScope.Statements))
-      Return New BoundProgram(diagnostics.ToImmutable, functionBodies.ToImmutable, statement)
+      Return New BoundProgram(previous, diagnostics.ToImmutable, functionBodies.ToImmutable, statement)
 
     End Function
 

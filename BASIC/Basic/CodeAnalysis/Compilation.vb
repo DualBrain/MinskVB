@@ -97,6 +97,12 @@ Namespace Global.Basic.CodeAnalysis
       Return New Compilation(Me, syntax)
     End Function
 
+    Private Function GetProgram() As BoundProgram
+      Dim previous = If(Me.Previous Is Nothing, Nothing, Me.Previous.GetProgram)
+      Return Binder.BindProgram(previous, GlobalScope)
+    End Function
+
+
     Public Function Evaluate(variables As Dictionary(Of VariableSymbol, Object)) As EvaluationResult
 
       Dim parseDiagnostics = SyntaxTrees.SelectMany(Function(st) st.Diagnostics)
@@ -106,7 +112,7 @@ Namespace Global.Basic.CodeAnalysis
         Return New EvaluationResult(diagnostics, Nothing)
       End If
 
-      Dim program = Binder.BindProgram(GlobalScope)
+      Dim program = GetProgram()
 
       Dim appPath = Environment.GetCommandLineArgs(0)
       Dim appDirectory = Path.GetDirectoryName(appPath)
@@ -129,7 +135,8 @@ Namespace Global.Basic.CodeAnalysis
     End Function
 
     Public Sub EmitTree(writer As TextWriter)
-      Dim program = Binder.BindProgram(GlobalScope)
+      Dim program = GetProgram()
+
       If program.Statement.Statements.Any() Then
         program.Statement.WriteTo(writer)
       Else
@@ -146,7 +153,7 @@ Namespace Global.Basic.CodeAnalysis
 
     Public Sub EmitTree(symbol As FunctionSymbol, writer As TextWriter)
 
-      Dim program = Binder.BindProgram(GlobalScope)
+      Dim program = GetProgram()
       Dim body As BoundBlockStatement
       'If Not program.Functions.TryGetValue(symbol, body) Then
       '  Return

@@ -9,24 +9,33 @@ Namespace Global.Basic.CodeAnalysis
 
   Friend NotInheritable Class Evaluator
 
+    Private ReadOnly m_program As BoundProgram
+    Private ReadOnly m_globals As Dictionary(Of VariableSymbol, Object)
+    Private ReadOnly m_functions As New Dictionary(Of FunctionSymbol, BoundBlockStatement)
     Private ReadOnly m_locals As New Stack(Of Dictionary(Of VariableSymbol, Object))
-    'Private ReadOnly m_functionBodies As Immutable.ImmutableDictionary(Of FunctionSymbol, BoundBlockStatement)
     Private m_random As Random
 
     Private m_lastValue As Object
 
     Sub New(program As BoundProgram, variables As Dictionary(Of VariableSymbol, Object))
-      Me.Program = program
-      Globals = variables
+      Me.m_program = program
+      m_globals = variables
       m_locals.Push(New Dictionary(Of VariableSymbol, Object))
+
+      Dim currrent = program
+      While currrent IsNot Nothing
+        For Each kv In currrent.Functions
+          Dim func = kv.Key
+          Dim body = kv.Value
+          m_functions.Add(func, body)
+        Next
+        currrent = currrent.Previous
+      End While
+
     End Sub
 
-    Public ReadOnly Property Program As BoundProgram
-
-    Public ReadOnly Property Globals As Dictionary(Of VariableSymbol, Object)
-
     Public Function Evaluate() As Object
-      Return EvaluateStatement(Program.Statement)
+      Return EvaluateStatement(m_program.Statement)
     End Function
 
     Private Function EvaluateStatement(body As BoundBlockStatement) As Object
@@ -103,7 +112,7 @@ Namespace Global.Basic.CodeAnalysis
 
     Private Function EvaluateVariableExpression(v As BoundVariableExpression) As Object
       If v.Variable.Kind = SymbolKind.GlobalVariable Then
-        Return Globals(v.Variable)
+        Return m_globals(v.Variable)
       Else
         Dim locals = m_locals.Peek()
         Return locals(v.Variable)
@@ -247,7 +256,7 @@ Namespace Global.Basic.CodeAnalysis
           locals.Add(parameter, value)
         Next
         m_locals.Push(locals)
-        Dim statement = Program.Functions(node.Function)
+        Dim statement = m_functions(node.Function)
         Dim result = EvaluateStatement(statement)
         m_locals.Pop()
         Return result
@@ -270,7 +279,7 @@ Namespace Global.Basic.CodeAnalysis
 
     Private Sub Assign(variable As VariableSymbol, value As Object)
       If variable.Kind = SymbolKind.GlobalVariable Then
-        Globals(variable) = value
+        m_globals(variable) = value
       Else
         Dim locals = m_locals.Peek()
         locals(variable) = value
