@@ -16,15 +16,25 @@ Namespace Global.Basic.CodeAnalysis
 
     Private m_globalScope As BoundGlobalScope = Nothing
 
-    Public Sub New(ParamArray syntaxTrees() As SyntaxTree)
-      Me.New(Nothing, syntaxTrees)
-    End Sub
+    'Public Sub New(ParamArray syntaxTrees() As SyntaxTree)
+    '  Me.New(Nothing, syntaxTrees)
+    'End Sub
 
-    Private Sub New(previous As Compilation, ParamArray syntaxTrees() As SyntaxTree)
+    Private Sub New(isScript As Boolean, previous As Compilation, ParamArray syntaxTrees() As SyntaxTree)
+      Me.IsScript = isScript
       Me.Previous = previous
       Me.SyntaxTrees = syntaxTrees.ToImmutableArray
     End Sub
 
+    Public Shared Function Create(ParamArray syntaxTrees() As SyntaxTree) As Compilation
+      Return New Compilation(False, Nothing, syntaxTrees)
+    End Function
+
+    Public Shared Function CreateScript(previous As Compilation, ParamArray syntaxTrees() As SyntaxTree) As Compilation
+      Return New Compilation(True, previous, syntaxTrees)
+    End Function
+
+    Public ReadOnly Property IsScript As Boolean
     Public ReadOnly Property Previous As Compilation
     Public ReadOnly Property SyntaxTrees As ImmutableArray(Of SyntaxTree)
     Public ReadOnly Property Functions As ImmutableArray(Of FunctionSymbol)
@@ -41,7 +51,7 @@ Namespace Global.Basic.CodeAnalysis
     Friend ReadOnly Property GlobalScope As BoundGlobalScope
       Get
         If m_globalScope Is Nothing Then
-          Dim g = Binder.BindGlobalScope(Previous?.GlobalScope, SyntaxTrees)
+          Dim g = Binder.BindGlobalScope(IsScript, Previous?.GlobalScope, SyntaxTrees)
           Interlocked.CompareExchange(m_globalScope, g, Nothing)
         End If
         Return m_globalScope
@@ -93,15 +103,10 @@ Namespace Global.Basic.CodeAnalysis
 
     End Function
 
-    Public Function ContinueWith(syntax As SyntaxTree) As Compilation
-      Return New Compilation(Me, syntax)
-    End Function
-
     Private Function GetProgram() As BoundProgram
       Dim previous = If(Me.Previous Is Nothing, Nothing, Me.Previous.GetProgram)
-      Return Binder.BindProgram(previous, GlobalScope)
+      Return Binder.BindProgram(IsScript, previous, GlobalScope)
     End Function
-
 
     Public Function Evaluate(variables As Dictionary(Of VariableSymbol, Object)) As EvaluationResult
 

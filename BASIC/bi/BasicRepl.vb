@@ -15,7 +15,7 @@ Friend NotInheritable Class BasicRepl
   Inherits Repl
 
   Private Shared m_loadingSubmission As Boolean
-  Private Shared ReadOnly m_emptyCompilation As New Compilation()
+  Private Shared ReadOnly m_emptyCompilation As Compilation = Compilation.CreateScript(Nothing)
   Private m_previous As Compilation = Nothing
   Private m_showTree As Boolean = False
   Private m_showProgram As Boolean = False
@@ -161,12 +161,7 @@ Friend NotInheritable Class BasicRepl
   Protected Overrides Sub EvaluateSubmission(text As String)
 
     Dim tree = SyntaxTree.Parse(text)
-
-    'If Not isBlank AndAlso tree.Diagnostics.Any Then
-    '  Continue Do
-    'End If
-
-    Dim compilation = If(m_previous Is Nothing, New Compilation(tree), m_previous.ContinueWith(tree))
+    Dim compilation = Basic.CodeAnalysis.Compilation.CreateScript(m_previous, tree)
 
     If m_showTree Then
       Dim color = Console.ForegroundColor
@@ -231,7 +226,10 @@ Friend NotInheritable Class BasicRepl
   End Sub
 
   Private Sub ClearSubmissions()
-    Directory.Delete(GetSubmissionsDirectory, recursive:=True)
+    Dim dir = GetSubmissionsDirectory()
+    If Directory.Exists(dir) Then
+      Directory.Delete(dir, recursive:=True)
+    End If
   End Sub
 
   Private Sub SaveSubmission(text As String)

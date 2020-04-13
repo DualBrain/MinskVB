@@ -107,7 +107,7 @@ Namespace Global.Basic.IO
 
       ' We have errors, so don't try to evaluate (execute).
       For Each diagnostic In diagnostics.OrderBy(Function(diag) diag.Location.FileName).
-                                         ThenBy(Function(diag) diag.Location.Span).
+                                         ThenBy(Function(diag) diag.Location.Span.Start).
                                          ThenBy(Function(diag) diag.Location.Span.Length)
 
         Dim text = diagnostic.Location.Text

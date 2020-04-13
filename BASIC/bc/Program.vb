@@ -37,7 +37,7 @@ Module Program
       Return 1
     End If
 
-    Dim c = New Compilation(syntaxTrees.ToArray)
+    Dim c = Compilation.Create(syntaxTrees.ToArray)
 
     Dim result = c.Evaluate(New Dictionary(Of VariableSymbol, Object))
 

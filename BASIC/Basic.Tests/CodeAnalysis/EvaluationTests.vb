@@ -610,7 +610,7 @@ Namespace Global.Basic.Tests.CodeAnalysis
     Private Shared Sub AssertValue(text As String, expectedValue As Object)
 
       Dim tree = SyntaxTree.Parse(text)
-      Dim compilation = New Compilation(tree)
+      Dim compilation = Basic.CodeAnalysis.Compilation.CreateScript(Nothing, tree)
       Dim variables = New Dictionary(Of VariableSymbol, Object)
       Dim result = compilation.Evaluate(variables)
 
@@ -624,7 +624,7 @@ Namespace Global.Basic.Tests.CodeAnalysis
 
       Dim at = AnnotatedText.Parse(text)
       Dim tree = SyntaxTree.Parse(at.Text)
-      Dim compilation = New Compilation(tree)
+      Dim compilation = Basic.CodeAnalysis.Compilation.CreateScript(Nothing, tree)
       Dim result = compilation.Evaluate(New Dictionary(Of VariableSymbol, Object))
 
       Dim expectedDiagnostics = AnnotatedText.UnindentLines(diagnosticText)

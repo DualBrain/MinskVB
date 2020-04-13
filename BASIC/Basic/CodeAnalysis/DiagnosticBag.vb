@@ -131,6 +131,10 @@ Namespace Global.Basic.CodeAnalysis
       Report(location, $"An expression of type '{returnType}' is expected.")
     End Sub
 
+    Public Sub ReportInvalidExpressionStatement(location As TextLocation)
+      Report(location, "Only assignment and call epxressions can be used as a statement.")
+    End Sub
+
   End Class
 
 End Namespace
