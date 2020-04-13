@@ -51,7 +51,7 @@ Namespace Global.Basic.CodeAnalysis
     Public Iterator Function GetSymbols() As IEnumerable(Of Symbol)
 
       Dim submission = Me
-      Dim seeSymbolNames = New HashSet(Of String)
+      Dim seenSymbolNames = New HashSet(Of String)
 
       While submission IsNot Nothing
 
@@ -63,28 +63,33 @@ Namespace Global.Basic.CodeAnalysis
                                Where(Function(fi) fi.FieldType = GetType(FunctionSymbol)).
                                Select(Function(fi) CType(fi.GetValue(Nothing), FunctionSymbol)).
                                ToList
-        For Each builtIn In builtInFunctions
-          If seeSymbolNames.Add(builtIn.Name) Then
-            Yield builtIn
-          End If
-        Next
+        'For Each builtIn In builtInFunctions
+        '  If seeSymbolNames.Add(builtIn.Name) Then
+        '    Yield builtIn
+        '  End If
+        'Next
 
         For Each f In submission.Functions
-          If (seeSymbolNames.Add(f.Name)) Then
+          If (seenSymbolNames.Add(f.Name)) Then
             Yield f
           End If
         Next
 
         For Each v In submission.Variables
-          If (seeSymbolNames.Add(v.Name)) Then
+          If (seenSymbolNames.Add(v.Name)) Then
             Yield v
+          End If
+        Next
+
+        For Each builtIn In builtInFunctions
+          If seenSymbolNames.Add(builtIn.Name) Then
+            Yield builtIn
           End If
         Next
 
         submission = submission.Previous
 
       End While
-
 
     End Function
 
