@@ -67,7 +67,7 @@ Namespace Global.Basic.Tests.CodeAnalysis
     <InlineData("!true", False)>
     <InlineData("not true", False)>
     <InlineData("!false", True)>
-    <InlineData("var a = 10", 10)>
+    <InlineData("var a = 10 return a", 10)>
     <InlineData(ChrW(34) + "test" + ChrW(34), "test")>
     <InlineData(ChrW(34) + "te" + ChrW(34) + ChrW(34) + "st" & ChrW(34), "te" & ChrW(34) & "st")>
     <InlineData(ChrW(34) + "test" & ChrW(34) & " == " & ChrW(34) & "test" & ChrW(34), True)>
@@ -88,18 +88,18 @@ Namespace Global.Basic.Tests.CodeAnalysis
     <InlineData("false and false", False)>
     <InlineData("true && true", True)>
     <InlineData("true and true", True)>
-    <InlineData("{ var a = 10 (a * a) }", 100)>
-    <InlineData("{ var a = 0 (a = 10) * a }", 100)>
-    <InlineData("{ var a = 0 if a == 0 a = 10 a}", 10)>
-    <InlineData("{ var a = 0 if a == 4 a = 10 a}", 0)>
-    <InlineData("{ var a = 0 if a == 0 a = 10 else a=5 a}", 10)>
-    <InlineData("{ var a = 0 if a == 4 a = 10 else a=5 a}", 5)>
-    <InlineData("{ var i = 10 var result = 0 while i > 0 { result = result + i i = i - 1} result }", 55)>
-    <InlineData("{ var result = 0 for i = 1 to 10 { result = result + i} result }", 55)>
-    <InlineData("{ var a = 10 for i = 1 to (a = a - 1) { } a }", 9)>
-    <InlineData("{ var a = 0 do a = a + 1 while a < 10 a}", 10)>
-    <InlineData("{ var i = 0 while i < 5 { i = i + 1 if i == 5 continue } i }", 5)>
-    <InlineData("{ var i = 0 do { i = i + 1 if i == 5 continue } while i < 5 i }", 5)>
+    <InlineData("{ var a = 10 return a * a }", 100)>
+    <InlineData("{ var a = 0 return (a = 10) * a }", 100)>
+    <InlineData("{ var a = 0 if a == 0 a = 10 return a}", 10)>
+    <InlineData("{ var a = 0 if a == 4 a = 10 return a}", 0)>
+    <InlineData("{ var a = 0 if a == 0 a = 10 else a=5 return a}", 10)>
+    <InlineData("{ var a = 0 if a == 4 a = 10 else a=5 return a}", 5)>
+    <InlineData("{ var i = 10 var result = 0 while i > 0 { result = result + i i = i - 1} return result }", 55)>
+    <InlineData("{ var result = 0 for i = 1 to 10 { result = result + i} return result }", 55)>
+    <InlineData("{ var a = 10 for i = 1 to (a = a - 1) { } return a }", 9)>
+    <InlineData("{ var a = 0 do a = a + 1 while a < 10 return a}", 10)>
+    <InlineData("{ var i = 0 while i < 5 { i = i + 1 if i == 5 continue } return i }", 5)>
+    <InlineData("{ var i = 0 do { i = i + 1 if i == 5 continue } while i < 5 return i }", 5)>
     Public Sub SyntaxFact_GetText_RoundTrips(text As String, expectedValue As Object)
       AssertValue(text, expectedValue)
     End Sub
@@ -335,15 +335,12 @@ Namespace Global.Basic.Tests.CodeAnalysis
     End Sub
 
     <Fact>
-    Public Sub Evaluator_Invalid_Return()
+    Public Sub Evaluator_Script_Return()
 
       Dim text = "
-        [return]"
+        return"
 
-      Dim diagnostics = "
-        The 'return' keyword can only be used inside of functions."
-
-      AssertDiagnostics(text, diagnostics)
+      AssertValue(text, "")
 
     End Sub
 
@@ -391,7 +388,7 @@ Namespace Global.Basic.Tests.CodeAnalysis
         test([t])"
 
       Dim diagnostics = "
-        Parameter 'n' requires a value of type 'int' but was given a value of type 'string'."
+        Cannot convert type 'string' to 'int'. An explicit conversion exists (are you missing a cast?)"
 
       AssertDiagnostics(text, diagnostics)
 

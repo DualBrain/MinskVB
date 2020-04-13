@@ -46,6 +46,12 @@ Namespace Global.Basic.CodeAnalysis.Binding
 
       Dim globalStatements = syntaxTrees.SelectMany(Function(st) st.Root.Members).OfType(Of GlobalStatementSyntax)
 
+      Dim statements = ImmutableArray.CreateBuilder(Of BoundStatement)
+      For Each globalStatement In globalStatements
+        Dim statement = binder.BindGlobalStatement(globalStatement.Statement)
+        statements.Add(statement)
+      Next
+
       ' Check global statements.
 
       Dim firstGlobalStatementPerSyntaxTree = syntaxTrees.Select(Function(st) st.Root.Members.OfType(Of GlobalStatementSyntax).FirstOrDefault).
@@ -101,18 +107,6 @@ Namespace Global.Basic.CodeAnalysis.Binding
       End If
 
       Dim diagnostics = binder.Diagnostics.ToImmutableArray
-
-      Dim globalStatementFunction = If(mainFunction, scriptFunction)
-      Dim statements = ImmutableArray.CreateBuilder(Of BoundStatement)
-
-      If globalStatementFunction IsNot Nothing Then
-        Dim statementBinder = New Binder(isScript, parentScope, globalStatementFunction)
-        For Each globalStatement In globalStatements
-          Dim statement = statementBinder.BindGlobalStatement(globalStatement.Statement)
-          statements.Add(statement)
-        Next
-        diagnostics.AddRange(statementBinder.Diagnostics)
-      End If
 
       Dim variables = binder.m_scope.GetDeclaredVariables
 
@@ -429,7 +423,15 @@ Namespace Global.Basic.CodeAnalysis.Binding
       Dim expression = If(syntax.Expression Is Nothing, Nothing, BindExpression(syntax.Expression))
 
       If m_function Is Nothing Then
-        Diagnostics.ReportInvalidReturn(syntax.ReturnKeyword.Location)
+        If m_isScript Then
+          ' Ignore because we allow both return with and without values.
+          If expression Is Nothing Then
+            expression = New BoundLiteralExpression("")
+          End If
+        ElseIf expression IsNot Nothing Then
+          ' Main does not support return values.
+          Diagnostics.ReportInvalidReturnExpression(syntax.Expression.Location, m_function.Name)
+        End If
       Else
         If m_function.Type Is TypeSymbol.Void Then
           If expression IsNot Nothing Then

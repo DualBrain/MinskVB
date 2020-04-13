@@ -119,10 +119,6 @@ Namespace Global.Basic.CodeAnalysis
       Report(location, "Not all code paths return a value.")
     End Sub
 
-    Public Sub ReportInvalidReturn(location As TextLocation)
-      Report(location, "The 'return' keyword can only be used inside of functions.")
-    End Sub
-
     Public Sub ReportInvalidReturnExpression(location As TextLocation, functionName As String)
       Report(location, $"Since the function '{functionName}' does not return a value, the 'return' keyword cannot be followed by an expression.")
     End Sub
