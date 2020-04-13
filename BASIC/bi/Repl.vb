@@ -476,10 +476,29 @@ Friend MustInherit Class Repl
     Dim maxNameLength = m_metaCommands.Max(Function(mc) mc.Name.Length)
 
     For Each metaCommand In m_metaCommands.OrderBy(Function(mc) mc.Name)
-      Dim paddedName = metaCommand.Name.PadRight(maxNameLength)
+      'Dim paddedName = metaCommand.Name.PadRight(maxNameLength)
 
-      Console.Out.WritePunctuation("#")
-      Console.Out.WriteIdentifier(paddedName)
+      Dim metaParams = metaCommand.Method.GetParameters
+      If metaParams.Length = 0 Then
+        Dim paddedName = metaCommand.Name.PadRight(maxNameLength)
+        Console.Out.WritePunctuation("#")
+        Console.Out.WriteIdentifier(paddedName)
+      Else
+        Console.Out.WritePunctuation("#")
+        Console.Out.WriteIdentifier(metaCommand.Name)
+        For Each pi In metaParams
+          Console.Out.WriteSpace()
+          Console.Out.WritePunctuation("<")
+          Console.Out.WriteIdentifier(pi.Name)
+          Console.Out.WritePunctuation(">")
+        Next
+        Console.Out.WriteLine()
+        Console.Out.WriteSpace
+        Console.Out.Write(Space(maxNameLength))
+      End If
+
+      'Console.Out.WritePunctuation("#")
+      'Console.Out.WriteIdentifier(paddedName)
       Console.Out.WriteSpace()
       Console.Out.WriteSpace()
       Console.Out.WriteSpace()
