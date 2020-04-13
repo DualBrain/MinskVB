@@ -112,7 +112,7 @@ Namespace Global.Basic.CodeAnalysis.Syntax
         Case " "c, ChrW(10), ChrW(13), ChrW(9) ' Short-circuit whitespace checking (common).
           ReadWhiteSpace()
         Case Else
-          If Char.IsLetter(Current) Then
+          If Char.IsLetter(Current) OrElse Current = "$"c Then
             ReadIdentifierOrKeyword()
           ElseIf Char.IsWhiteSpace(Current) Then
             ReadWhiteSpace()
@@ -203,7 +203,7 @@ Namespace Global.Basic.CodeAnalysis.Syntax
 
     Private Sub ReadIdentifierOrKeyword()
 
-      While Char.IsLetter(Current)
+      While Char.IsLetter(Current) OrElse Current = "$"c
         Position += 1
       End While
 

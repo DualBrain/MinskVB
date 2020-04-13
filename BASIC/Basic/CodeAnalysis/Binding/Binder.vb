@@ -564,6 +564,13 @@ Namespace Global.Basic.CodeAnalysis.Binding
 
     Private Function LookupType(name As String) As TypeSymbol
       Select Case name
+#If BASIC Then
+        Case "INTEGER" : Return TypeSymbol.Int
+        Case "LONG" : Return TypeSymbol.Int
+        Case "SINGLE" : Return TypeSymbol.Int
+        Case "DOUBLE" : Return TypeSymbol.Int
+        Case "STRING" : Return TypeSymbol.String
+#End If
         Case "bool" : Return TypeSymbol.Bool
         Case "int" : Return TypeSymbol.Int
         Case "string" : Return TypeSymbol.String

@@ -14,7 +14,8 @@ Imports System.IO
 Friend NotInheritable Class BasicRepl
   Inherits Repl
 
-  Private m_loadingSubmission As Boolean
+  Private Shared m_loadingSubmission As Boolean
+  Private Shared ReadOnly m_emptyCompilation As New Compilation()
   Private m_previous As Compilation = Nothing
   Private m_showTree As Boolean = False
   Private m_showProgram As Boolean = False
@@ -96,11 +97,12 @@ Friend NotInheritable Class BasicRepl
   <MetaCommand("ls", "Lists all symbols")>
   Protected Sub EvaluateLs()
 
-    If m_previous Is Nothing Then
-      Return
-    End If
-
-    Dim symbols = m_previous.GetSymbols.OrderBy(Function(s) s.Kind).ThenBy(Function(s) s.Name)
+    'If m_previous Is Nothing Then
+    '  Return
+    'End If
+    'Dim symbols = m_previous.GetSymbols.OrderBy(Function(s) s.Kind).ThenBy(Function(s) s.Name)
+    Dim compilation = If(m_previous, m_emptyCompilation)
+    Dim symbols = compilation.GetSymbols.OrderBy(Function(s) s.Kind).ThenBy(Function(s) s.Name)
 
     For Each symbol In symbols
       symbol.WriteTo(Console.Out)
@@ -112,11 +114,12 @@ Friend NotInheritable Class BasicRepl
   <MetaCommand("dump", "Shows bound tree of a given function")>
   Protected Sub EvaluateDump(functionName As String)
 
-    If m_previous Is Nothing Then
-      Return
-    End If
-
-    Dim symbol = m_previous.GetSymbols.OfType(Of FunctionSymbol).SingleOrDefault(Function(f) f.Name = functionName)
+    'If m_previous Is Nothing Then
+    '  Return
+    'End If
+    'Dim symbol = m_previous.GetSymbols.OfType(Of FunctionSymbol).SingleOrDefault(Function(f) f.Name = functionName)
+    Dim compilation = If(m_previous, m_emptyCompilation)
+    Dim symbol = compilation.GetSymbols.OfType(Of FunctionSymbol).SingleOrDefault(Function(f) f.Name = functionName)
 
     If symbol Is Nothing Then
       Console.ForegroundColor = ConsoleColor.Red
@@ -125,8 +128,8 @@ Friend NotInheritable Class BasicRepl
       Return
     End If
 
-    m_previous.EmitTree(symbol, Console.Out)
-
+    'm_previous.EmitTree(symbol, Console.Out)
+    compilation.EmitTree(symbol, Console.Out)
 
   End Sub
 

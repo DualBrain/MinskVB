@@ -180,6 +180,55 @@ Namespace Global.Basic.CodeAnalysis
 
     Private Function EvaluateCallExpression(node As BoundCallExpression) As Object
 
+#If BASIC Then
+
+      'Public ReadOnly Asc As New FunctionSymbol("ASC", ImmutableArray.Create(New ParameterSymbol("value", TypeSymbol.String)), TypeSymbol.Int)
+      'Public ReadOnly Chr As New FunctionSymbol("CHR$", ImmutableArray.Create(New ParameterSymbol("value", TypeSymbol.Int)), TypeSymbol.String)
+      'Public ReadOnly Instr As New FunctionSymbol("INSTR", ImmutableArray.Create(New ParameterSymbol("start", TypeSymbol.Int), New ParameterSymbol("string1", TypeSymbol.String), New ParameterSymbol("string2", TypeSymbol.String)), TypeSymbol.Int)
+      'Public ReadOnly LCase As New FunctionSymbol("LCASE$", ImmutableArray.Create(New ParameterSymbol("value", TypeSymbol.String), New ParameterSymbol("num", TypeSymbol.Int)), TypeSymbol.String)
+      'Public ReadOnly Len As New FunctionSymbol("LEN", ImmutableArray.Create(New ParameterSymbol("value", TypeSymbol.String)), TypeSymbol.Int)
+      'Public ReadOnly MidFunction As New FunctionSymbol("MID$", ImmutableArray.Create(New ParameterSymbol("value", TypeSymbol.String), New ParameterSymbol("start", TypeSymbol.Int), New ParameterSymbol("num", TypeSymbol.Int)), TypeSymbol.String)
+      'Public ReadOnly Right As New FunctionSymbol("RIGHT$", ImmutableArray.Create(New ParameterSymbol("value", TypeSymbol.String), New ParameterSymbol("num", TypeSymbol.Int)), TypeSymbol.String)
+      'Public ReadOnly Space As New FunctionSymbol("SPACE$", ImmutableArray.Create(New ParameterSymbol("num", TypeSymbol.Int)), TypeSymbol.String)
+      'Public ReadOnly Str As New FunctionSymbol("STR$", ImmutableArray.Create(New ParameterSymbol("num", TypeSymbol.Int)), TypeSymbol.String)
+      'Public ReadOnly StringFunctionA As New FunctionSymbol("STRING$", ImmutableArray.Create(New ParameterSymbol("num", TypeSymbol.Int), New ParameterSymbol("code", TypeSymbol.Int)), TypeSymbol.String)
+      'Public ReadOnly StringFunctionB As New FunctionSymbol("STRING$", ImmutableArray.Create(New ParameterSymbol("string1", TypeSymbol.String), New ParameterSymbol("code", TypeSymbol.Int)), TypeSymbol.String)
+      'Public ReadOnly UCase As New FunctionSymbol("UCASE$", ImmutableArray.Create(New ParameterSymbol("value", TypeSymbol.String)), TypeSymbol.String)
+      'Public ReadOnly Val As New FunctionSymbol("VAL", ImmutableArray.Create(New ParameterSymbol("value", TypeSymbol.String)), TypeSymbol.Int)
+
+
+      If node.Function Is BuiltinFunctions.Hex Then
+        Return CInt(EvaluateExpression(node.Arguments(0))).ToString("X")
+      ElseIf node.Function Is BuiltinFunctions.Oct Then
+        Return Convert.ToString(CInt(EvaluateExpression(node.Arguments(0))), 8)
+      ElseIf node.Function Is BuiltinFunctions.Asc Then
+        Return Strings.AscW(CStr(EvaluateExpression(node.Arguments(0))))
+      ElseIf node.Function Is BuiltinFunctions.Chr Then
+        Return Strings.ChrW(CInt(EvaluateExpression(node.Arguments(0))))
+      ElseIf node.Function Is BuiltinFunctions.Instr Then
+        Return Nothing
+      ElseIf node.Function Is BuiltinFunctions.LCase Then
+        Return CStr(EvaluateExpression(node.Arguments(0))).ToLower
+      ElseIf node.Function Is BuiltinFunctions.Len Then
+        Return CStr(EvaluateExpression(node.Arguments(0))).Length
+      ElseIf node.Function Is BuiltinFunctions.MidFunction Then
+        Return Nothing
+      ElseIf node.Function Is BuiltinFunctions.Right Then
+        Return Nothing
+      ElseIf node.Function Is BuiltinFunctions.Space Then
+        Return Nothing
+      ElseIf node.Function Is BuiltinFunctions.Str Then
+        Return CStr(CDbl(EvaluateExpression(node.Arguments(0))))
+      ElseIf node.Function Is BuiltinFunctions.StringFunction Then
+        Return Nothing
+      ElseIf node.Function Is BuiltinFunctions.UCase Then
+        Return CStr(EvaluateExpression(node.Arguments(0))).ToUpper
+      ElseIf node.Function Is BuiltinFunctions.Val Then
+        Return Convert.ToDouble(CStr(EvaluateExpression(node.Arguments(0))))
+      End If
+
+#End If
+
       If node.Function Is BuiltinFunctions.Input Then
         Return Console.ReadLine()
       ElseIf node.Function Is BuiltinFunctions.Print Then

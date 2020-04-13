@@ -55,6 +55,20 @@ Namespace Global.Basic.CodeAnalysis
 
       While submission IsNot Nothing
 
+        Dim bindingFlags = Reflection.BindingFlags.Static Or
+                           Reflection.BindingFlags.Public Or
+                           Reflection.BindingFlags.NonPublic
+        Dim builtInFunctions = GetType(BuiltinFunctions).
+                               GetFields(bindingFlags).
+                               Where(Function(fi) fi.FieldType = GetType(FunctionSymbol)).
+                               Select(Function(fi) CType(fi.GetValue(Nothing), FunctionSymbol)).
+                               ToList
+        For Each builtIn In builtInFunctions
+          If seeSymbolNames.Add(builtIn.Name) Then
+            Yield builtIn
+          End If
+        Next
+
         For Each f In submission.Functions
           If (seeSymbolNames.Add(f.Name)) Then
             Yield f
@@ -129,12 +143,14 @@ Namespace Global.Basic.CodeAnalysis
 
       Dim program = Binder.BindProgram(GlobalScope)
       Dim body As BoundBlockStatement
+      'If Not program.Functions.TryGetValue(symbol, body) Then
+      '  Return
+      'End If
+      symbol.WriteTo(writer)
+      writer.WriteLine()
       If Not program.Functions.TryGetValue(symbol, body) Then
         Return
       End If
-
-      symbol.WriteTo(writer)
-      writer.WriteLine()
       body.WriteTo(writer)
 
     End Sub

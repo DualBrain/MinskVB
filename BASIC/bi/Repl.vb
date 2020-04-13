@@ -33,7 +33,8 @@ Friend MustInherit Class Repl
 
     For Each method In methods
 
-      Dim attribute = CType(method.GetCustomAttribute(GetType(MetaCommandAttribute)), MetaCommandAttribute)
+      'Dim attribute = CType(method.GetCustomAttribute(GetType(MetaCommandAttribute)), MetaCommandAttribute)
+      Dim attribute = method.GetCustomAttribute(Of MetaCommandAttribute)
 
       If attribute Is Nothing Then Continue For
 
@@ -403,7 +404,7 @@ Friend MustInherit Class Repl
     Dim parameters = command.Method.GetParameters
 
     If args.Count <> parameters.Length Then
-      Dim parameterNames = String.Join(", ", parameters.Select(Function(p) $"<{p.Name}>"))
+      Dim parameterNames = String.Join(" ", parameters.Select(Function(p) $"<{p.Name}>"))
       ForegroundColor = Red
       WriteLine($"error: invalid number of arguments")
       WriteLine($"usage: #{command.Name} {parameterNames}")
@@ -411,7 +412,9 @@ Friend MustInherit Class Repl
       Return
     End If
 
-    command.Method.Invoke(Me, args.ToArray)
+    'command.Method.Invoke(Me, args.ToArray)
+    Dim instance = If(command.Method.IsStatic, Nothing, Me)
+    command.Method.Invoke(instance, args.ToArray)
 
   End Sub
 

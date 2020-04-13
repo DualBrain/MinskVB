@@ -62,8 +62,8 @@ Namespace Global.Basic.CodeAnalysis.Binding
       Dim thenStatement = RewriteStatement(node.ThenStatement)
       Dim elseStatement = If(node.ElseStatement Is Nothing, Nothing, RewriteStatement(node.ElseStatement))
       If condition Is node.Condition AndAlso
-               thenStatement Is node.ThenStatement AndAlso
-               elseStatement Is node.ElseStatement Then
+         thenStatement Is node.ThenStatement AndAlso
+         elseStatement Is node.ElseStatement Then
         Return node
       End If
       Return New BoundIfStatement(condition, thenStatement, elseStatement)
