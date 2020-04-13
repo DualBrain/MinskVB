@@ -135,6 +135,18 @@ Namespace Global.Basic.CodeAnalysis
       Report(location, "Only assignment and call epxressions can be used as a statement.")
     End Sub
 
+    Public Sub ReportOnlyOneFileCanHaveGlobalStatements(location As TextLocation)
+      Report(location, "At most one file can have global statements.")
+    End Sub
+
+    Public Sub ReportMainMustHaveCorrectSignature(location As TextLocation)
+      Report(location, "main must not take arguments and not return anything.")
+    End Sub
+
+    Public Sub ReportCannotMixMainAndGlobalStatements(location As TextLocation)
+      Report(location, "Cannot declare main function when global statements are used.")
+    End Sub
+
   End Class
 
 End Namespace

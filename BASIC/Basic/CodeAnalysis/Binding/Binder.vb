@@ -15,7 +15,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
     Private m_scope As BoundScope
     Private ReadOnly m_isScript As Boolean
     Private ReadOnly m_function As FunctionSymbol
-    Private ReadOnly m_diagnostics As DiagnosticBag = New DiagnosticBag
+    Private ReadOnly Property Diagnostics As DiagnosticBag = New DiagnosticBag
     Private ReadOnly m_loopStack As New Stack(Of (BreakLabel As BoundLabel, ContinueLabel As BoundLabel))
     Private m_labelCounter As Integer
 
@@ -46,22 +46,81 @@ Namespace Global.Basic.CodeAnalysis.Binding
 
       Dim globalStatements = syntaxTrees.SelectMany(Function(st) st.Root.Members).OfType(Of GlobalStatementSyntax)
 
-      Dim statements = ImmutableArray.CreateBuilder(Of BoundStatement)
+      ' Check global statements.
 
-      For Each globalStatement In globalStatements
-        Dim statement = binder.BindGlobalStatement(globalStatement.Statement)
-        statements.Add(statement)
-      Next
+      Dim firstGlobalStatementPerSyntaxTree = syntaxTrees.Select(Function(st) st.Root.Members.OfType(Of GlobalStatementSyntax).FirstOrDefault).
+                                                          Where(Function(g) g IsNot Nothing).
+                                                          ToArray
+
+      If firstGlobalStatementPerSyntaxTree.Length > 1 Then
+        For Each globalStatement In firstGlobalStatementPerSyntaxTree
+          binder.Diagnostics.ReportOnlyOneFileCanHaveGlobalStatements(globalStatement.Location)
+        Next
+      End If
+
+      ' Check for main/script with global statements.
 
       Dim functions = binder.m_scope.GetDeclaredFunctions
+
+      Dim mainFunction As FunctionSymbol
+      Dim scriptFunction As FunctionSymbol
+
+      If isScript Then
+
+        mainFunction = Nothing
+
+        If globalStatements.Any Then
+          scriptFunction = New FunctionSymbol("$eval", ImmutableArray(Of ParameterSymbol).Empty, TypeSymbol.Any, Nothing)
+        Else
+          scriptFunction = Nothing
+        End If
+
+      Else
+
+        mainFunction = functions.FirstOrDefault(Function(f) f.Name = "main")
+        scriptFunction = Nothing
+
+        If mainFunction IsNot Nothing Then
+          If mainFunction.Type IsNot TypeSymbol.Void OrElse
+             mainFunction.Parameters.Any Then
+            binder.Diagnostics.ReportMainMustHaveCorrectSignature(mainFunction.Declaration.Identifier.Location)
+          End If
+        End If
+
+        If globalStatements.Any Then
+          If mainFunction IsNot Nothing Then
+            binder.Diagnostics.ReportCannotMixMainAndGlobalStatements(mainFunction.Declaration.Identifier.Location)
+            For Each globalStatement In firstGlobalStatementPerSyntaxTree
+              binder.Diagnostics.ReportCannotMixMainAndGlobalStatements(globalStatement.Location)
+            Next
+          Else
+            mainFunction = New FunctionSymbol("main", ImmutableArray(Of ParameterSymbol).Empty, TypeSymbol.Void)
+          End If
+        End If
+
+      End If
+
+      Dim diagnostics = binder.Diagnostics.ToImmutableArray
+
+      Dim globalStatementFunction = If(mainFunction, scriptFunction)
+      Dim statements = ImmutableArray.CreateBuilder(Of BoundStatement)
+
+      If globalStatementFunction IsNot Nothing Then
+        Dim statementBinder = New Binder(isScript, parentScope, globalStatementFunction)
+        For Each globalStatement In globalStatements
+          Dim statement = statementBinder.BindGlobalStatement(globalStatement.Statement)
+          statements.Add(statement)
+        Next
+        diagnostics.AddRange(statementBinder.Diagnostics)
+      End If
+
       Dim variables = binder.m_scope.GetDeclaredVariables
-      Dim diagnostics = binder.m_diagnostics.ToImmutableArray
 
       If previous IsNot Nothing Then
         diagnostics = diagnostics.InsertRange(0, previous.Diagnostics)
       End If
 
-      Return New BoundGlobalScope(previous, diagnostics, functions, variables, statements.ToImmutable)
+      Return New BoundGlobalScope(previous, diagnostics, mainFunction, scriptFunction, functions, variables, statements.ToImmutable)
 
     End Function
 
@@ -72,26 +131,38 @@ Namespace Global.Basic.CodeAnalysis.Binding
       Dim functionBodies = ImmutableDictionary.CreateBuilder(Of FunctionSymbol, BoundBlockStatement)
       Dim diagnostics = ImmutableArray.CreateBuilder(Of Diagnostic)
 
-      'Dim scope = globalScope
-      'While scope IsNot Nothing
-
       For Each func In globalScope.Functions
         Dim binder = New Binder(isScript, parentScope, func)
         Dim body = binder.BindStatement(func.Declaration.Body)
         Dim loweredBody = Lowerer.Lower(body)
         If func.Type IsNot TypeSymbol.Void AndAlso Not ControlFlowGraph.AllPathsReturn(loweredBody) Then
-          binder.m_diagnostics.ReportAllPathsMustReturn(func.Declaration.Identifier.Location)
+          binder.Diagnostics.ReportAllPathsMustReturn(func.Declaration.Identifier.Location)
         End If
         functionBodies.Add(func, loweredBody)
-        diagnostics.AddRange(binder.m_diagnostics)
+        diagnostics.AddRange(binder.Diagnostics)
       Next
 
-      '  scope = scope.Previous
+      If globalScope.MainFunction IsNot Nothing AndAlso globalScope.Statements.Any Then
+        Dim body = Lowerer.Lower(New BoundBlockStatement(globalScope.Statements))
+        functionBodies.Add(globalScope.MainFunction, body)
+      ElseIf globalScope.ScriptFunction IsNot Nothing Then
+        Dim statements = globalScope.Statements
+        Dim es = TryCast(statements(0), BoundExpressionStatement)
+        Dim needsReturn = statements.Length = 1 AndAlso
+                          TypeOf es Is BoundExpressionStatement AndAlso
+                          es.Expression.Type IsNot TypeSymbol.Void
+        If needsReturn Then
+          statements = statements.SetItem(0, New BoundReturnStatement(es.Expression))
+        ElseIf statements.Any AndAlso
+               statements.Last.Kind <> BoundNodeKind.ReturnStatement Then
+          Dim nullValue = New BoundLiteralExpression("")
+          statements = statements.Add(New BoundReturnStatement(nullValue))
+        End If
+        Dim body = Lowerer.Lower(New BoundBlockStatement(statements))
+        functionBodies.Add(globalScope.ScriptFunction, body)
+      End If
 
-      'End While
-
-      Dim statement = Lowerer.Lower(New BoundBlockStatement(globalScope.Statements))
-      Return New BoundProgram(previous, diagnostics.ToImmutable, functionBodies.ToImmutable, statement)
+      Return New BoundProgram(previous, diagnostics.ToImmutable, globalScope.MainFunction, globalScope.ScriptFunction, functionBodies.ToImmutable)
 
     End Function
 
@@ -103,7 +174,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
         Dim parameterName = parameterSyntax.Identifier.Text
         Dim parameterType = BindTypeClause(parameterSyntax.Type)
         If Not seenParameterNames.Add(parameterName) Then
-          m_diagnostics.ReportParameterAlreadyDeclared(parameterSyntax.Location, parameterName)
+          Diagnostics.ReportParameterAlreadyDeclared(parameterSyntax.Location, parameterName)
         Else
           Dim parameter = New ParameterSymbol(parameterName, parameterType)
           parameters.Add(parameter)
@@ -114,7 +185,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
       'If Not m_scope.TryDeclareFunction(func) Then
       If (func.Declaration.Identifier.Text IsNot Nothing AndAlso
           Not m_scope.TryDeclareFunction(func)) Then
-        m_diagnostics.ReportSymbolAlreadyDeclared(syntax.Identifier.Location, func.Name)
+        Diagnostics.ReportSymbolAlreadyDeclared(syntax.Identifier.Location, func.Name)
       End If
     End Sub
 
@@ -160,7 +231,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
     Public Function BindExpression(syntax As ExpressionSyntax, Optional canBeVoid As Boolean = False) As BoundExpression
       Dim result = BindExpressionInternal(syntax)
       If Not canBeVoid AndAlso result.Type Is TypeSymbol.Void Then
-        m_diagnostics.ReportExpressionMustHaveValue(syntax.Location)
+        Diagnostics.ReportExpressionMustHaveValue(syntax.Location)
         Return New BoundErrorExpression
       End If
       Return result
@@ -206,7 +277,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
                                     es.Expression.Kind = BoundNodeKind.AssignmentExpression Or
                                     es.Expression.Kind = BoundNodeKind.CallExpression
           If Not isAllowedExpression Then
-            m_diagnostics.ReportInvalidExpressionStatement(syntax.Location)
+            Diagnostics.ReportInvalidExpressionStatement(syntax.Location)
           End If
         End If
       End If
@@ -270,7 +341,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
       End If
       Dim type = LookupType(syntax.Identifier.Text)
       If type Is Nothing Then
-        m_diagnostics.ReportUndefinedType(syntax.Identifier.Location, syntax.Identifier.Text)
+        Diagnostics.ReportUndefinedType(syntax.Identifier.Location, syntax.Identifier.Text)
         Return Nothing
       End If
       Return type
@@ -335,7 +406,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
     Private Function BindBreakStatement(syntax As BreakStatementSyntax) As BoundStatement
 
       If m_loopStack.Count = 0 Then
-        m_diagnostics.ReportInvalidBreakOrContinue(syntax.Keyword.Location, syntax.Keyword.Text)
+        Diagnostics.ReportInvalidBreakOrContinue(syntax.Keyword.Location, syntax.Keyword.Text)
         Return BindErrorStatement()
       End If
 
@@ -346,7 +417,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
 
     Private Function BindContinueStatement(syntax As ContinueStatementSyntax) As BoundStatement
       If m_loopStack.Count = 0 Then
-        m_diagnostics.ReportInvalidBreakOrContinue(syntax.Keyword.Location, syntax.Keyword.Text)
+        Diagnostics.ReportInvalidBreakOrContinue(syntax.Keyword.Location, syntax.Keyword.Text)
         Return BindErrorStatement()
       End If
       Dim continueLabel = m_loopStack.Peek().ContinueLabel
@@ -358,15 +429,15 @@ Namespace Global.Basic.CodeAnalysis.Binding
       Dim expression = If(syntax.Expression Is Nothing, Nothing, BindExpression(syntax.Expression))
 
       If m_function Is Nothing Then
-        m_diagnostics.ReportInvalidReturn(syntax.ReturnKeyword.Location)
+        Diagnostics.ReportInvalidReturn(syntax.ReturnKeyword.Location)
       Else
         If m_function.Type Is TypeSymbol.Void Then
           If expression IsNot Nothing Then
-            m_diagnostics.ReportInvalidReturnExpression(syntax.Expression.Location, m_function.Name)
+            Diagnostics.ReportInvalidReturnExpression(syntax.Expression.Location, m_function.Name)
           End If
         Else
           If expression Is Nothing Then
-            m_diagnostics.ReportMissingReturnExpression(syntax.ReturnKeyword.Location, m_function.Type)
+            Diagnostics.ReportMissingReturnExpression(syntax.ReturnKeyword.Location, m_function.Type)
           Else
             expression = BindConversion(syntax.Expression.Location, expression, m_function.Type)
           End If
@@ -424,7 +495,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
       'End If
 
       If variable.IsReadOnly Then
-        m_diagnostics.ReportCannotAssign(syntax.EqualsToken.Location, name)
+        Diagnostics.ReportCannotAssign(syntax.EqualsToken.Location, name)
       End If
 
       Dim convertedExpression = BindConversion(syntax.Expression.Location, boundExpression, variable.Type)
@@ -440,7 +511,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
       End If
       Dim boundOperator = BoundUnaryOperator.Bind(syntax.OperatorToken.Kind, boundOperand.Type)
       If boundOperator Is Nothing Then
-        m_diagnostics.ReportUndefinedUnaryOperator(syntax.OperatorToken.Location, syntax.OperatorToken.Text, boundOperand.Type)
+        Diagnostics.ReportUndefinedUnaryOperator(syntax.OperatorToken.Location, syntax.OperatorToken.Text, boundOperand.Type)
         Return New BoundErrorExpression
       End If
       Return New BoundUnaryExpression(boundOperator, boundOperand)
@@ -454,7 +525,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
       End If
       Dim boundOperator = BoundBinaryOperator.Bind(syntax.OperatorToken.Kind, boundLeft.Type, boundRight.Type)
       If boundOperator Is Nothing Then
-        m_diagnostics.ReportUndefinedBinaryOperator(syntax.OperatorToken.Location, syntax.OperatorToken.Text, boundLeft.Type, boundRight.Type)
+        Diagnostics.ReportUndefinedBinaryOperator(syntax.OperatorToken.Location, syntax.OperatorToken.Text, boundLeft.Type, boundRight.Type)
         Return New BoundErrorExpression
       End If
       Return New BoundBinaryExpression(boundLeft, boundOperator, boundRight)
@@ -479,12 +550,12 @@ Namespace Global.Basic.CodeAnalysis.Binding
       'If Not m_scope.TryLookupFunction(syntax.Identifier.Text, func) Then
       Dim symbol = m_scope.TryLookupSymbol(syntax.Identifier.Text)
       If symbol Is Nothing Then
-        m_diagnostics.ReportUndefinedFunction(syntax.Identifier.Location, syntax.Identifier.Text)
+        Diagnostics.ReportUndefinedFunction(syntax.Identifier.Location, syntax.Identifier.Text)
         Return New BoundErrorExpression
       End If
       Dim func = TryCast(symbol, FunctionSymbol)
       If func Is Nothing Then
-        m_diagnostics.ReportNotAFunction(syntax.Identifier.Location, syntax.Identifier.Text)
+        Diagnostics.ReportNotAFunction(syntax.Identifier.Location, syntax.Identifier.Text)
         Return New BoundErrorExpression
       End If
       If syntax.Arguments.Count <> func.Parameters.Length Then
@@ -503,7 +574,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
           span = syntax.CloseParen.Span
         End If
         Dim location = New TextLocation(syntax.SyntaxTree.Text, span)
-        m_diagnostics.ReportWrongArgumentCount(location, func.Name, func.Parameters.Length, syntax.Arguments.Count)
+        Diagnostics.ReportWrongArgumentCount(location, func.Name, func.Parameters.Length, syntax.Arguments.Count)
         Return New BoundErrorExpression
       End If
 
@@ -548,12 +619,12 @@ Namespace Global.Basic.CodeAnalysis.Binding
       Dim c = Conversion.Classify(expression.Type, [type])
       If Not c.Exists Then
         If expression.Type IsNot TypeSymbol.Error AndAlso [type] IsNot TypeSymbol.Error Then
-          m_diagnostics.ReportCannotConvert(diagnosticLocation, expression.Type, [type])
+          Diagnostics.ReportCannotConvert(diagnosticLocation, expression.Type, [type])
         End If
         Return New BoundErrorExpression
       End If
       If Not allowExplicit AndAlso c.IsExplicit Then
-        m_diagnostics.ReportCannotConvertImplicitly(diagnosticLocation, expression.Type, [type])
+        Diagnostics.ReportCannotConvertImplicitly(diagnosticLocation, expression.Type, [type])
       End If
 
       If c.IsIdentity Then Return expression
@@ -568,7 +639,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
                                     DirectCast(New GlobalVariableSymbol(name, isReadOnly, type), VariableSymbol),
                                     DirectCast(New LocalVariableSymbol(name, isReadOnly, type), VariableSymbol))
       If [declare] AndAlso Not m_scope.TryDeclareVariable(variable) Then
-        m_diagnostics.ReportSymbolAlreadyDeclared(identifier.Location, name)
+        Diagnostics.ReportSymbolAlreadyDeclared(identifier.Location, name)
       End If
       Return variable
     End Function
@@ -581,10 +652,10 @@ Namespace Global.Basic.CodeAnalysis.Binding
       If TypeOf s Is VariableSymbol Then
         Return TryCast(s, VariableSymbol)
       ElseIf s Is Nothing Then
-        m_diagnostics.ReportUndefinedVariable(identifierToken.Location, name)
+        Diagnostics.ReportUndefinedVariable(identifierToken.Location, name)
         Return Nothing
       Else
-        m_diagnostics.ReportNotAVariable(identifierToken.Location, name)
+        Diagnostics.ReportNotAVariable(identifierToken.Location, name)
         Return Nothing
       End If
 

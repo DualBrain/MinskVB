@@ -37,6 +37,11 @@ Namespace Global.Basic.CodeAnalysis
     Public ReadOnly Property IsScript As Boolean
     Public ReadOnly Property Previous As Compilation
     Public ReadOnly Property SyntaxTrees As ImmutableArray(Of SyntaxTree)
+    Public ReadOnly Property MainFunction As FunctionSymbol
+      Get
+        Return GlobalScope.MainFunction
+      End Get
+    End Property
     Public ReadOnly Property Functions As ImmutableArray(Of FunctionSymbol)
       Get
         Return GlobalScope.Functions
@@ -119,14 +124,14 @@ Namespace Global.Basic.CodeAnalysis
 
       Dim program = GetProgram()
 
-      Dim appPath = Environment.GetCommandLineArgs(0)
-      Dim appDirectory = Path.GetDirectoryName(appPath)
-      Dim cfgPath = Path.Combine(appDirectory, "cfg.dot")
-      Dim cfgStatement = If(Not program.Statement.Statements.Any AndAlso program.Functions.Any, program.Functions.Last.Value, program.Statement)
-      Dim cfg = ControlFlowGraph.Create(cfgStatement)
-      Using streamWriter As New StreamWriter(cfgPath)
-        cfg.WriteTo(streamWriter)
-      End Using
+      'Dim appPath = Environment.GetCommandLineArgs(0)
+      'Dim appDirectory = Path.GetDirectoryName(appPath)
+      'Dim cfgPath = Path.Combine(appDirectory, "cfg.dot")
+      'Dim cfgStatement = If(Not program.Statement.Statements.Any AndAlso program.Functions.Any, program.Functions.Last.Value, program.Statement)
+      'Dim cfg = ControlFlowGraph.Create(cfgStatement)
+      'Using streamWriter As New StreamWriter(cfgPath)
+      '  cfg.WriteTo(streamWriter)
+      'End Using
 
       If program.Diagnostics.Any Then
         Return New EvaluationResult(program.Diagnostics.ToImmutableArray, Nothing)
@@ -140,20 +145,26 @@ Namespace Global.Basic.CodeAnalysis
     End Function
 
     Public Sub EmitTree(writer As TextWriter)
-      Dim program = GetProgram()
 
-      If program.Statement.Statements.Any() Then
-        program.Statement.WriteTo(writer)
-      Else
-        For Each functionBody In program.Functions
-          If Not GlobalScope.Functions.Contains(functionBody.Key) Then
-            Continue For
-          End If
-          functionBody.Key.WriteTo(writer)
-          writer.WriteLine()
-          functionBody.Value.WriteTo(writer)
-        Next
+      If GlobalScope.MainFunction IsNot Nothing Then
+        EmitTree(GlobalScope.MainFunction, writer)
+      ElseIf GlobalScope.ScriptFunction IsNot Nothing Then
+        EmitTree(GlobalScope.ScriptFunction, writer)
       End If
+
+      'Dim program = GetProgram()
+      'If program.Statement.Statements.Any() Then
+      '  program.Statement.WriteTo(writer)
+      'Else
+      '  For Each functionBody In program.Functions
+      '    If Not GlobalScope.Functions.Contains(functionBody.Key) Then
+      '      Continue For
+      '    End If
+      '    functionBody.Key.WriteTo(writer)
+      '    writer.WriteLine()
+      '    functionBody.Value.WriteTo(writer)
+      '  Next
+      'End If
     End Sub
 
     Public Sub EmitTree(symbol As FunctionSymbol, writer As TextWriter)

@@ -35,7 +35,13 @@ Namespace Global.Basic.CodeAnalysis
     End Sub
 
     Public Function Evaluate() As Object
-      Return EvaluateStatement(m_program.Statement)
+      Dim func = If(m_program.MainFunction, m_program.ScriptFunction)
+      If func Is Nothing Then
+        Return Nothing
+      Else
+        Dim body = m_functions(func)
+        Return EvaluateStatement(body)
+      End If
     End Function
 
     Private Function EvaluateStatement(body As BoundBlockStatement) As Object
