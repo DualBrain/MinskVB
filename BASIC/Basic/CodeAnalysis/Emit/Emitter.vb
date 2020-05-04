@@ -19,6 +19,7 @@ Namespace Global.Basic.CodeAnalysis.Emit
 
     Private ReadOnly _diagnostics As New DiagnosticBag
     Private ReadOnly _knownTypes As New Dictionary(Of TypeSymbol, TypeReference)
+    Private ReadOnly _objectEqualsReference As MethodReference
     Private ReadOnly _consoleReadLineReference As MethodReference
     Private ReadOnly _consoleWriteLineReference As MethodReference
     Private ReadOnly _stringConcatReference As MethodReference
@@ -61,6 +62,7 @@ Namespace Global.Basic.CodeAnalysis.Emit
         _knownTypes.Add(entry.typeSymbol, typeReference)
       Next
 
+      _objectEqualsReference = Emit_ResolveMethod(assemblies, "System.Object", "Equals", {"System.Object", "System.Object"})
       _consoleReadLineReference = Emit_ResolveMethod(assemblies, "System.Console", "ReadLine", Array.Empty(Of String))
       _consoleWriteLineReference = Emit_ResolveMethod(assemblies, "System.Console", "WriteLine", {"System.String"})
       _stringConcatReference = Emit_ResolveMethod(assemblies, "System.String", "Concat", {"System.String", "System.String"})
@@ -238,17 +240,83 @@ Namespace Global.Basic.CodeAnalysis.Emit
     End Sub
 
     Private Sub EmitBinaryExpression(ilProcessor As ILProcessor, node As BoundBinaryExpression)
+
+      EmitExpression(ilProcessor, node.Left)
+      EmitExpression(ilProcessor, node.Right)
+
+      ' +(string, string)
       If node.Op.Kind = BoundBinaryOperatorKind.Addition Then
         If node.Left.Type Is TypeSymbol.String AndAlso node.Right.Type Is TypeSymbol.String Then
-          EmitExpression(ilProcessor, node.Left)
-          EmitExpression(ilProcessor, node.Right)
           ilProcessor.Emit(OpCodes.Call, _stringConcatReference)
-        Else
-          Throw New NotImplementedException
+          Return
         End If
-      Else
-        Throw New NotImplementedException
       End If
+
+      ' ==(any, any)
+      ' ==(string, string)
+      If node.Op.Kind = BoundBinaryOperatorKind.Equals Then
+        If (node.Left.Type Is TypeSymbol.Any AndAlso node.Right.Type Is TypeSymbol.Any) OrElse
+           (node.Left.Type Is TypeSymbol.String AndAlso node.Right.Type Is TypeSymbol.String) Then
+          ilProcessor.Emit(OpCodes.Call, _objectEqualsReference)
+          Return
+        End If
+      End If
+
+      ' !=(any, any)
+      ' !=(string, string)
+      If node.Op.Kind = BoundBinaryOperatorKind.NotEquals Then
+        If (node.Left.Type Is TypeSymbol.Any AndAlso node.Right.Type Is TypeSymbol.Any) OrElse
+           (node.Left.Type Is TypeSymbol.String AndAlso node.Right.Type Is TypeSymbol.String) Then
+          ilProcessor.Emit(OpCodes.Call, _objectEqualsReference)
+          ilProcessor.Emit(OpCodes.Ldc_I4_0)
+          ilProcessor.Emit(OpCodes.Ceq)
+          Return
+        End If
+      End If
+
+      Select Case node.Op.Kind
+        Case BoundBinaryOperatorKind.Addition
+          ilProcessor.Emit(OpCodes.Add)
+        Case BoundBinaryOperatorKind.Subtraction
+          ilProcessor.Emit(OpCodes.Sub)
+        Case BoundBinaryOperatorKind.Multiplication
+          ilProcessor.Emit(OpCodes.Mul)
+        Case BoundBinaryOperatorKind.Division
+          ilProcessor.Emit(OpCodes.Div)
+        Case BoundBinaryOperatorKind.LogicalAnd
+          'TODO: Implement short-circuit evaluation.
+          ilProcessor.Emit(OpCodes.And)
+        Case BoundBinaryOperatorKind.LogicalOr
+          'TODO: Implement short-circuit evaluation.
+          ilProcessor.Emit(OpCodes.Or)
+        Case BoundBinaryOperatorKind.BitwiseAnd
+          ilProcessor.Emit(OpCodes.And)
+        Case BoundBinaryOperatorKind.BitwiseOr
+          ilProcessor.Emit(OpCodes.Or)
+        Case BoundBinaryOperatorKind.BitwiseXor
+          ilProcessor.Emit(OpCodes.Xor)
+        Case BoundBinaryOperatorKind.Equals
+          ilProcessor.Emit(OpCodes.Ceq)
+        Case BoundBinaryOperatorKind.NotEquals
+          ilProcessor.Emit(OpCodes.Ceq)
+          ilProcessor.Emit(OpCodes.Ldc_I4_0)
+          ilProcessor.Emit(OpCodes.Ceq)
+        Case BoundBinaryOperatorKind.Less
+          ilProcessor.Emit(OpCodes.Clt)
+        Case BoundBinaryOperatorKind.LessOrEquals
+          ilProcessor.Emit(OpCodes.Cgt)
+          ilProcessor.Emit(OpCodes.Ldc_I4_0)
+          ilProcessor.Emit(OpCodes.Ceq)
+        Case BoundBinaryOperatorKind.Greater
+          ilProcessor.Emit(OpCodes.Cgt)
+        Case BoundBinaryOperatorKind.GreaterOrEquals
+          ilProcessor.Emit(OpCodes.Clt)
+          ilProcessor.Emit(OpCodes.Ldc_I4_0)
+          ilProcessor.Emit(OpCodes.Ceq)
+        Case Else
+          Throw New Exception($"Unexpected binary operator {SyntaxFacts.GetText(node.Op.SyntaxKind)}({node.Op.Type})")
+      End Select
+
     End Sub
 
     Private Sub EmitCallExpression(ilProcessor As ILProcessor, node As BoundCallExpression)
