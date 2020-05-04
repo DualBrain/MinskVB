@@ -2,6 +2,5 @@ function main()
 {
   print("What's your name?")
   let name = input()
-  print("Hello ")
-  print(name)
+  print("Hello " + name + "!")
 }

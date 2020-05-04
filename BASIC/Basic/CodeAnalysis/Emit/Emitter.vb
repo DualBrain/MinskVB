@@ -15,18 +15,19 @@ Namespace Global.Basic.CodeAnalysis.Emit
   Friend NotInheritable Class Emitter
 
     Private ReadOnly _diagnostics As New DiagnosticBag
-    Private ReadOnly _knownTypes As New Dictionary(Of TypeSymbol, Ccl.TypeReference)
-    Private ReadOnly _consoleReadLineReference As Ccl.MethodReference
-    Private ReadOnly _consoleWriteLineReference As Ccl.MethodReference
-    Private ReadOnly _assemblyDefinition As Ccl.AssemblyDefinition
+    Private ReadOnly _knownTypes As New Dictionary(Of TypeSymbol, TypeReference)
+    Private ReadOnly _consoleReadLineReference As MethodReference
+    Private ReadOnly _consoleWriteLineReference As MethodReference
+    Private ReadOnly _stringConcatReference As MethodReference
+    Private ReadOnly _assemblyDefinition As AssemblyDefinition
     Private ReadOnly _methods As New Dictionary(Of FunctionSymbol, MethodDefinition)
     Private ReadOnly _locals As New Dictionary(Of VariableSymbol, VariableDefinition)
 
-    Private _typeDefinition As Ccl.TypeDefinition
+    Private _typeDefinition As TypeDefinition
 
     Private Sub New(moduleName As String, references() As String)
 
-      Dim assemblies = New List(Of Ccl.AssemblyDefinition)
+      Dim assemblies = New List(Of AssemblyDefinition)
 
       For Each reference In references
         Try
@@ -45,9 +46,9 @@ Namespace Global.Basic.CodeAnalysis.Emit
         (TypeSymbol.Void, "System.Void")
       }
 
-      Dim assemblyName = New Ccl.AssemblyNameDefinition(moduleName, New Version(1, 0))
-      _assemblyDefinition = Ccl.AssemblyDefinition.CreateAssembly(assemblyName, moduleName, Ccl.ModuleKind.Console)
-      _knownTypes = New Dictionary(Of TypeSymbol, Ccl.TypeReference)
+      Dim assemblyName = New AssemblyNameDefinition(moduleName, New Version(1, 0))
+      _assemblyDefinition = AssemblyDefinition.CreateAssembly(assemblyName, moduleName, ModuleKind.Console)
+      _knownTypes = New Dictionary(Of TypeSymbol, TypeReference)
 
       For Each entry In builtInTypes
         Dim typeReference = Emit_ResolveType(assemblies, entry.typeSymbol.Name, entry.metadataName)
@@ -56,6 +57,7 @@ Namespace Global.Basic.CodeAnalysis.Emit
 
       _consoleReadLineReference = Emit_ResolveMethod(assemblies, "System.Console", "ReadLine", Array.Empty(Of String))
       _consoleWriteLineReference = Emit_ResolveMethod(assemblies, "System.Console", "WriteLine", {"System.String"})
+      _stringConcatReference = Emit_ResolveMethod(assemblies, "System.String", "Concat", {"System.String", "System.String"})
 
     End Sub
 
@@ -202,7 +204,17 @@ Namespace Global.Basic.CodeAnalysis.Emit
     End Sub
 
     Private Sub EmitBinaryExpression(ilProcessor As ILProcessor, node As BoundBinaryExpression)
-      Throw New NotImplementedException()
+      If node.Op.Kind = BoundBinaryOperatorKind.Addition Then
+        If node.Left.Type Is TypeSymbol.String AndAlso node.Right.Type Is TypeSymbol.String Then
+          EmitExpression(ilProcessor, node.Left)
+          EmitExpression(ilProcessor, node.Right)
+          ilProcessor.Emit(OpCodes.Call, _stringConcatReference)
+        Else
+          Throw New NotImplementedException
+        End If
+      Else
+        Throw New NotImplementedException
+      End If
     End Sub
 
     Private Sub EmitCallExpression(ilProcessor As ILProcessor, node As BoundCallExpression)
