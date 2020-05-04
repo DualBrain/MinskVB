@@ -128,7 +128,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
       For Each func In globalScope.Functions
         Dim binder = New Binder(isScript, parentScope, func)
         Dim body = binder.BindStatement(func.Declaration.Body)
-        Dim loweredBody = Lowerer.Lower(body)
+        Dim loweredBody = Lowerer.Lower(func, body)
         If func.Type IsNot TypeSymbol.Void AndAlso Not ControlFlowGraph.AllPathsReturn(loweredBody) Then
           binder.Diagnostics.ReportAllPathsMustReturn(func.Declaration.Identifier.Location)
         End If
@@ -137,7 +137,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
       Next
 
       If globalScope.MainFunction IsNot Nothing AndAlso globalScope.Statements.Any Then
-        Dim body = Lowerer.Lower(New BoundBlockStatement(globalScope.Statements))
+        Dim body = Lowerer.Lower(globalScope.MainFunction, New BoundBlockStatement(globalScope.Statements))
         functionBodies.Add(globalScope.MainFunction, body)
       ElseIf globalScope.ScriptFunction IsNot Nothing Then
         Dim statements = globalScope.Statements
@@ -152,7 +152,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
           Dim nullValue = New BoundLiteralExpression("")
           statements = statements.Add(New BoundReturnStatement(nullValue))
         End If
-        Dim body = Lowerer.Lower(New BoundBlockStatement(statements))
+        Dim body = Lowerer.Lower(globalScope.ScriptFunction, New BoundBlockStatement(statements))
         functionBodies.Add(globalScope.ScriptFunction, body)
       End If
 

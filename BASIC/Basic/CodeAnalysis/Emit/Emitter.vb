@@ -116,8 +116,8 @@ Namespace Global.Basic.CodeAnalysis.Emit
       For Each statement In body.Statements
         EmitStatement(ilProcessor, statement)
       Next
-      'HACK: We should make sure that our bound tree has explicit returns.
-      If func.Type Is TypeSymbol.Void Then ilProcessor.Emit(OpCodes.Ret)
+      ''HACK: We should make sure that our bound tree has explicit returns.
+      'If func.Type Is TypeSymbol.Void Then ilProcessor.Emit(OpCodes.Ret)
       method.Body.OptimizeMacros
     End Sub
 

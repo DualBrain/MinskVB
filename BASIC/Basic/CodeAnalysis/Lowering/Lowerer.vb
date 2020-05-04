@@ -23,13 +23,13 @@ Namespace Global.Basic.CodeAnalysis.Lowering
       Return New BoundLabel(name)
     End Function
 
-    Public Shared Function Lower(statement As BoundStatement) As BoundBlockStatement
+    Public Shared Function Lower(func As FunctionSymbol, statement As BoundStatement) As BoundBlockStatement
       Dim lowerer = New Lowerer
       Dim result = lowerer.RewriteStatement(statement)
-      Return Flatten(result)
+      Return Flatten(func, result)
     End Function
 
-    Private Shared Function Flatten(statement As BoundStatement) As BoundBlockStatement
+    Private Shared Function Flatten(func As FunctionSymbol, statement As BoundStatement) As BoundBlockStatement
       Dim builder = ImmutableArray.CreateBuilder(Of BoundStatement)
       Dim stack = New Stack(Of BoundStatement)
       stack.Push(statement)
@@ -43,7 +43,20 @@ Namespace Global.Basic.CodeAnalysis.Lowering
           builder.Add(current)
         End If
       End While
+      If func.Type Is TypeSymbol.Void Then
+        If builder.Count = 0 OrElse CanFallThrough(builder.Last) Then
+          builder.Add(New BoundReturnStatement(Nothing))
+        End If
+      End If
       Return New BoundBlockStatement(builder.ToImmutable)
+    End Function
+
+    Private Shared Function CanFallThrough(boundStatement As BoundStatement) As Boolean
+      'TODO: We don't rewrite conditional gotos where the condition is always true.
+      '      We shouldn't handle this here, because we should really rewrite those
+      '      to unconditional gotos in the first place.
+      Return boundStatement.Kind <> BoundNodeKind.ReturnStatement AndAlso
+             boundStatement.Kind <> BoundNodeKind.GotoStatement
     End Function
 
     Protected Overrides Function RewriteIfStatement(node As BoundIfStatement) As BoundStatement
@@ -82,8 +95,8 @@ Namespace Global.Basic.CodeAnalysis.Lowering
         ' <else>
         ' end:
 
-        Dim elseLabel = GenerateLabel
-        Dim endLabel = GenerateLabel
+        Dim elseLabel = GenerateLabel()
+        Dim endLabel = GenerateLabel()
 
         Dim gotoFalse = New BoundConditionalGotoStatement(elseLabel, node.Condition, False)
         Dim gotoEndStatement = New BoundGotoStatement(endLabel)
@@ -92,11 +105,11 @@ Namespace Global.Basic.CodeAnalysis.Lowering
         Dim endLabelStatement = New BoundLabelStatement(endLabel)
 
         Dim result = New BoundBlockStatement(ImmutableArray.Create(Of BoundStatement)(gotoFalse,
-                                                                                              node.ThenStatement,
-                                                                                              gotoEndStatement,
-                                                                                              elseLabelStatement,
-                                                                                              node.ElseStatement,
-                                                                                              endLabelStatement))
+                                                                                      node.ThenStatement,
+                                                                                      gotoEndStatement,
+                                                                                      elseLabelStatement,
+                                                                                      node.ElseStatement,
+                                                                                      endLabelStatement))
         Return RewriteStatement(result)
 
       End If
@@ -117,7 +130,7 @@ Namespace Global.Basic.CodeAnalysis.Lowering
       ' gotoTrue <condition> body
       ' break:
 
-      Dim bodyLabel = GenerateLabel
+      Dim bodyLabel = GenerateLabel()
 
       Dim gotoContinue = New BoundGotoStatement(node.ContinueLabel)
       Dim bodyLabelStatement = New BoundLabelStatement(bodyLabel)
