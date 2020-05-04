@@ -16,5 +16,4 @@ Namespace Global.Basic.CodeAnalysis
     Public ReadOnly Property Value As Object
 
   End Class
-
 End Namespace

@@ -170,7 +170,7 @@ Namespace Global.Basic.CodeAnalysis
     Public Sub EmitTree(symbol As FunctionSymbol, writer As TextWriter)
 
       Dim program = GetProgram()
-      Dim body As BoundBlockStatement
+      Dim body As BoundBlockStatement = Nothing
       'If Not program.Functions.TryGetValue(symbol, body) Then
       '  Return
       'End If
@@ -182,6 +182,19 @@ Namespace Global.Basic.CodeAnalysis
       body.WriteTo(writer)
 
     End Sub
+
+    Public Function Emit(moduleName As String, references As String(), outputPath As String) As ImmutableArray(Of Diagnostic)
+
+      Dim program = GetProgram()
+
+      If program.Diagnostics.Any Then
+        Return program.Diagnostics
+      End If
+
+      Return Basic.CodeAnalysis.Emit.Emitter.Emit(program, moduleName, references, outputPath)
+
+    End Function
+
 
   End Class
 

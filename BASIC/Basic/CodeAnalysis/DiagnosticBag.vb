@@ -5,6 +5,7 @@ Option Infer On
 Imports Basic.CodeAnalysis.Symbols
 Imports Basic.CodeAnalysis.Syntax
 Imports Basic.CodeAnalysis.Text
+Imports Mono.Cecil
 
 Namespace Global.Basic.CodeAnalysis
 
@@ -18,7 +19,7 @@ Namespace Global.Basic.CodeAnalysis
     End Function
 
     Private Function IEnumerable_GetEnumerator() As IEnumerator Implements IEnumerable.GetEnumerator
-      Return GetEnumerator
+      Return GetEnumerator()
     End Function
 
     Private Sub Report(location As TextLocation, message As String)
@@ -146,6 +147,30 @@ Namespace Global.Basic.CodeAnalysis
     Public Sub ReportCannotMixMainAndGlobalStatements(location As TextLocation)
       Report(location, "Cannot declare main function when global statements are used.")
     End Sub
+
+    Public Sub ReportInvalidReference(path As String)
+      Report(Nothing, $"The reference is not a valid .NET assembly: '{path}'")
+    End Sub
+
+    Public Sub ReportRequiredTypeNotFound(internalName As String, metadataName As String)
+      Report(Nothing, If(internalName Is Nothing,
+                         $"The required type '{metadataName}' cannot be resolved among the given references.",
+                         $"The required type '{internalName}' ('{metadataName}') cannot be resolved among the given references."))
+    End Sub
+
+    Public Sub ReportRequiredTypeAmbiguous(internalName As String, metadataName As String, foundTypes() As TypeDefinition)
+      Dim assemblyNames = foundTypes.Select(Function(t) t.Module.Assembly.Name.Name)
+      Dim assemblyNameList = String.Join(", ", assemblyNames)
+      Report(Nothing, If(internalName Is Nothing,
+                         $"The required type '{internalName}' was found in multiple references: {assemblyNameList}",
+                         $"The required type '{internalName}' ('{metadataName}') was found in multiple references: {assemblyNameList}"))
+    End Sub
+
+    Public Sub ReportRequiredMethodNotFound(typeName As String, methodName As String, parameterTypeNames() As String)
+      Dim parameterTypeNameList = String.Join(", ", parameterTypeNames)
+      Report(Nothing, $"The required method '{typeName}.{methodName}({parameterTypeNameList})' cann be resolved among the given references.")
+    End Sub
+
 
   End Class
 

@@ -105,8 +105,16 @@ Namespace Global.Basic.IO
     <Extension>
     Public Sub WriteDiagnostics(writer As TextWriter, diagnostics As IEnumerable(Of Diagnostic))
 
+      For Each diagnostic In diagnostics.Where(Function(diag) diag.Location.Text Is Nothing)
+        writer.SetForeground(DarkRed)
+        'writer.Write(diagnostic.Message)
+        writer.WriteLine(diagnostic.Message)
+        writer.ResetColor()
+      Next
+
       ' We have errors, so don't try to evaluate (execute).
-      For Each diagnostic In diagnostics.OrderBy(Function(diag) diag.Location.FileName).
+      For Each diagnostic In diagnostics.Where(Function(diag) diag.Location.Text IsNot Nothing).
+                                         OrderBy(Function(diag) diag.Location.FileName).
                                          ThenBy(Function(diag) diag.Location.Span.Start).
                                          ThenBy(Function(diag) diag.Location.Span.Length)
 
@@ -145,7 +153,6 @@ Namespace Global.Basic.IO
         writer.Write(er)
         writer.ResetColor()
         ' Write the rest of the line.
-        writer.WriteLine(suffix)
 
       Next
 
