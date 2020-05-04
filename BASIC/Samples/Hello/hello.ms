@@ -1,1 +1,7 @@
-print("Hello World on Wednesday Morning!")
+function main()
+{
+  print("What's your name?")
+  let name = input()
+  print("Hello ")
+  print(name)
+}

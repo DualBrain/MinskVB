@@ -16,9 +16,12 @@ Namespace Global.Basic.CodeAnalysis.Emit
 
     Private ReadOnly _diagnostics As New DiagnosticBag
     Private ReadOnly _knownTypes As New Dictionary(Of TypeSymbol, Ccl.TypeReference)
+    Private ReadOnly _consoleReadLineReference As Ccl.MethodReference
     Private ReadOnly _consoleWriteLineReference As Ccl.MethodReference
     Private ReadOnly _assemblyDefinition As Ccl.AssemblyDefinition
     Private ReadOnly _methods As New Dictionary(Of FunctionSymbol, MethodDefinition)
+    Private ReadOnly _locals As New Dictionary(Of VariableSymbol, VariableDefinition)
+
     Private _typeDefinition As Ccl.TypeDefinition
 
     Private Sub New(moduleName As String, references() As String)
@@ -51,6 +54,7 @@ Namespace Global.Basic.CodeAnalysis.Emit
         _knownTypes.Add(entry.typeSymbol, typeReference)
       Next
 
+      _consoleReadLineReference = Emit_ResolveMethod(assemblies, "System.Console", "ReadLine", Array.Empty(Of String))
       _consoleWriteLineReference = Emit_ResolveMethod(assemblies, "System.Console", "WriteLine", {"System.String"})
 
     End Sub
@@ -99,6 +103,7 @@ Namespace Global.Basic.CodeAnalysis.Emit
 
     Private Sub EmitFunctionBody(func As FunctionSymbol, body As BoundBlockStatement)
       Dim method = _methods(func)
+      _locals.Clear()
       Dim ilProcessor = method.Body.GetILProcessor
       For Each statement In body.Statements
         EmitStatement(ilProcessor, statement)
@@ -122,7 +127,12 @@ Namespace Global.Basic.CodeAnalysis.Emit
     End Sub
 
     Private Sub EmitVariableDeclaration(ilProcessor As ILProcessor, node As BoundVariableDeclaration)
-      Throw New NotImplementedException()
+      Dim typeReference = _knownTypes(node.Variable.Type)
+      Dim variableDefinition = New VariableDefinition(typeReference)
+      _locals.Add(node.Variable, variableDefinition)
+      ilProcessor.Body.Variables.Add(variableDefinition)
+      EmitExpression(ilProcessor, node.Initializer)
+      ilProcessor.Emit(OpCodes.Stloc, variableDefinition)
     End Sub
 
     Private Sub EmitLabelStatement(ilProcessor As ILProcessor, node As BoundLabelStatement)
@@ -179,7 +189,8 @@ Namespace Global.Basic.CodeAnalysis.Emit
     End Sub
 
     Private Sub EmitVariableExpression(ilProcessor As ILProcessor, node As BoundVariableExpression)
-      Throw New NotImplementedException()
+      Dim variableDefinition = _locals(node.Variable)
+      ilProcessor.Emit(OpCodes.Ldloc, variableDefinition)
     End Sub
 
     Private Sub EmitAssignmentExpression(ilProcessor As ILProcessor, node As BoundAssignmentExpression)
@@ -200,10 +211,10 @@ Namespace Global.Basic.CodeAnalysis.Emit
         EmitExpression(ilProcessor, argument)
       Next
 
-      If node.Function Is Print Then
+      If node.Function Is Input Then
+        ilProcessor.Emit(OpCodes.Call, _consoleReadLineReference)
+      ElseIf node.Function Is Print Then
         ilProcessor.Emit(OpCodes.Call, _consoleWriteLineReference)
-      ElseIf node.Function Is Input Then
-        Throw New NotImplementedException
       ElseIf node.Function Is Rnd Then
         Throw New NotImplementedException
       Else
