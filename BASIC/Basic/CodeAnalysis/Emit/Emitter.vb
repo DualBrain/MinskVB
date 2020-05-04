@@ -196,7 +196,10 @@ Namespace Global.Basic.CodeAnalysis.Emit
     End Sub
 
     Private Sub EmitAssignmentExpression(ilProcessor As ILProcessor, node As BoundAssignmentExpression)
-      Throw New NotImplementedException()
+      Dim variableDefinition = _locals(node.Variable)
+      EmitExpression(ilProcessor, node.Expression)
+      ilProcessor.Emit(OpCodes.Dup)
+      ilProcessor.Emit(OpCodes.Stloc, variableDefinition)
     End Sub
 
     Private Sub EmitUnaryExpression(ilProcessor As ILProcessor, node As BoundUnaryExpression)
