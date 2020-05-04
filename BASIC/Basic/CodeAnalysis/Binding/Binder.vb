@@ -170,7 +170,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
         If Not seenParameterNames.Add(parameterName) Then
           Diagnostics.ReportParameterAlreadyDeclared(parameterSyntax.Location, parameterName)
         Else
-          Dim parameter = New ParameterSymbol(parameterName, parameterType)
+          Dim parameter = New ParameterSymbol(parameterName, parameterType, parameters.Count)
           parameters.Add(parameter)
         End If
       Next

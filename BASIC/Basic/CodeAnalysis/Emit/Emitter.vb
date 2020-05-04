@@ -97,8 +97,14 @@ Namespace Global.Basic.CodeAnalysis.Emit
     End Function
 
     Private Sub EmitFunctionDeclaration(func As FunctionSymbol)
-      Dim voidType = _knownTypes(TypeSymbol.Void)
-      Dim method = New MethodDefinition(func.Name, Ccl.MethodAttributes.Static Or Ccl.MethodAttributes.Private, voidType)
+      Dim functionType = _knownTypes(func.Type)
+      Dim method = New MethodDefinition(func.Name, Ccl.MethodAttributes.Static Or Ccl.MethodAttributes.Private, functionType)
+      For Each parameter In func.Parameters
+        Dim parameterType = _knownTypes(parameter.Type)
+        Dim parameterAttributes = Ccl.ParameterAttributes.None
+        Dim parameterDefinition = New Ccl.ParameterDefinition(parameter.Name, parameterAttributes, parameterType)
+        method.Parameters.Add(parameterDefinition)
+      Next
       _typeDefinition.Methods.Add(method)
       _methods.Add(func, method)
     End Sub
@@ -150,7 +156,8 @@ Namespace Global.Basic.CodeAnalysis.Emit
     End Sub
 
     Private Sub EmitReturnStatement(ilProcessor As ILProcessor, node As BoundReturnStatement)
-      Throw New NotImplementedException()
+      If node.Expression IsNot Nothing Then EmitExpression(ilProcessor, node.Expression)
+      ilProcessor.Emit(OpCodes.Ret)
     End Sub
 
     Private Sub EmitExpressionStatement(ilProcessor As ILProcessor, node As BoundExpressionStatement)
@@ -191,8 +198,13 @@ Namespace Global.Basic.CodeAnalysis.Emit
     End Sub
 
     Private Sub EmitVariableExpression(ilProcessor As ILProcessor, node As BoundVariableExpression)
-      Dim variableDefinition = _locals(node.Variable)
-      ilProcessor.Emit(OpCodes.Ldloc, variableDefinition)
+      If TypeOf node.Variable Is ParameterSymbol Then
+        Dim parameter = CType(node.Variable, ParameterSymbol)
+        ilProcessor.Emit(OpCodes.Ldarg, parameter.Ordinal)
+      Else
+        Dim variableDefinition = _locals(node.Variable)
+        ilProcessor.Emit(OpCodes.Ldloc, variableDefinition)
+      End If
     End Sub
 
     Private Sub EmitAssignmentExpression(ilProcessor As ILProcessor, node As BoundAssignmentExpression)

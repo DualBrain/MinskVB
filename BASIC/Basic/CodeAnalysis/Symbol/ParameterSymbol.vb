@@ -7,11 +7,13 @@ Namespace Global.Basic.CodeAnalysis.Symbols
   Public NotInheritable Class ParameterSymbol
     Inherits LocalVariableSymbol
 
-    Sub New(name As String, type As TypeSymbol)
+    Sub New(name As String, type As TypeSymbol, ordinal As Integer)
       MyBase.New(name, True, type)
+      Me.Ordinal = ordinal
     End Sub
 
     Public Overrides ReadOnly Property Kind As SymbolKind = SymbolKind.Parameter
+    Public ReadOnly Property Ordinal As Integer
 
   End Class
 
