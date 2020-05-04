@@ -11,6 +11,7 @@ Imports Mono.Cecil
 Imports Mono.Cecil.Rocks
 Imports System.Security.Cryptography
 Imports Microsoft.VisualBasic.CompilerServices
+Imports Basic.CodeAnalysis.Syntax
 
 Namespace Global.Basic.CodeAnalysis.Emit
 
@@ -221,7 +222,19 @@ Namespace Global.Basic.CodeAnalysis.Emit
     End Sub
 
     Private Sub EmitUnaryExpression(ilProcessor As ILProcessor, node As BoundUnaryExpression)
-      Throw New NotImplementedException()
+      EmitExpression(ilProcessor, node.Operand)
+      If node.Op.Kind = BoundUnaryOperatorKind.Identity Then
+        ' Done.
+      ElseIf node.Op.Kind = BoundUnaryOperatorKind.LogicalNegation Then
+        ilProcessor.Emit(OpCodes.Ldc_I4_0)
+        ilProcessor.Emit(OpCodes.Ceq)
+      ElseIf node.Op.Kind = BoundUnaryOperatorKind.Negation Then
+        ilProcessor.Emit(OpCodes.Neg)
+      ElseIf node.Op.Kind = BoundUnaryOperatorKind.Onescomplement Then
+        ilProcessor.Emit(OpCodes.Not)
+      Else
+        Throw New Exception($"Unexpected unary operator {SyntaxFacts.GetText(node.Op.SyntaxKind)}({node.Operand.Type})")
+      End If
     End Sub
 
     Private Sub EmitBinaryExpression(ilProcessor As ILProcessor, node As BoundBinaryExpression)
