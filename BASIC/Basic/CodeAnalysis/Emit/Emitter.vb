@@ -14,27 +14,23 @@ Imports Mono.Cecil
 
 Namespace Global.Basic.CodeAnalysis.Emit
 
-  Friend Module Emitter
+  Friend NotInheritable Class Emitter
 
-    'Private ReadOnly _diagnostics = New DiagnosticBag
-    'Private ReadOnly _assemblies = New List(Of AssemblyDefinition)
-    'Private ReadOnly _knownTypes = New Dictionary(Of TypeSymbol, TypeReference)
-    'Private ReadOnly consoleType As TypeReference
+    Private ReadOnly _diagnostics As New DiagnosticBag
+    Private ReadOnly _knownTypes As New Dictionary(Of TypeSymbol, Ccl.TypeReference)
+    Private ReadOnly _consoleWriteLineReference As Ccl.MethodReference
+    Private ReadOnly _assemblyDefinition As Ccl.AssemblyDefinition
 
-    Public Function Emit(program As BoundProgram, moduleName As String, references() As String, outputPath As String) As ImmutableArray(Of Diagnostic)
-
-      If program.Diagnostics.Any Then Return program.Diagnostics
+    Private Sub New(moduleName As String, references() As String)
 
       Dim assemblies = New List(Of Ccl.AssemblyDefinition)
-
-      Dim result = New DiagnosticBag
 
       For Each reference In references
         Try
           Dim assembly = Ccl.AssemblyDefinition.ReadAssembly(reference)
           assemblies.Add(assembly)
         Catch ex As BadImageFormatException
-          result.ReportInvalidReference(reference)
+          _diagnostics.ReportInvalidReference(reference)
         End Try
       Next
 
@@ -47,61 +43,74 @@ Namespace Global.Basic.CodeAnalysis.Emit
       }
 
       Dim assemblyName = New Ccl.AssemblyNameDefinition(moduleName, New Version(1, 0))
-      Dim assemblyDefinition = Ccl.AssemblyDefinition.CreateAssembly(assemblyName, moduleName, Ccl.ModuleKind.Console)
-      Dim knownTypes = New Dictionary(Of TypeSymbol, Ccl.TypeReference)
+      _assemblyDefinition = Ccl.AssemblyDefinition.CreateAssembly(assemblyName, moduleName, Ccl.ModuleKind.Console)
+      _knownTypes = New Dictionary(Of TypeSymbol, Ccl.TypeReference)
 
       For Each entry In builtInTypes
-        Dim typeReference = ResolveType(assemblies, result, assemblyDefinition, entry.typeSymbol.Name, entry.metadataName)
-        knownTypes.Add(entry.typeSymbol, typeReference)
+        Dim typeReference = ResolveType(assemblies, entry.typeSymbol.Name, entry.metadataName)
+        _knownTypes.Add(entry.typeSymbol, typeReference)
       Next
 
-      Dim consoleWriteLineReference = ResolveMethod(assemblies, result, assemblyDefinition, "System.Console", "WriteLine", {"System.String"})
+      _consoleWriteLineReference = ResolveMethod(assemblies, "System.Console", "WriteLine", {"System.String"})
 
-      If result.Any Then Return result.ToImmutableArray
+    End Sub
 
-      Dim objectType = knownTypes(TypeSymbol.Any)
+    Public Function GetDiagnostics() As ImmutableArray(Of Diagnostic)
+      Return _diagnostics.ToImmutableArray
+    End Function
+
+    Public Function Emit(program As BoundProgram, outputPath As String) As ImmutableArray(Of Diagnostic)
+
+      If _diagnostics.Any Then Return _diagnostics.ToImmutableArray
+
+      Dim objectType = _knownTypes(TypeSymbol.Any)
       Dim typeDefinition = New Ccl.TypeDefinition("", "Program", Abstract Or Sealed, objectType)
-      assemblyDefinition.MainModule.Types.Add(typeDefinition)
+      _assemblyDefinition.MainModule.Types.Add(typeDefinition)
 
-      Dim voidType = knownTypes(TypeSymbol.Void)
+      Dim voidType = _knownTypes(TypeSymbol.Void)
       Dim mainMethod = New Ccl.MethodDefinition("Main", Ccl.MethodAttributes.Static Or Ccl.MethodAttributes.Private, voidType)
       typeDefinition.Methods.Add(mainMethod)
 
       Dim ilProcessor = mainMethod.Body.GetILProcessor
       ilProcessor.Emit(OpCodes.Ldstr, "Hello world from Cory!")
-      ilProcessor.Emit(OpCodes.Call, consoleWriteLineReference)
+      ilProcessor.Emit(OpCodes.Call, _consoleWriteLineReference)
       ilProcessor.Emit(OpCodes.Ret)
 
-      assemblyDefinition.EntryPoint = mainMethod
+      _assemblyDefinition.EntryPoint = mainMethod
 
-      assemblyDefinition.Write(outputPath)
+      _assemblyDefinition.Write(outputPath)
 
-      Return result.ToImmutableArray
+      Return _diagnostics.ToImmutableArray
+
+    End Function
+
+    Public Shared Function Emit(program As BoundProgram, moduleName As String, references() As String, outputPath As String) As ImmutableArray(Of Diagnostic)
+
+      If program.Diagnostics.Any Then Return program.Diagnostics
+
+      Dim emitter = New Emitter(moduleName, references)
+      Return emitter.Emit(program, outputPath)
 
     End Function
 
     Private Function ResolveType(assemblies As List(Of AssemblyDefinition),
-                                 result As DiagnosticBag,
-                                 assemblyDefinition As AssemblyDefinition,
                                  internalName As String,
                                  metadataName As String) As TypeReference
       Dim foundTypes = assemblies.SelectMany(Function(a) a.Modules).
                                   SelectMany(Function(m) m.Types).
                                   Where(Function(t) t.FullName = metadataName).ToArray
       If foundTypes.Length = 1 Then
-        Dim typeReference = assemblyDefinition.MainModule.ImportReference(foundTypes(0))
+        Dim typeReference = _assemblyDefinition.MainModule.ImportReference(foundTypes(0))
         Return typeReference
       ElseIf foundTypes.Length = 0 Then
-        result.ReportRequiredTypeNotFound(internalName, metadataName)
+        _diagnostics.ReportRequiredTypeNotFound(internalName, metadataName)
       Else
-        result.ReportRequiredTypeAmbiguous(internalName, metadataName, foundTypes)
+        _diagnostics.ReportRequiredTypeAmbiguous(internalName, metadataName, foundTypes)
       End If
       Return Nothing
     End Function
 
     Private Function ResolveMethod(assemblies As List(Of AssemblyDefinition),
-                                   result As DiagnosticBag,
-                                   assemblyDefinition As AssemblyDefinition,
                                    typeName As String,
                                    methodName As String,
                                    parameterTypeNames As String()) As MethodReference
@@ -126,18 +135,18 @@ Namespace Global.Basic.CodeAnalysis.Emit
           If Not allParametersMatch Then
             Continue For
           End If
-          Return assemblyDefinition.MainModule.ImportReference(method)
+          Return _assemblyDefinition.MainModule.ImportReference(method)
         Next
-        result.ReportRequiredMethodNotFound(typeName, methodName, parameterTypeNames)
+        _diagnostics.ReportRequiredMethodNotFound(typeName, methodName, parameterTypeNames)
         Return Nothing
       ElseIf foundTypes.Length = 0 Then
-        result.ReportRequiredTypeNotFound(Nothing, typeName)
+        _diagnostics.ReportRequiredTypeNotFound(Nothing, typeName)
       Else
-        result.ReportRequiredTypeAmbiguous(Nothing, typeName, foundTypes)
+        _diagnostics.ReportRequiredTypeAmbiguous(Nothing, typeName, foundTypes)
       End If
       Return Nothing
     End Function
 
-  End Module
+  End Class
 
 End Namespace
