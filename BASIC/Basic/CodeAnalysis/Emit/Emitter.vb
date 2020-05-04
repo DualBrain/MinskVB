@@ -18,7 +18,7 @@ Namespace Global.Basic.CodeAnalysis.Emit
   Friend NotInheritable Class Emitter
 
     Private ReadOnly _diagnostics As New DiagnosticBag
-    Private ReadOnly _knownTypes As New Dictionary(Of TypeSymbol, TypeReference)
+    Private ReadOnly _knownTypes As New Dictionary(Of TypeSymbol, Ccl.TypeReference)
     Private ReadOnly _objectEqualsReference As MethodReference
     Private ReadOnly _consoleReadLineReference As MethodReference
     Private ReadOnly _consoleWriteLineReference As MethodReference
@@ -29,6 +29,8 @@ Namespace Global.Basic.CodeAnalysis.Emit
     Private ReadOnly _assemblyDefinition As AssemblyDefinition
     Private ReadOnly _methods As New Dictionary(Of FunctionSymbol, MethodDefinition)
     Private ReadOnly _locals As New Dictionary(Of VariableSymbol, VariableDefinition)
+    Private ReadOnly _labels As New Dictionary(Of BoundLabel, Integer)
+    Private ReadOnly _fixups As New List(Of (InstructionIndex As Integer, Target As BoundLabel))
 
     Private _typeDefinition As TypeDefinition
 
@@ -47,8 +49,8 @@ Namespace Global.Basic.CodeAnalysis.Emit
 
       Dim builtInTypes = New List(Of (typeSymbol As TypeSymbol, metadataName As String)) From {
         (TypeSymbol.Any, "System.Object"),
-        (TypeSymbol.Bool, "System.Int32"),
-        (TypeSymbol.Int, "System.Boolean"),
+        (TypeSymbol.Bool, "System.Boolean"),
+        (TypeSymbol.Int, "System.Int32"),
         (TypeSymbol.String, "System.String"),
         (TypeSymbol.Void, "System.Void")
       }
@@ -123,9 +125,18 @@ Namespace Global.Basic.CodeAnalysis.Emit
     Private Sub EmitFunctionBody(func As FunctionSymbol, body As BoundBlockStatement)
       Dim method = _methods(func)
       _locals.Clear()
+      _labels.Clear()
+      _fixups.Clear()
       Dim ilProcessor = method.Body.GetILProcessor
       For Each statement In body.Statements
         EmitStatement(ilProcessor, statement)
+      Next
+      For Each fixup In _fixups
+        Dim targetLabel = fixup.Target
+        Dim targetInstructionIndex = _labels(targetLabel)
+        Dim targetInstruction = ilProcessor.Body.Instructions(targetInstructionIndex)
+        Dim instructionToFixup = ilProcessor.Body.Instructions(fixup.InstructionIndex)
+        instructionToFixup.Operand = targetInstruction
       Next
       method.Body.OptimizeMacros
     End Sub
@@ -153,15 +164,19 @@ Namespace Global.Basic.CodeAnalysis.Emit
     End Sub
 
     Private Sub EmitLabelStatement(ilProcessor As ILProcessor, node As BoundLabelStatement)
-      Throw New NotImplementedException()
+      _labels.Add(node.Label, ilProcessor.Body.Instructions.Count)
     End Sub
 
     Private Sub EmitGotoStatement(ilProcessor As ILProcessor, node As BoundGotoStatement)
-      Throw New NotImplementedException()
+      _fixups.Add((ilProcessor.Body.Instructions.Count, node.Label))
+      ilProcessor.Emit(OpCodes.Br, instruction.Create(OpCodes.Nop))
     End Sub
 
     Private Sub EmitConditionalGotoStatement(ilProcessor As ILProcessor, node As BoundConditionalGotoStatement)
-      Throw New NotImplementedException()
+      EmitExpression(ilProcessor, node.Condition)
+      Dim opCode = If(node.JumpIfTrue, OpCodes.Brtrue, OpCodes.Brfalse)
+      _fixups.Add((ilProcessor.Body.Instructions.Count, node.Label))
+      ilProcessor.Emit(opCode, Instruction.Create(OpCodes.Nop))
     End Sub
 
     Private Sub EmitReturnStatement(ilProcessor As ILProcessor, node As BoundReturnStatement)

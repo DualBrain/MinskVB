@@ -1,21 +1,8 @@
 function main()
 {
-  let x = 1 == 2
-  let y = 1 != 2
 
-  let a = "1" == "2"
-  let b = "1" != "2"
-
-  print(string(x))
-  print(string(y))
-  print(string(a))
-  print(string(b))
+ for i = 1 to 10
+   print(string(i))
 
 }
 
-function readLine(prompt: string): string
-{
-  print(prompt)
-  let name = input()
-  return name
-}
