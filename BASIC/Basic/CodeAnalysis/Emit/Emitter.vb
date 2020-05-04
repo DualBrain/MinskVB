@@ -9,6 +9,8 @@ Imports Basic.CodeAnalysis.Symbols
 Imports Mono.Cecil.Cil
 Imports Mono.Cecil
 Imports Mono.Cecil.Rocks
+Imports System.Security.Cryptography
+Imports Microsoft.VisualBasic.CompilerServices
 
 Namespace Global.Basic.CodeAnalysis.Emit
 
@@ -19,6 +21,9 @@ Namespace Global.Basic.CodeAnalysis.Emit
     Private ReadOnly _consoleReadLineReference As MethodReference
     Private ReadOnly _consoleWriteLineReference As MethodReference
     Private ReadOnly _stringConcatReference As MethodReference
+    Private ReadOnly _convertToBooleanReference As MethodReference
+    Private ReadOnly _convertToInt32Reference As MethodReference
+    Private ReadOnly _convertToStringReference As MethodReference
     Private ReadOnly _assemblyDefinition As AssemblyDefinition
     Private ReadOnly _methods As New Dictionary(Of FunctionSymbol, MethodDefinition)
     Private ReadOnly _locals As New Dictionary(Of VariableSymbol, VariableDefinition)
@@ -58,6 +63,9 @@ Namespace Global.Basic.CodeAnalysis.Emit
       _consoleReadLineReference = Emit_ResolveMethod(assemblies, "System.Console", "ReadLine", Array.Empty(Of String))
       _consoleWriteLineReference = Emit_ResolveMethod(assemblies, "System.Console", "WriteLine", {"System.String"})
       _stringConcatReference = Emit_ResolveMethod(assemblies, "System.String", "Concat", {"System.String", "System.String"})
+      _convertToBooleanReference = Emit_ResolveMethod(assemblies, "System.Convert", "ToBoolean", {"System.Object"})
+      _convertToInt32Reference = Emit_ResolveMethod(assemblies, "System.Convert", "ToInt32", {"System.Object"})
+      _convertToStringReference = Emit_ResolveMethod(assemblies, "System.Convert", "ToString", {"System.Object"})
 
     End Sub
 
@@ -116,8 +124,6 @@ Namespace Global.Basic.CodeAnalysis.Emit
       For Each statement In body.Statements
         EmitStatement(ilProcessor, statement)
       Next
-      ''HACK: We should make sure that our bound tree has explicit returns.
-      'If func.Type Is TypeSymbol.Void Then ilProcessor.Emit(OpCodes.Ret)
       method.Body.OptimizeMacros
     End Sub
 
@@ -252,7 +258,21 @@ Namespace Global.Basic.CodeAnalysis.Emit
     End Sub
 
     Private Sub EmitConversionExpression(ilProcessor As ILProcessor, node As BoundConversionExpression)
-      Throw New NotImplementedException()
+      EmitExpression(ilProcessor, node.Expression)
+      Dim needsBoxing = node.Expression.Type Is TypeSymbol.Bool OrElse
+                        node.Expression.Type Is TypeSymbol.Int
+      If needsBoxing Then ilProcessor.Emit(OpCodes.Box, _knownTypes(node.Expression.Type))
+      If node.Type Is TypeSymbol.Any Then
+        ' Done.
+      ElseIf node.Type Is TypeSymbol.Bool Then
+        ilProcessor.Emit(OpCodes.Call, _convertToBooleanReference)
+      ElseIf node.Type Is TypeSymbol.Int Then
+        ilProcessor.Emit(OpCodes.Call, _convertToInt32Reference)
+      ElseIf node.Type Is TypeSymbol.String Then
+        ilProcessor.Emit(OpCodes.Call, _convertToStringReference)
+      Else
+        Throw New Exception($"Unexpected conversion from {node.Expression.Type} to {node.Type}")
+      End If
     End Sub
 
 #Region "Converted from 'inline' functions."
