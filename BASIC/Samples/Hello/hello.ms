@@ -1,8 +1,7 @@
 function main()
 {
 
- for i = 1 to 10
-   print(string(i))
-
+  var x = rnd(15)
+  print(string(x))
 }
 

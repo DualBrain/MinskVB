@@ -26,6 +26,9 @@ Namespace Global.Basic.CodeAnalysis.Emit
     Private ReadOnly _convertToBooleanReference As MethodReference
     Private ReadOnly _convertToInt32Reference As MethodReference
     Private ReadOnly _convertToStringReference As MethodReference
+    Private ReadOnly _randomReference As TypeReference
+    Private ReadOnly _randomCtorReference As MethodReference
+    Private ReadOnly _randomNextReference As MethodReference
     Private ReadOnly _assemblyDefinition As AssemblyDefinition
     Private ReadOnly _methods As New Dictionary(Of FunctionSymbol, MethodDefinition)
     Private ReadOnly _locals As New Dictionary(Of VariableSymbol, VariableDefinition)
@@ -33,6 +36,7 @@ Namespace Global.Basic.CodeAnalysis.Emit
     Private ReadOnly _fixups As New List(Of (InstructionIndex As Integer, Target As BoundLabel))
 
     Private _typeDefinition As TypeDefinition
+    Private _randomFieldDefinition As FieldDefinition
 
     Private Sub New(moduleName As String, references() As String)
 
@@ -71,6 +75,10 @@ Namespace Global.Basic.CodeAnalysis.Emit
       _convertToBooleanReference = Emit_ResolveMethod(assemblies, "System.Convert", "ToBoolean", {"System.Object"})
       _convertToInt32Reference = Emit_ResolveMethod(assemblies, "System.Convert", "ToInt32", {"System.Object"})
       _convertToStringReference = Emit_ResolveMethod(assemblies, "System.Convert", "ToString", {"System.Object"})
+
+      _randomReference = Emit_ResolveType(assemblies, Nothing, "System.Random")
+      _randomCtorReference = Emit_ResolveMethod(assemblies, "System.Random", ".ctor", Array.Empty(Of String))
+      _randomNextReference = Emit_ResolveMethod(assemblies, "System.Random", "Next", {"System.Int32"})
 
     End Sub
 
@@ -336,6 +344,22 @@ Namespace Global.Basic.CodeAnalysis.Emit
 
     Private Sub EmitCallExpression(ilProcessor As ILProcessor, node As BoundCallExpression)
 
+      If node.Function Is BuiltinFunctions.Rnd Then
+
+        If _randomFieldDefinition Is Nothing Then
+          EmitRandomField()
+        End If
+
+        ilProcessor.Emit(OpCodes.Ldsfld, _randomFieldDefinition)
+        For Each argument In node.Arguments
+          EmitExpression(ilProcessor, argument)
+        Next
+        ilProcessor.Emit(OpCodes.Callvirt, _randomNextReference)
+
+        Return
+
+      End If
+
       For Each argument In node.Arguments
         EmitExpression(ilProcessor, argument)
       Next
@@ -344,13 +368,26 @@ Namespace Global.Basic.CodeAnalysis.Emit
         ilProcessor.Emit(OpCodes.Call, _consoleReadLineReference)
       ElseIf node.Function Is Print Then
         ilProcessor.Emit(OpCodes.Call, _consoleWriteLineReference)
-      ElseIf node.Function Is Rnd Then
-        Throw New NotImplementedException
       Else
         Dim methodDefinition = _methods(node.Function)
         ilProcessor.Emit(OpCodes.Call, methodDefinition)
       End If
 
+    End Sub
+
+    Private Sub EmitRandomField()
+      _randomFieldDefinition = New FieldDefinition("$rnd", Ccl.FieldAttributes.Static Or
+                                                           Ccl.FieldAttributes.Private, _randomReference)
+      _typeDefinition.Fields.Add(_randomFieldDefinition)
+      Dim staticConstructor = New Ccl.MethodDefinition(".cctor", Ccl.MethodAttributes.Static Or
+                                                                 Ccl.MethodAttributes.Private Or
+                                                                 Ccl.MethodAttributes.SpecialName Or
+                                                                 Ccl.MethodAttributes.RTSpecialName, _knownTypes(TypeSymbol.Void))
+      _typeDefinition.Methods.Insert(0, staticConstructor)
+      Dim ilProcessor = staticConstructor.Body.GetILProcessor
+      ilProcessor.Emit(OpCodes.Newobj, _randomCtorReference)
+      ilProcessor.Emit(OpCodes.Stsfld, _randomFieldDefinition)
+      ilProcessor.Emit(OpCodes.Ret)
     End Sub
 
     Private Sub EmitConversionExpression(ilProcessor As ILProcessor, node As BoundConversionExpression)
