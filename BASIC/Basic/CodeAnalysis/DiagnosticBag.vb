@@ -123,6 +123,10 @@ Namespace Global.Basic.CodeAnalysis
       Report(location, $"Since the function '{functionName}' does not return a value, the 'return' keyword cannot be followed by an expression.")
     End Sub
 
+    Public Sub ReportInvalidReturnWithValueInGlobalStatements(location As TextLocation)
+      Report(location, $"The 'return' keyword cannot be followed by an expression in global statements.")
+    End Sub
+
     Public Sub ReportMissingReturnExpression(location As TextLocation, returnType As TypeSymbol)
       Report(location, $"An expression of type '{returnType}' is expected.")
     End Sub

@@ -430,7 +430,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
           End If
         ElseIf expression IsNot Nothing Then
           ' Main does not support return values.
-          Diagnostics.ReportInvalidReturnExpression(syntax.Expression.Location, m_function.Name)
+          Diagnostics.ReportInvalidReturnWithValueInGlobalStatements(syntax.Expression.Location)
         End If
       Else
         If m_function.Type Is TypeSymbol.Void Then
