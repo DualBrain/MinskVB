@@ -47,16 +47,21 @@ Namespace Global.Basic.CodeAnalysis.Emit
       _knownTypes = New Dictionary(Of TypeSymbol, Ccl.TypeReference)
 
       For Each entry In builtInTypes
-        Dim typeReference = ResolveType(assemblies, entry.typeSymbol.Name, entry.metadataName)
+        Dim typeReference = Emit_ResolveType(assemblies, entry.typeSymbol.Name, entry.metadataName)
         _knownTypes.Add(entry.typeSymbol, typeReference)
       Next
 
-      _consoleWriteLineReference = ResolveMethod(assemblies, "System.Console", "WriteLine", {"System.String"})
+      _consoleWriteLineReference = Emit_ResolveMethod(assemblies, "System.Console", "WriteLine", {"System.String"})
 
     End Sub
 
-    Public Function GetDiagnostics() As ImmutableArray(Of Diagnostic)
-      Return _diagnostics.ToImmutableArray
+    Public Shared Function Emit(program As BoundProgram, moduleName As String, references() As String, outputPath As String) As ImmutableArray(Of Diagnostic)
+
+      If program.Diagnostics.Any Then Return program.Diagnostics
+
+      Dim emitter = New Emitter(moduleName, references)
+      Return emitter.Emit(program, outputPath)
+
     End Function
 
     Public Function Emit(program As BoundProgram, outputPath As String) As ImmutableArray(Of Diagnostic)
@@ -84,18 +89,9 @@ Namespace Global.Basic.CodeAnalysis.Emit
 
     End Function
 
-    Public Shared Function Emit(program As BoundProgram, moduleName As String, references() As String, outputPath As String) As ImmutableArray(Of Diagnostic)
-
-      If program.Diagnostics.Any Then Return program.Diagnostics
-
-      Dim emitter = New Emitter(moduleName, references)
-      Return emitter.Emit(program, outputPath)
-
-    End Function
-
-    Private Function ResolveType(assemblies As List(Of AssemblyDefinition),
-                                 internalName As String,
-                                 metadataName As String) As TypeReference
+    Private Function Emit_ResolveType(assemblies As List(Of AssemblyDefinition),
+                                      internalName As String,
+                                      metadataName As String) As TypeReference
       Dim foundTypes = assemblies.SelectMany(Function(a) a.Modules).
                                   SelectMany(Function(m) m.Types).
                                   Where(Function(t) t.FullName = metadataName).ToArray
@@ -110,10 +106,10 @@ Namespace Global.Basic.CodeAnalysis.Emit
       Return Nothing
     End Function
 
-    Private Function ResolveMethod(assemblies As List(Of AssemblyDefinition),
-                                   typeName As String,
-                                   methodName As String,
-                                   parameterTypeNames As String()) As MethodReference
+    Private Function Emit_ResolveMethod(assemblies As List(Of AssemblyDefinition),
+                                        typeName As String,
+                                        methodName As String,
+                                        parameterTypeNames As String()) As MethodReference
       Dim foundTypes = assemblies.SelectMany(Function(a) a.Modules).
                                   SelectMany(Function(m) m.Types).
                                   Where(Function(t) t.FullName = typeName).ToArray
