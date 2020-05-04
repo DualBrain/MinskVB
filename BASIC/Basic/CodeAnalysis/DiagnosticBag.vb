@@ -162,7 +162,7 @@ Namespace Global.Basic.CodeAnalysis
       Dim assemblyNames = foundTypes.Select(Function(t) t.Module.Assembly.Name.Name)
       Dim assemblyNameList = String.Join(", ", assemblyNames)
       Report(Nothing, If(internalName Is Nothing,
-                         $"The required type '{internalName}' was found in multiple references: {assemblyNameList}",
+                         $"The required type '{metadataName}' was found in multiple references: {assemblyNameList}",
                          $"The required type '{internalName}' ('{metadataName}') was found in multiple references: {assemblyNameList}"))
     End Sub
 
