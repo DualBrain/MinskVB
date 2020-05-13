@@ -70,7 +70,7 @@ Namespace Global.Basic.CodeAnalysis.Emit
 
       _objectEqualsReference = Emit_ResolveMethod(assemblies, "System.Object", "Equals", {"System.Object", "System.Object"})
       _consoleReadLineReference = Emit_ResolveMethod(assemblies, "System.Console", "ReadLine", Array.Empty(Of String))
-      _consoleWriteLineReference = Emit_ResolveMethod(assemblies, "System.Console", "WriteLine", {"System.String"})
+      _consoleWriteLineReference = Emit_ResolveMethod(assemblies, "System.Console", "WriteLine", {"System.Object"})
       _stringConcatReference = Emit_ResolveMethod(assemblies, "System.String", "Concat", {"System.String", "System.String"})
       _convertToBooleanReference = Emit_ResolveMethod(assemblies, "System.Convert", "ToBoolean", {"System.Object"})
       _convertToInt32Reference = Emit_ResolveMethod(assemblies, "System.Convert", "ToInt32", {"System.Object"})

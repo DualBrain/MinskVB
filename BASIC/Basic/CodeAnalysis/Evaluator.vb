@@ -247,8 +247,8 @@ Namespace Global.Basic.CodeAnalysis
       If node.Function Is BuiltinFunctions.Input Then
         Return Console.ReadLine()
       ElseIf node.Function Is BuiltinFunctions.Print Then
-        Dim message = CStr(EvaluateExpression(node.Arguments(0)))
-        Console.WriteLine(message)
+        Dim value = EvaluateExpression(node.Arguments(0))
+        Console.WriteLine(value)
         Return Nothing
       ElseIf node.Function Is BuiltinFunctions.Rnd Then
         Dim max = CInt(EvaluateExpression(node.Arguments(0)))
