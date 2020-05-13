@@ -68,21 +68,18 @@ Namespace Global.Basic.CodeAnalysis
       Dim submission = Me
       Dim seenSymbolNames = New HashSet(Of String)
 
+      Dim builtInFunctions = Symbols.BuiltinFunctions.GetAll().ToList()
+
       While submission IsNot Nothing
 
-        Dim bindingFlags = Reflection.BindingFlags.Static Or
-                           Reflection.BindingFlags.Public Or
-                           Reflection.BindingFlags.NonPublic
-        Dim builtInFunctions = GetType(BuiltinFunctions).
-                               GetFields(bindingFlags).
-                               Where(Function(fi) fi.FieldType = GetType(FunctionSymbol)).
-                               Select(Function(fi) CType(fi.GetValue(Nothing), FunctionSymbol)).
-                               ToList
-        'For Each builtIn In builtInFunctions
-        '  If seeSymbolNames.Add(builtIn.Name) Then
-        '    Yield builtIn
-        '  End If
-        'Next
+        'Dim bindingFlags = Reflection.BindingFlags.Static Or
+        '                   Reflection.BindingFlags.Public Or
+        '                   Reflection.BindingFlags.NonPublic
+        'Dim builtInFunctions = GetType(BuiltinFunctions).
+        '                       GetFields(bindingFlags).
+        '                       Where(Function(fi) fi.FieldType = GetType(FunctionSymbol)).
+        '                       Select(Function(fi) CType(fi.GetValue(Nothing), FunctionSymbol)).
+        '                       ToList
 
         For Each f In submission.Functions
           If (seenSymbolNames.Add(f.Name)) Then
