@@ -88,6 +88,10 @@ Namespace Global.Basic.Tests.CodeAnalysis
     <InlineData("false and false", False)>
     <InlineData("true && true", True)>
     <InlineData("true and true", True)>
+    <InlineData("{ var a : any = 0 var b : any = " + Chr(34) + "b" + Chr(34) + " return a == b }", False)>
+    <InlineData("{ var a : any = 0 var b : any = " + Chr(34) + "b" + Chr(34) + " return a != b }", True)>
+    <InlineData("{ var a : any = 0 var b : any = 0 return a == b }", True)>
+    <InlineData("{ var a : any = 0 var b : any = 0 return a != b }", False)>
     <InlineData("{ var a = 10 return a * a }", 100)>
     <InlineData("{ var a = 0 return (a = 10) * a }", 100)>
     <InlineData("{ var a = 0 if a == 0 a = 10 return a}", 10)>
