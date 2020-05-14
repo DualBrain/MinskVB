@@ -7,6 +7,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
   Friend Enum BoundNodeKind
 
     ' Statements
+    NopStatement
     BlockStatement
     VariableDeclaration
     IfStatement

@@ -13,6 +13,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
       Me.Left = left
       Me.Op = op
       Me.Right = right
+      ConstantValue = ConstantFolding.ComputeConstant(left, op, right)
     End Sub
 
     Public Overrides ReadOnly Property Kind As BoundNodeKind = BoundNodeKind.BinaryExpression
@@ -24,6 +25,14 @@ Namespace Global.Basic.CodeAnalysis.Binding
     Public ReadOnly Property Left As BoundExpression
     Public ReadOnly Property Op As BoundBinaryOperator
     Public ReadOnly Property Right As BoundExpression
+    Public Overrides ReadOnly Property ConstantValue As BoundConstant
+    '  Get
+    '    Return MyBase.ConstantValue
+    '  End Get
+    '  Set(value As BoundConstant)
+    '    MyBase.ConstantValue = value
+    '  End Set
+    'End Property
 
   End Class
 

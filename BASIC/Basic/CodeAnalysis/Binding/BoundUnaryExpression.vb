@@ -12,6 +12,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
     Sub New(op As BoundUnaryOperator, operand As BoundExpression)
       Me.Op = op
       Me.Operand = operand
+      ConstantValue = ConstantFolding.ComputeConstant(op, operand)
     End Sub
 
     Public Overrides ReadOnly Property Kind As BoundNodeKind = BoundNodeKind.UnaryExpression
@@ -22,6 +23,14 @@ Namespace Global.Basic.CodeAnalysis.Binding
     End Property
     Public ReadOnly Property Op As BoundUnaryOperator
     Public ReadOnly Property Operand As BoundExpression
+    Public Overrides ReadOnly Property ConstantValue As BoundConstant
+    '  Get
+    '    Return MyBase.ConstantValue
+    '  End Get
+    '  Set(value As BoundConstant)
+    '    MyBase.ConstantValue = value
+    '  End Set
+    'End Property
 
   End Class
 

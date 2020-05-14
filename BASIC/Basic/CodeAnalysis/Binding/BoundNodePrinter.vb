@@ -25,6 +25,8 @@ Namespace Global.Basic.CodeAnalysis.Binding
       Select Case node.Kind
         Case BoundNodeKind.BlockStatement
           WriteBlockStatement(CType(node, BoundBlockStatement), writer)
+        Case BoundNodeKind.NopStatement
+          WriteNopStatement(CType(node, BoundNopStatement), writer)
         Case BoundNodeKind.VariableDeclaration
           WriteVariableDeclaration(CType(node, BoundVariableDeclaration), writer)
         Case BoundNodeKind.IfStatement
@@ -127,6 +129,11 @@ Namespace Global.Basic.CodeAnalysis.Binding
       writer.WritePunctuation(SyntaxKind.CloseBraceToken)
       writer.WriteLine()
 
+    End Sub
+
+    Private Sub WriteNopStatement(node As BoundNopStatement, writer As IndentedTextWriter)
+      writer.WriteKeyword("nop")
+      writer.WriteLine()
     End Sub
 
     Private Sub WriteVariableDeclaration(node As BoundVariableDeclaration, writer As IndentedTextWriter)

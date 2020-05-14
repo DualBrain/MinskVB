@@ -57,6 +57,7 @@ Namespace Global.Basic.CodeAnalysis
       While index < body.Statements.Length
         Dim s = body.Statements(index)
         Select Case s.Kind
+          Case BoundNodeKind.NopStatement : index += 1
           Case BoundNodeKind.VariableDeclaration : EvaluateVariableDeclaration(DirectCast(s, BoundVariableDeclaration)) : index += 1
           Case BoundNodeKind.ExpressionStatement : EvaluateExpressionStatement(DirectCast(s, BoundExpressionStatement)) : index += 1
           Case BoundNodeKind.GotoStatement

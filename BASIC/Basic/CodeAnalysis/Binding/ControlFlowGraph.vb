@@ -97,7 +97,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
             Case BoundNodeKind.GotoStatement, BoundNodeKind.ConditionalGotoStatement, BoundNodeKind.ReturnStatement
               m_statements.Add(statement)
               StartBlock()
-            Case BoundNodeKind.VariableDeclaration, BoundNodeKind.ExpressionStatement
+            Case BoundNodeKind.NopStatement, BoundNodeKind.VariableDeclaration, BoundNodeKind.ExpressionStatement
               m_statements.Add(statement)
             Case Else
               Throw New Exception($"Unexpected statement: {statement.Kind}")
@@ -168,7 +168,10 @@ Namespace Global.Basic.CodeAnalysis.Binding
                 Connect(current, elseBlock, elseCondition)
               Case BoundNodeKind.ReturnStatement
                 Connect(current, m_end)
-              Case BoundNodeKind.VariableDeclaration, BoundNodeKind.LabelStatement, BoundNodeKind.ExpressionStatement
+              Case BoundNodeKind.NopStatement,
+                   BoundNodeKind.VariableDeclaration,
+                   BoundNodeKind.LabelStatement,
+                   BoundNodeKind.ExpressionStatement
                 If isLastStatementInBlock Then
                   Connect(current, [next])
                 End If

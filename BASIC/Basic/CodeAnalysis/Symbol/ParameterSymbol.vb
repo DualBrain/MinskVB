@@ -8,7 +8,7 @@ Namespace Global.Basic.CodeAnalysis.Symbols
     Inherits LocalVariableSymbol
 
     Sub New(name As String, type As TypeSymbol, ordinal As Integer)
-      MyBase.New(name, True, type)
+      MyBase.New(name, True, type, Nothing)
       Me.Ordinal = ordinal
     End Sub
 

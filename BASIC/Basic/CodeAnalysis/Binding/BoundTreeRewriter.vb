@@ -11,6 +11,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
     Public Overridable Function RewriteStatement(node As BoundStatement) As BoundStatement
       Select Case node.Kind
         Case BoundNodeKind.BlockStatement : Return RewriteBlockStatement(DirectCast(node, BoundBlockStatement))
+        Case BoundNodeKind.NopStatement : Return RewriteNopStatement(DirectCast(node, BoundNopStatement))
         Case BoundNodeKind.VariableDeclaration : Return RewriteVariableDeclaration(DirectCast(node, BoundVariableDeclaration))
         Case BoundNodeKind.IfStatement : Return RewriteIfStatement(DirectCast(node, BoundIfStatement))
         Case BoundNodeKind.WhileStatement : Return RewriteWhileStatement(DirectCast(node, BoundWhileStatement))
@@ -47,6 +48,10 @@ Namespace Global.Basic.CodeAnalysis.Binding
         Return node
       End If
       Return New BoundBlockStatement(builder.MoveToImmutable)
+    End Function
+
+    Protected Overridable Function RewriteNopStatement(node As BoundNopStatement) As BoundStatement
+      Return node
     End Function
 
     Protected Overridable Function RewriteVariableDeclaration(node As BoundVariableDeclaration) As BoundStatement

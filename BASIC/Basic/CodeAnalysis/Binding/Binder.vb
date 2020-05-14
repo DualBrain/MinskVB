@@ -323,8 +323,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
       Dim type = BindTypeClause(syntax.TypeClause)
       Dim initializer = BindExpression(syntax.Initializer)
       Dim variableType = If(type, initializer.Type)
-      'Dim variable = BindVariable(syntax.Identifier, isReadOnly, variableType)
-      Dim variable = BindVariableDeclaration(syntax.Identifier, isReadOnly, variableType)
+      Dim variable = BindVariableDeclaration(syntax.Identifier, isReadOnly, variableType, initializer.ConstantValue)
       Dim convertedInitializer = BindConversion(syntax.Initializer.Location, initializer, variableType)
       Return New BoundVariableDeclaration(variable, convertedInitializer)
     End Function
@@ -634,12 +633,12 @@ Namespace Global.Basic.CodeAnalysis.Binding
     End Function
 
     'Private Function BindVariable(identifier As SyntaxToken, isReadOnly As Boolean, type As TypeSymbol) As VariableSymbol
-    Private Function BindVariableDeclaration(identifier As SyntaxToken, isReadOnly As Boolean, type As TypeSymbol) As VariableSymbol
+    Private Function BindVariableDeclaration(identifier As SyntaxToken, isReadOnly As Boolean, type As TypeSymbol, Optional constant As BoundConstant = Nothing) As VariableSymbol
       Dim name = If(identifier.Text, "?")
       Dim [declare] = Not identifier.IsMissing
       Dim variable = If(m_function Is Nothing,
-                                    DirectCast(New GlobalVariableSymbol(name, isReadOnly, type), VariableSymbol),
-                                    DirectCast(New LocalVariableSymbol(name, isReadOnly, type), VariableSymbol))
+                                    DirectCast(New GlobalVariableSymbol(name, isReadOnly, type, constant), VariableSymbol),
+                                    DirectCast(New LocalVariableSymbol(name, isReadOnly, type, constant), VariableSymbol))
       If [declare] AndAlso Not m_scope.TryDeclareVariable(variable) Then
         Diagnostics.ReportSymbolAlreadyDeclared(identifier.Location, name)
       End If

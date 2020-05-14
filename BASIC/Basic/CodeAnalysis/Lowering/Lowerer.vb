@@ -26,7 +26,7 @@ Namespace Global.Basic.CodeAnalysis.Lowering
     Public Shared Function Lower(func As FunctionSymbol, statement As BoundStatement) As BoundBlockStatement
       Dim lowerer = New Lowerer
       Dim result = lowerer.RewriteStatement(statement)
-      Return Flatten(func, result)
+      Return RemoveDeadCode(Flatten(func, result))
     End Function
 
     Private Shared Function Flatten(func As FunctionSymbol, statement As BoundStatement) As BoundBlockStatement
@@ -57,6 +57,22 @@ Namespace Global.Basic.CodeAnalysis.Lowering
       '      to unconditional gotos in the first place.
       Return boundStatement.Kind <> BoundNodeKind.ReturnStatement AndAlso
              boundStatement.Kind <> BoundNodeKind.GotoStatement
+    End Function
+
+    Private Shared Function RemoveDeadCode(node As BoundBlockStatement) As BoundBlockStatement
+
+      Dim controlFlow = ControlFlowGraph.Create(node)
+      Dim reachableStatements = New HashSet(Of BoundStatement)(controlFlow.Blocks.SelectMany(Function(b) b.Statements))
+
+      Dim builder = node.Statements.ToBuilder
+      For i = builder.Count - 1 To 0 Step -1
+        If Not reachableStatements.Contains(builder(i)) Then
+          builder.RemoveAt(i)
+        End If
+      Next
+
+      Return New BoundBlockStatement(builder.ToImmutable)
+
     End Function
 
     Protected Overrides Function RewriteIfStatement(node As BoundIfStatement) As BoundStatement
@@ -204,7 +220,7 @@ Namespace Global.Basic.CodeAnalysis.Lowering
 
       Dim variableDeclaration = New BoundVariableDeclaration(node.Variable, node.LowerBound)
       Dim variableExpression = New BoundVariableExpression(node.Variable)
-      Dim upperBoundSymbol = New LocalVariableSymbol("upperBound", True, TypeSymbol.Int)
+      Dim upperBoundSymbol = New LocalVariableSymbol("upperBound", True, TypeSymbol.Int, node.UpperBound.ConstantValue)
       Dim upperBoundDeclaration = New BoundVariableDeclaration(upperBoundSymbol, node.UpperBound)
       Dim condition = New BoundBinaryExpression(
               variableExpression,
@@ -228,6 +244,22 @@ Namespace Global.Basic.CodeAnalysis.Lowering
               whileStatement))
 
       Return RewriteStatement(result)
+
+    End Function
+
+    Protected Overrides Function RewriteConditionalGotoStatement(node As BoundConditionalGotoStatement) As BoundStatement
+
+      If node.Condition.ConstantValue IsNot Nothing Then
+        Dim condition = CBool(node.Condition.ConstantValue.Value)
+        condition = If(node.JumpIfTrue, condition, Not condition)
+        If condition Then
+          Return New BoundGotoStatement(node.Label)
+        Else
+          Return New BoundNopStatement()
+        End If
+      End If
+
+      Return MyBase.RewriteConditionalGotoStatement(node)
 
     End Function
 

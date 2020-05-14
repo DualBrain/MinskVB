@@ -151,6 +151,7 @@ Namespace Global.Basic.CodeAnalysis.Emit
 
     Private Sub EmitStatement(ilProcessor As ILProcessor, node As BoundStatement)
       Select Case node.Kind
+        Case BoundNodeKind.NopStatement : EmitNopStatement(ilProcessor, CType(node, BoundNopStatement))
         Case BoundNodeKind.VariableDeclaration : EmitVariableDeclaration(ilProcessor, CType(node, BoundVariableDeclaration))
         Case BoundNodeKind.LabelStatement : EmitLabelStatement(ilProcessor, CType(node, BoundLabelStatement))
         Case BoundNodeKind.GotoStatement : EmitGotoStatement(ilProcessor, CType(node, BoundGotoStatement))
@@ -160,6 +161,10 @@ Namespace Global.Basic.CodeAnalysis.Emit
         Case Else
           Throw New Exception($"Unexpected node kind {node.Kind}")
       End Select
+    End Sub
+
+    Private Sub EmitNopStatement(ilProcessor As ILProcessor, node As BoundNopStatement)
+      ilProcessor.Emit(OpCodes.Nop)
     End Sub
 
     Private Sub EmitVariableDeclaration(ilProcessor As ILProcessor, node As BoundVariableDeclaration)
