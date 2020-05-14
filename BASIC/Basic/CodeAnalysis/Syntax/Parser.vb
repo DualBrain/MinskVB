@@ -216,7 +216,6 @@ Namespace Global.Basic.CodeAnalysis.Syntax
       ' If LET or DIM, set... otherwise, default to VAR (whether it's VAR or not).
       Select Case Current.Kind
         Case SyntaxKind.LetKeyword : expected = SyntaxKind.LetKeyword
-        Case SyntaxKind.DimKeyword : expected = SyntaxKind.DimKeyword
         Case Else
       End Select
 

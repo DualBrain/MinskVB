@@ -12,6 +12,8 @@ Imports System.Console
 Imports System.ConsoleColor
 Imports System.IO
 
+Imports Basic.CodeAnalysis.Syntax.SyntaxFacts
+
 Friend NotInheritable Class BasicRepl
   Inherits Repl
 
@@ -62,7 +64,7 @@ Friend NotInheritable Class BasicRepl
       Dim tokenSpan = TextSpan.FromBounds(tokenStart, tokenEnd)
       Dim tokenText = renderState.Text.ToString(tokenSpan)
 
-      Dim isKeyword = token.Kind.ToString.EndsWith("Keyword")
+      Dim isKeyword = token.Kind.IsKeyword
       Dim isNumber = token.Kind = SyntaxKind.NumberToken
       Dim isIdentifier = token.Kind = SyntaxKind.IdentifierToken
       Dim isString = token.Kind = SyntaxKind.StringToken

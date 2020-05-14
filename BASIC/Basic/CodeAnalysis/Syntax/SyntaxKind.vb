@@ -28,7 +28,7 @@ Namespace Global.Basic.CodeAnalysis.Syntax
     BangEqualsToken
     LessThanToken
     LessThanEqualsToken
-    LessThanGreaterThanToken
+    'LessThanGreaterThanToken
     GreaterThanEqualsToken
     GreaterThanToken
     PipeToken
@@ -46,16 +46,16 @@ Namespace Global.Basic.CodeAnalysis.Syntax
     FalseKeyword
     TrueKeyword
 
-    NotKeyword
-    AndKeyword
-    AndAlsoKeyword
-    OrKeyword
-    OrElseKeyword
+    'NotKeyword
+    'AndKeyword
+    'AndAlsoKeyword
+    'OrKeyword
+    'OrElseKeyword
 
     LetKeyword 'TODO: LET has a different behavior in BASIC.
     ReturnKeyword
     VarKeyword
-    DimKeyword
+    'DimKeyword
 
     FunctionKeyword
 

@@ -32,8 +32,7 @@ Namespace Global.Basic.Tests.CodeAnalysis.Syntax
                                   .Cast(Of SyntaxKind) _
                                   .Where(Function(k) k <> SyntaxKind.SingleLineCommentToken AndAlso
                                                      k <> SyntaxKind.MultiLineCommentToken) _
-                                  .Where(Function(k) k.ToString.EndsWith("Keyword") OrElse
-                                                     k.ToString.EndsWith("Token"))
+                                  .Where(Function(k) k.IsToken)
 
       Dim testedTokenKinds = GetTokens.Concat(GetSeparators).Select(Function(t) t.kind)
 
@@ -140,8 +139,8 @@ Namespace Global.Basic.Tests.CodeAnalysis.Syntax
 
     Private Shared Function RequiresSeparator(kind1 As SyntaxKind, kind2 As SyntaxKind) As Boolean
 
-      Dim isKeyword1 = kind1.ToString.EndsWith("Keyword")
-      Dim isKeyword2 = kind2.ToString.EndsWith("Keyword")
+      Dim isKeyword1 = kind1.IsKeyword
+      Dim isKeyword2 = kind2.IsKeyword
 
       If isKeyword1 AndAlso isKeyword2 Then Return True
       If isKeyword1 AndAlso kind2 = SyntaxKind.IdentifierToken Then Return True

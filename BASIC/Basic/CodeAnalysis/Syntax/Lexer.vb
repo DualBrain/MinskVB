@@ -99,9 +99,9 @@ Namespace Global.Basic.CodeAnalysis.Syntax
             Kind = SyntaxKind.BangToken : Position += 1
           End If
         Case "<"c
-          If LookAhead = ">"c Then
-            Kind = SyntaxKind.LessThanGreaterThanToken : Position += 2
-          ElseIf LookAhead = "="c Then
+          'If LookAhead = ">"c Then
+          '  Kind = SyntaxKind.LessThanGreaterThanToken : Position += 2
+          If LookAhead = "="c Then
             Kind = SyntaxKind.LessThanEqualsToken : Position += 2
           Else
             Kind = SyntaxKind.LessThanToken : Position += 1

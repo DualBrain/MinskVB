@@ -27,7 +27,6 @@ Namespace Global.Basic.CodeAnalysis.Binding
 
     Private Shared ReadOnly m_operators() As BoundUnaryOperator = {
           New BoundUnaryOperator(SyntaxKind.BangToken, BoundUnaryOperatorKind.LogicalNegation, TypeSymbol.Bool),
-          New BoundUnaryOperator(SyntaxKind.NotKeyword, BoundUnaryOperatorKind.LogicalNegation, TypeSymbol.Bool),
           New BoundUnaryOperator(SyntaxKind.PlusToken, BoundUnaryOperatorKind.Identity, TypeSymbol.Int),
           New BoundUnaryOperator(SyntaxKind.MinusToken, BoundUnaryOperatorKind.Negation, TypeSymbol.Int),
           New BoundUnaryOperator(SyntaxKind.TildeToken, BoundUnaryOperatorKind.Onescomplement, TypeSymbol.Int)

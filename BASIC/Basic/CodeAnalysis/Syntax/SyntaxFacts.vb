@@ -15,7 +15,6 @@ Namespace Global.Basic.CodeAnalysis.Syntax
         Case SyntaxKind.PlusToken,
              SyntaxKind.MinusToken,
              SyntaxKind.BangToken,
-             SyntaxKind.NotKeyword,
              SyntaxKind.TildeToken
           Return 6
 
@@ -39,19 +38,16 @@ Namespace Global.Basic.CodeAnalysis.Syntax
              SyntaxKind.BangEqualsToken,
              SyntaxKind.LessThanToken,
              SyntaxKind.LessThanEqualsToken,
-             SyntaxKind.LessThanGreaterThanToken,
              SyntaxKind.GreaterThanEqualsToken,
              SyntaxKind.GreaterThanToken
           Return 3
 
         Case SyntaxKind.AmpersandToken,
-             SyntaxKind.AmpersandAmpersandToken,
-             SyntaxKind.AndKeyword
+             SyntaxKind.AmpersandAmpersandToken
           Return 2
 
         Case SyntaxKind.PipeToken,
              SyntaxKind.PipePipeToken,
-             SyntaxKind.OrKeyword,
              SyntaxKind.HatToken
           Return 1
 
@@ -76,8 +72,6 @@ Namespace Global.Basic.CodeAnalysis.Syntax
           Return SyntaxKind.ReturnKeyword
         Case "var"
           Return SyntaxKind.VarKeyword
-        Case "dim"
-          Return SyntaxKind.DimKeyword
 
         Case "function"
           Return SyntaxKind.FunctionKeyword
@@ -105,17 +99,6 @@ Namespace Global.Basic.CodeAnalysis.Syntax
           Return SyntaxKind.ForKeyword
         Case "to"
           Return SyntaxKind.ToKeyword
-
-        Case "not"
-          Return SyntaxKind.NotKeyword
-        Case "and"
-          Return SyntaxKind.AndKeyword
-        Case "andalso"
-          Return SyntaxKind.AndAlsoKeyword
-        Case "or"
-          Return SyntaxKind.OrKeyword
-        Case "orelse"
-          Return SyntaxKind.OrElseKeyword
 
         Case Else
           Return SyntaxKind.IdentifierToken
@@ -155,56 +138,62 @@ Namespace Global.Basic.CodeAnalysis.Syntax
         Case SyntaxKind.SlashToken : Return "/"
         Case SyntaxKind.BangToken : Return "!"
         Case SyntaxKind.EqualsToken : Return "="
-        Case SyntaxKind.AmpersandToken : Return "&"
-        Case SyntaxKind.AmpersandAmpersandToken : Return "&&"
-        Case SyntaxKind.HatToken : Return "^"
         Case SyntaxKind.TildeToken : Return "~"
-        Case SyntaxKind.EqualsEqualsToken : Return "=="
-        Case SyntaxKind.BangEqualsToken : Return "!="
         Case SyntaxKind.LessThanToken : Return "<"
         Case SyntaxKind.LessThanEqualsToken : Return "<="
-        Case SyntaxKind.LessThanGreaterThanToken : Return "<>"
-        Case SyntaxKind.GreaterThanEqualsToken : Return ">="
         Case SyntaxKind.GreaterThanToken : Return ">"
+        Case SyntaxKind.GreaterThanEqualsToken : Return ">="
+        Case SyntaxKind.AmpersandToken : Return "&"
+        Case SyntaxKind.AmpersandAmpersandToken : Return "&&"
         Case SyntaxKind.PipeToken : Return "|"
         Case SyntaxKind.PipePipeToken : Return "||"
+        Case SyntaxKind.HatToken : Return "^"
+        Case SyntaxKind.EqualsEqualsToken : Return "=="
+        Case SyntaxKind.BangEqualsToken : Return "!="
+        'Case SyntaxKind.LessThanGreaterThanToken : Return "<>"
         Case SyntaxKind.OpenParenToken : Return "("
         Case SyntaxKind.CloseParenToken : Return ")"
         Case SyntaxKind.OpenBraceToken : Return "{"
         Case SyntaxKind.CloseBraceToken : Return "}"
         Case SyntaxKind.ColonToken : Return ":"
         Case SyntaxKind.CommaToken : Return ","
-        Case SyntaxKind.FalseKeyword : Return "false"
-        Case SyntaxKind.TrueKeyword : Return "true"
-        Case SyntaxKind.NotKeyword : Return "not"
-        Case SyntaxKind.AndKeyword : Return "and"
-        Case SyntaxKind.AndAlsoKeyword : Return "andalso"
-        Case SyntaxKind.OrKeyword : Return "or"
-        Case SyntaxKind.OrElseKeyword : Return "orelse"
-        Case SyntaxKind.LetKeyword : Return "let"
-        Case SyntaxKind.ReturnKeyword : Return "return"
-        Case SyntaxKind.VarKeyword : Return "var"
-        Case SyntaxKind.DimKeyword : Return "dim"
-
-        Case SyntaxKind.FunctionKeyword : Return "function"
-        Case SyntaxKind.IfKeyword : Return "if"
-        'Case SyntaxKind.ThenKeyword : Return "then"
         Case SyntaxKind.BreakKeyword : Return "break"
         Case SyntaxKind.ContinueKeyword : Return "continue"
         Case SyntaxKind.ElseKeyword : Return "else"
-          'Case SyntaxKind.ElseIfKeyword : Return "elseif"
-          'Case SyntaxKind.EndIfKeyword : Return "endif"
-
+        Case SyntaxKind.FalseKeyword : Return "false"
+        Case SyntaxKind.ForKeyword : Return "for"
+        Case SyntaxKind.FunctionKeyword : Return "function"
+        Case SyntaxKind.IfKeyword : Return "if"
+        Case SyntaxKind.LetKeyword : Return "let"
+        Case SyntaxKind.ReturnKeyword : Return "return"
+        Case SyntaxKind.ToKeyword : Return "to"
+        Case SyntaxKind.TrueKeyword : Return "true"
+        Case SyntaxKind.VarKeyword : Return "var"
         Case SyntaxKind.WhileKeyword : Return "while"
         Case SyntaxKind.DoKeyword : Return "do"
 
-        Case SyntaxKind.ForKeyword : Return "for"
-        Case SyntaxKind.ToKeyword : Return "to"
+          'Case SyntaxKind.NotKeyword : Return "not"
+          'Case SyntaxKind.AndKeyword : Return "and"
+          'Case SyntaxKind.AndAlsoKeyword : Return "andalso"
+          'Case SyntaxKind.OrKeyword : Return "or"
+          'Case SyntaxKind.OrElseKeyword : Return "orelse"
+          'Case SyntaxKind.DimKeyword : Return "dim"
 
         Case Else
           Return Nothing
       End Select
 
+    End Function
+
+    <Extension>
+    Public Function IsKeyword(kind As SyntaxKind) As Boolean
+      Return kind.ToString.EndsWith("Keyword")
+    End Function
+
+    <Extension>
+    Public Function IsToken(kind As SyntaxKind) As Boolean
+      Return kind.IsKeyword OrElse
+             kind.ToString.EndsWith("Token")
     End Function
 
   End Module
