@@ -35,6 +35,7 @@ Friend NotInheritable Class BasicRepl
       Dim isNumber = token.Kind = SyntaxKind.NumberToken
       Dim isIdentifier = token.Kind = SyntaxKind.IdentifierToken
       Dim isString = token.Kind = SyntaxKind.StringToken
+      Dim isComment = token.Kind = SyntaxKind.SingleLineCommentToken
 
       If isKeyword Then
         ForegroundColor = Blue
@@ -44,6 +45,8 @@ Friend NotInheritable Class BasicRepl
         ForegroundColor = Cyan
       ElseIf isString Then
         ForegroundColor = Magenta
+      ElseIf isComment Then
+        ForegroundColor = Green
       Else
         ForegroundColor = DarkGray
       End If
@@ -155,7 +158,8 @@ Friend NotInheritable Class BasicRepl
     Dim tree = SyntaxTree.Parse(text)
 
     ' Use Members because we need to exclude the EndOfFileToken.
-    If tree.Root.Members.Last.GetLastToken.IsMissing Then
+    Dim lastMember = tree.Root.Members.LastOrDefault
+    If lastMember Is Nothing OrElse lastMember.GetLastToken.IsMissing Then
       Return False
     End If
 

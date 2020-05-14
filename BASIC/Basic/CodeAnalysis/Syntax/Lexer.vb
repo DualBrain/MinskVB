@@ -58,7 +58,12 @@ Namespace Global.Basic.CodeAnalysis.Syntax
         Case "+"c : Kind = SyntaxKind.PlusToken : Position += 1
         Case "-"c : Kind = SyntaxKind.MinusToken : Position += 1
         Case "*"c : Kind = SyntaxKind.StarToken : Position += 1
-        Case "/"c : Kind = SyntaxKind.SlashToken : Position += 1
+        Case "/"c
+          If LookAhead = "/" Then
+            ReadSingleLineComment()
+          Else
+            Kind = SyntaxKind.SlashToken : Position += 1
+          End If
         Case "("c : Kind = SyntaxKind.OpenParenToken : Position += 1
         Case ")"c : Kind = SyntaxKind.CloseParenToken : Position += 1
         Case "{"c : Kind = SyntaxKind.OpenBraceToken : Position += 1
@@ -151,6 +156,24 @@ Namespace Global.Basic.CodeAnalysis.Syntax
 
       Me.Value = value
       Kind = SyntaxKind.NumberToken
+
+    End Sub
+
+    Private Sub ReadSingleLineComment()
+
+      _Position += 2
+
+      Dim done = False
+      While Not done
+        Select Case Current
+          Case ChrW(0), ChrW(13), ChrW(10)
+            done = True
+          Case Else
+            _Position += 1
+        End Select
+      End While
+
+      _Kind = SyntaxKind.SingleLineCommentToken
 
     End Sub
 

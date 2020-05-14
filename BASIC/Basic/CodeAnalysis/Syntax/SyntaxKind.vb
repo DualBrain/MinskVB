@@ -10,6 +10,7 @@ Namespace Global.Basic.CodeAnalysis.Syntax
     BadToken
     EndOfFileToken
     WhitespaceToken
+    SingleLineCommentToken
     NumberToken
     StringToken
     PlusToken
