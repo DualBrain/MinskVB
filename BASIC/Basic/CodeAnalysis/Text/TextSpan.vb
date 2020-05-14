@@ -25,6 +25,11 @@ Namespace Global.Basic.CodeAnalysis.Text
       Return New TextSpan(start, length)
     End Function
 
+    Public Function OverlapsWith(span As TextSpan) As Boolean
+      Return Start < span.End AndAlso
+             [End] > span.Start
+    End Function
+
     Public Overrides Function ToString() As String
       Return $"{Start}...{[End]}"
     End Function

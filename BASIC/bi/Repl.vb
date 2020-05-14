@@ -61,16 +61,18 @@ Friend MustInherit Class Repl
     Loop
   End Sub
 
+  Private Delegate Function LineRenderHandler(lines As IReadOnlyList(Of String), lineIndex As Integer, state As Object) As Object
+
   Private NotInheritable Class SubmissionView
 
     Private WithEvents SubmissionDocument As ObservableCollection(Of String)
     Private ReadOnly m_cursorTop As Integer
-    Private ReadOnly m_lineRenderer As Action(Of String)
+    Private ReadOnly m_lineRenderer As LineRenderHandler
     Private m_renderedLineCount As Integer
     Private m_currentLine As Integer
     Private m_currentCharacter As Integer
 
-    Sub New(lineRenderer As Action(Of String), submissionDocument As ObservableCollection(Of String))
+    Sub New(lineRenderer As LineRenderHandler, submissionDocument As ObservableCollection(Of String))
       m_lineRenderer = lineRenderer
       Me.SubmissionDocument = submissionDocument
       m_cursorTop = CursorTop
@@ -87,6 +89,7 @@ Friend MustInherit Class Repl
       CursorVisible = False
 
       Dim lineCount = 0
+      Dim state = CObj(Nothing)
 
       For Each line In SubmissionDocument
 
@@ -100,7 +103,7 @@ Friend MustInherit Class Repl
         End If
 
         ResetColor()
-        m_lineRenderer(line)
+        m_lineRenderer(SubmissionDocument, lineCount, state)
         Write(New String(" "c, WindowWidth - line.Length - 2))
         lineCount += 1
 
@@ -435,9 +438,10 @@ Friend MustInherit Class Repl
     m_submissionHistory.Clear()
   End Sub
 
-  Protected Overridable Sub RenderLine(line As String)
-    Write(line)
-  End Sub
+  Protected Overridable Function RenderLine(lines As IReadOnlyList(Of String), lineIndex As Integer, state As Object) As Object
+    Write(lines(lineIndex))
+    Return state
+  End Function
 
   Protected MustOverride Function IsCompleteSubmission(text As String) As Boolean
 

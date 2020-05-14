@@ -7,6 +7,7 @@ Imports Basic.CodeAnalysis.Symbols
 Imports Basic.CodeAnalysis.Syntax
 Imports Basic.CodeAnalysis.Text
 Imports Basic.IO
+Imports System.Collections.Immutable
 Imports System.Console
 Imports System.ConsoleColor
 Imports System.IO
@@ -25,11 +26,41 @@ Friend NotInheritable Class BasicRepl
     LoadSubmissions()
   End Sub
 
-  Protected Overrides Sub RenderLine(line As String)
+  Private NotInheritable Class RenderState
 
-    Dim tokens = SyntaxTree.ParseTokens(line)
+    Public Sub New(text As SourceText, tokens As ImmutableArray(Of SyntaxToken))
+      Me.Text = text
+      Me.Tokens = tokens
+    End Sub
 
-    For Each token In tokens
+    Public ReadOnly Property Text As SourceText
+    Public ReadOnly Property Tokens As ImmutableArray(Of SyntaxToken)
+
+  End Class
+
+  Protected Overrides Function RenderLine(lines As IReadOnlyList(Of String), lineIndex As Integer, state As Object) As Object
+
+    Dim renderState As RenderState
+
+    If state Is Nothing Then
+      Dim text = String.Join(Environment.NewLine, lines)
+      Dim st = SourceText.From(text)
+      Dim tokens = SyntaxTree.ParseTokens(st)
+      renderState = New RenderState(st, tokens)
+    Else
+      renderState = CType(state, RenderState)
+    End If
+
+    Dim lineSpan = renderState.Text.Lines(lineIndex).Span
+
+    For Each token In renderState.Tokens
+
+      If Not lineSpan.OverlapsWith(token.Span) Then Continue For
+
+      Dim tokenStart = Math.Max(token.Span.Start, lineSpan.Start)
+      Dim tokenEnd = Math.Min(token.Span.End, lineSpan.End)
+      Dim tokenSpan = TextSpan.FromBounds(tokenStart, tokenEnd)
+      Dim tokenText = renderState.Text.ToString(tokenSpan)
 
       Dim isKeyword = token.Kind.ToString.EndsWith("Keyword")
       Dim isNumber = token.Kind = SyntaxKind.NumberToken
@@ -50,12 +81,14 @@ Friend NotInheritable Class BasicRepl
       Else
         ForegroundColor = DarkGray
       End If
-      Write(token.Text)
+      Write(tokenText)
       ResetColor()
 
     Next
 
-  End Sub
+    Return renderState
+
+  End Function
 
   <MetaCommand("exit", "Exits the REPL")>
   Protected Sub EvaluateExit()

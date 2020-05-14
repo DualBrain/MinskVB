@@ -24,6 +24,7 @@ Namespace Global.Basic.CodeAnalysis.Syntax
         token = lexer.Lex
         If token.Kind <> SyntaxKind.WhitespaceToken AndAlso
            token.Kind <> SyntaxKind.SingleLineCommentToken AndAlso
+           token.Kind <> SyntaxKind.MultiLineCommentToken AndAlso
            token.Kind <> SyntaxKind.BadToken Then
           tokens.Add(token)
         End If

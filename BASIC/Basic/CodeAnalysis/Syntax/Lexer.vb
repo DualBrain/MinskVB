@@ -61,6 +61,8 @@ Namespace Global.Basic.CodeAnalysis.Syntax
         Case "/"c
           If LookAhead = "/" Then
             ReadSingleLineComment()
+          ElseIf LookAhead = "*" Then
+            ReadMultiLineComment()
           Else
             Kind = SyntaxKind.SlashToken : Position += 1
           End If
@@ -168,6 +170,33 @@ Namespace Global.Basic.CodeAnalysis.Syntax
         Select Case Current
           Case ChrW(0), ChrW(13), ChrW(10)
             done = True
+          Case Else
+            _Position += 1
+        End Select
+      End While
+
+      _Kind = SyntaxKind.SingleLineCommentToken
+
+    End Sub
+
+    Private Sub ReadMultiLineComment()
+
+      _Position += 2
+
+      Dim done = False
+      While Not done
+        Select Case Current
+          Case ChrW(0)
+            Dim span = New TextSpan(Start, 2)
+            Dim location = New TextLocation(Text, span)
+            Diagnostics.ReportUnterminatedMultiLineComment(location)
+            done = True
+          Case "*"c
+            If LookAhead = "/" Then
+              done = True
+              _Position += 1
+            End If
+            _Position += 1
           Case Else
             _Position += 1
         End Select

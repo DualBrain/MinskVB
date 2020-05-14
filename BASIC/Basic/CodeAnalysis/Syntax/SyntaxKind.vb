@@ -11,6 +11,7 @@ Namespace Global.Basic.CodeAnalysis.Syntax
     EndOfFileToken
     WhitespaceToken
     SingleLineCommentToken
+    MultiLineCommentToken
     NumberToken
     StringToken
     PlusToken

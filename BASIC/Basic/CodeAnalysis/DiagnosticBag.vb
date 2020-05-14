@@ -47,6 +47,10 @@ Namespace Global.Basic.CodeAnalysis
       Report(location, $"Unterminated string literal.")
     End Sub
 
+    Public Sub ReportUnterminatedMultiLineComment(location As TextLocation)
+      Report(location, $"Unterminated mult-line comment.")
+    End Sub
+
     Public Sub ReportUnexpectedToken(location As TextLocation, actualKind As SyntaxKind, expectedKind As SyntaxKind)
       Report(location, $"Unexpected token <{actualKind}>, expected <{expectedKind}>.")
     End Sub
@@ -170,7 +174,6 @@ Namespace Global.Basic.CodeAnalysis
       Dim parameterTypeNameList = String.Join(", ", parameterTypeNames)
       Report(Nothing, $"The required method '{typeName}.{methodName}({parameterTypeNameList})' cann be resolved among the given references.")
     End Sub
-
 
   End Class
 
