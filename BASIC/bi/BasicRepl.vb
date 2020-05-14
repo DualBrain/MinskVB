@@ -54,6 +54,11 @@ Friend NotInheritable Class BasicRepl
 
   End Sub
 
+  <MetaCommand("exit", "Exits the REPL")>
+  Protected Sub EvaluateExit()
+    Environment.Exit(0)
+  End Sub
+
   <MetaCommand("cls", "Clears the screen")>
   Protected Sub EvaluateCls()
     Clear()

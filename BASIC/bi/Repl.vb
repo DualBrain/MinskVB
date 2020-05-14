@@ -48,7 +48,9 @@ Friend MustInherit Class Repl
   Public Sub Run()
     Do
       Dim text = EditSubmission()
-      If String.IsNullOrEmpty(text) Then Return
+      If String.IsNullOrEmpty(text) Then
+        'Return
+      End If
       If Not text.Contains(Environment.NewLine) AndAlso text.StartsWith("#") Then
         EvaluateMetaCommand(text)
       Else
