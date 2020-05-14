@@ -30,6 +30,8 @@ Namespace Global.Basic.Tests.CodeAnalysis.Syntax
 
       Dim tokenKinds = System.Enum.GetValues(GetType(SyntaxKind)) _
                                   .Cast(Of SyntaxKind) _
+                                  .Where(Function(k) k <> SyntaxKind.SingleLineCommentToken AndAlso
+                                                     k <> SyntaxKind.MultiLineCommentToken) _
                                   .Where(Function(k) k.ToString.EndsWith("Keyword") OrElse
                                                      k.ToString.EndsWith("Token"))
 
@@ -144,91 +146,27 @@ Namespace Global.Basic.Tests.CodeAnalysis.Syntax
       If isKeyword1 AndAlso isKeyword2 Then Return True
       If isKeyword1 AndAlso kind2 = SyntaxKind.IdentifierToken Then Return True
       If kind1 = SyntaxKind.IdentifierToken AndAlso isKeyword2 Then Return True
-
-      If kind1 = SyntaxKind.IdentifierToken AndAlso
-                           kind2 = SyntaxKind.IdentifierToken Then
-        Return True
-      End If
-
-      If kind1 = SyntaxKind.NumberToken AndAlso
-                           kind2 = SyntaxKind.NumberToken Then
-        Return True
-      End If
-
-      If kind1 = SyntaxKind.StringToken AndAlso
-                           kind2 = SyntaxKind.StringToken Then
-        Return True
-      End If
-
-      If kind1 = SyntaxKind.BangToken AndAlso
-                           kind2 = SyntaxKind.EqualsToken Then
-        Return True
-      End If
-
-      If kind1 = SyntaxKind.BangToken AndAlso
-                           kind2 = SyntaxKind.EqualsEqualsToken Then
-        Return True
-      End If
-
-      If kind1 = SyntaxKind.EqualsToken AndAlso
-                           kind2 = SyntaxKind.EqualsToken Then
-        Return True
-      End If
-
-      If kind1 = SyntaxKind.EqualsToken AndAlso
-                           kind2 = SyntaxKind.EqualsEqualsToken Then
-        Return True
-      End If
-
-      If kind1 = SyntaxKind.LessThanToken AndAlso
-                           kind2 = SyntaxKind.EqualsToken Then
-        Return True
-      End If
-
-      If kind1 = SyntaxKind.LessThanToken AndAlso
-                           kind2 = SyntaxKind.EqualsEqualsToken Then
-        Return True
-      End If
-
-      If kind1 = SyntaxKind.LessThanToken AndAlso
-                           kind2 = SyntaxKind.GreaterThanEqualsToken Then
-        Return True
-      End If
-
-      If kind1 = SyntaxKind.LessThanToken AndAlso
-                           kind2 = SyntaxKind.GreaterThanToken Then
-        Return True
-      End If
-
-      If kind1 = SyntaxKind.GreaterThanToken AndAlso
-                           kind2 = SyntaxKind.EqualsToken Then
-        Return True
-      End If
-
-      If kind1 = SyntaxKind.GreaterThanToken AndAlso
-                           kind2 = SyntaxKind.EqualsEqualsToken Then
-        Return True
-      End If
-
-      If kind1 = SyntaxKind.PipeToken AndAlso
-                           kind2 = SyntaxKind.PipePipeToken Then
-        Return True
-      End If
-
-      If kind1 = SyntaxKind.PipeToken AndAlso
-                           kind2 = SyntaxKind.PipeToken Then
-        Return True
-      End If
-
-      If kind1 = SyntaxKind.AmpersandToken AndAlso
-                           kind2 = SyntaxKind.AmpersandAmpersandToken Then
-        Return True
-      End If
-
-      If kind1 = SyntaxKind.AmpersandToken AndAlso
-                           kind2 = SyntaxKind.AmpersandToken Then
-        Return True
-      End If
+      If kind1 = SyntaxKind.IdentifierToken AndAlso kind2 = SyntaxKind.IdentifierToken Then Return True
+      If kind1 = SyntaxKind.NumberToken AndAlso kind2 = SyntaxKind.NumberToken Then Return True
+      If kind1 = SyntaxKind.StringToken AndAlso kind2 = SyntaxKind.StringToken Then Return True
+      If kind1 = SyntaxKind.BangToken AndAlso kind2 = SyntaxKind.EqualsToken Then Return True
+      If kind1 = SyntaxKind.BangToken AndAlso kind2 = SyntaxKind.EqualsEqualsToken Then Return True
+      If kind1 = SyntaxKind.EqualsToken AndAlso kind2 = SyntaxKind.EqualsToken Then Return True
+      If kind1 = SyntaxKind.EqualsToken AndAlso kind2 = SyntaxKind.EqualsEqualsToken Then Return True
+      If kind1 = SyntaxKind.LessThanToken AndAlso kind2 = SyntaxKind.EqualsToken Then Return True
+      If kind1 = SyntaxKind.LessThanToken AndAlso kind2 = SyntaxKind.EqualsEqualsToken Then Return True
+      If kind1 = SyntaxKind.LessThanToken AndAlso kind2 = SyntaxKind.GreaterThanEqualsToken Then Return True
+      If kind1 = SyntaxKind.LessThanToken AndAlso kind2 = SyntaxKind.GreaterThanToken Then Return True
+      If kind1 = SyntaxKind.GreaterThanToken AndAlso kind2 = SyntaxKind.EqualsToken Then Return True
+      If kind1 = SyntaxKind.GreaterThanToken AndAlso kind2 = SyntaxKind.EqualsEqualsToken Then Return True
+      If kind1 = SyntaxKind.AmpersandToken AndAlso kind2 = SyntaxKind.AmpersandToken Then Return True
+      If kind1 = SyntaxKind.AmpersandToken AndAlso kind2 = SyntaxKind.AmpersandAmpersandToken Then Return True
+      If kind1 = SyntaxKind.PipeToken AndAlso kind2 = SyntaxKind.PipeToken Then Return True
+      If kind1 = SyntaxKind.PipeToken AndAlso kind2 = SyntaxKind.PipePipeToken Then Return True
+      If kind1 = SyntaxKind.SlashToken AndAlso kind2 = SyntaxKind.SlashToken Then Return True
+      If kind1 = SyntaxKind.SlashToken AndAlso kind2 = SyntaxKind.StarToken Then Return True
+      If kind1 = SyntaxKind.SlashToken AndAlso kind2 = SyntaxKind.SingleLineCommentToken Then Return True
+      If kind1 = SyntaxKind.SlashToken AndAlso kind2 = SyntaxKind.MultiLineCommentToken Then Return True
 
       'TODO: More cases...
 
@@ -249,16 +187,17 @@ Namespace Global.Basic.Tests.CodeAnalysis.Syntax
     End Function
 
     Private Shared Iterator Function GetTokenPairsWithSeparator() As IEnumerable(Of (kind1 As SyntaxKind, text1 As String,
-                                                                                                 separatorKind As SyntaxKind, separatorText As String,
-                                                                                                 kind2 As SyntaxKind, text2 As String))
+                                                                                                          separatorKind As SyntaxKind, separatorText As String,
+                                                                                                          kind2 As SyntaxKind, text2 As String))
 
       For Each t1 In GetTokens()
         For Each t2 In GetTokens()
           If RequiresSeparator(t1.kind, t2.kind) Then
             For Each s In GetSeparators()
-              Yield (t1.kind, t1.text,
-                                                               s.kind, s.text,
-                                                               t2.kind, t2.text)
+              If Not RequiresSeparator(t1.kind, s.kind) AndAlso
+                 Not RequiresSeparator(s.kind, t2.kind) Then
+                Yield (t1.kind, t1.text, s.kind, s.text, t2.kind, t2.text)
+              End If
             Next
           End If
         Next

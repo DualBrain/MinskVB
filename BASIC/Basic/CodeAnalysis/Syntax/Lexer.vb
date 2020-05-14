@@ -202,7 +202,7 @@ Namespace Global.Basic.CodeAnalysis.Syntax
         End Select
       End While
 
-      _Kind = SyntaxKind.SingleLineCommentToken
+      _Kind = SyntaxKind.MultiLineCommentToken
 
     End Sub
 
