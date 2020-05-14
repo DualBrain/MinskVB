@@ -99,8 +99,11 @@ Namespace Global.Basic.CodeAnalysis
 
     Private Function EvaluateExpression(node As BoundExpression) As Object
 
+      If node.ConstantValue IsNot Nothing Then
+        Return EvaluateConstantExpression(node)
+      End If
+
       Select Case node.Kind
-        Case BoundNodeKind.LiteralExpression : Return EvaluateLiteralExpression(node)
         Case BoundNodeKind.VariableExpression : Return EvaluateVariableExpression(DirectCast(node, BoundVariableExpression))
         Case BoundNodeKind.AssignmentExpression : Return EvaluateAssignmentExpression(DirectCast(node, BoundAssignmentExpression))
         Case BoundNodeKind.UnaryExpression : Return EvaluateUnaryExpression(node)
@@ -113,8 +116,8 @@ Namespace Global.Basic.CodeAnalysis
 
     End Function
 
-    Private Function EvaluateLiteralExpression(node As BoundExpression) As Object
-      Return DirectCast(node, BoundLiteralExpression).Value
+    Private Function EvaluateConstantExpression(node As BoundExpression) As Object
+      Return node.ConstantValue.Value
     End Function
 
     Private Function EvaluateVariableExpression(v As BoundVariableExpression) As Object

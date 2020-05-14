@@ -205,8 +205,12 @@ Namespace Global.Basic.CodeAnalysis.Emit
     End Sub
 
     Private Sub EmitExpression(ilProcessor As ILProcessor, node As BoundExpression)
+
+      If node.ConstantValue IsNot Nothing Then
+        EmitConstantExpression(ilProcessor, node)
+      End If
+
       Select Case node.Kind
-        Case BoundNodeKind.LiteralExpression : EmitLiteralExpression(ilProcessor, CType(node, BoundLiteralExpression))
         Case BoundNodeKind.VariableExpression : EmitVariableExpression(ilProcessor, CType(node, BoundVariableExpression))
         Case BoundNodeKind.AssignmentExpression : EmitAssignmentExpression(ilProcessor, CType(node, BoundAssignmentExpression))
         Case BoundNodeKind.UnaryExpression : EmitUnaryExpression(ilProcessor, CType(node, BoundUnaryExpression))
@@ -218,19 +222,19 @@ Namespace Global.Basic.CodeAnalysis.Emit
       End Select
     End Sub
 
-    Private Sub EmitLiteralExpression(ilProcessor As ILProcessor, node As BoundLiteralExpression)
+    Private Sub EmitConstantExpression(ilProcessor As ILProcessor, node As BoundExpression)
       If node.Type Is TypeSymbol.Bool Then
-        Dim value = CBool(node.Value)
+        Dim value = CBool(node.ConstantValue.Value)
         Dim instruction = If(value, OpCodes.Ldc_I4_1, OpCodes.Ldc_I4_0)
         ilProcessor.Emit(instruction)
       ElseIf node.Type Is TypeSymbol.Int Then
-        Dim value = CInt(node.Value)
+        Dim value = CInt(node.ConstantValue.Value)
         ilProcessor.Emit(OpCodes.Ldc_I4, value)
       ElseIf node.Type Is TypeSymbol.String Then
-        Dim value = CStr(node.Value)
+        Dim value = CStr(node.ConstantValue.Value)
         ilProcessor.Emit(OpCodes.Ldstr, value)
       Else
-        Throw New Exception($"Unexpected literal type: {node.Type}")
+        Throw New Exception($"Unexpected constant expression type: {node.Type}")
       End If
     End Sub
 
