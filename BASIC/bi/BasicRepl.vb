@@ -68,7 +68,7 @@ Friend NotInheritable Class BasicRepl
       Dim isNumber = token.Kind = SyntaxKind.NumberToken
       Dim isIdentifier = token.Kind = SyntaxKind.IdentifierToken
       Dim isString = token.Kind = SyntaxKind.StringToken
-      Dim isComment = token.Kind = SyntaxKind.SingleLineCommentTrivia
+      Dim isComment = token.Kind.IsComment
 
       If isKeyword Then
         ForegroundColor = Blue

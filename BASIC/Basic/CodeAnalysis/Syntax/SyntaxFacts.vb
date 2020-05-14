@@ -186,6 +186,17 @@ Namespace Global.Basic.CodeAnalysis.Syntax
     End Function
 
     <Extension>
+    Public Function IsComment(kind As SyntaxKind) As Boolean
+      Select Case kind
+        Case SyntaxKind.SingleLineCommentTrivia,
+             SyntaxKind.MultiLineCommentTrivia
+          Return True
+        Case Else
+          Return False
+      End Select
+    End Function
+
+    <Extension>
     Public Function IsTrivia(kind As SyntaxKind) As Boolean
       Select Case kind
         Case SyntaxKind.WhitespaceTrivia,
