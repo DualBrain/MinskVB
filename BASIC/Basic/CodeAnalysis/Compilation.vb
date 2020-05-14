@@ -182,6 +182,10 @@ Namespace Global.Basic.CodeAnalysis
 
     Public Function Emit(moduleName As String, references As String(), outputPath As String) As ImmutableArray(Of Diagnostic)
 
+      Dim parseDiagnostics = SyntaxTrees.SelectMany(Function(st) st.Diagnostics)
+      Dim diagnostics = parseDiagnostics.Concat(GlobalScope.Diagnostics).ToImmutableArray()
+      If diagnostics.Any() Then Return diagnostics
+
       Dim program = GetProgram()
 
       If program.Diagnostics.Any Then
