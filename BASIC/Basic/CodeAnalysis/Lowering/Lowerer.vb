@@ -253,9 +253,9 @@ Namespace Global.Basic.CodeAnalysis.Lowering
         Dim condition = CBool(node.Condition.ConstantValue.Value)
         condition = If(node.JumpIfTrue, condition, Not condition)
         If condition Then
-          Return New BoundGotoStatement(node.Label)
+          Return RewriteStatement(New BoundGotoStatement(node.Label))
         Else
-          Return New BoundNopStatement()
+          Return RewriteStatement(New BoundNopStatement())
         End If
       End If
 
