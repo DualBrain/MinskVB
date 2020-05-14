@@ -50,7 +50,7 @@ Namespace Global.Basic.CodeAnalysis.Syntax
     Public Function Lex() As SyntaxToken
 
       Start = Position
-      Kind = SyntaxKind.BadToken
+      Kind = SyntaxKind.BadTokenTrivia
       Value = Nothing
 
       Select Case Current
@@ -175,7 +175,7 @@ Namespace Global.Basic.CodeAnalysis.Syntax
         End Select
       End While
 
-      _Kind = SyntaxKind.SingleLineCommentToken
+      _Kind = SyntaxKind.SingleLineCommentTrivia
 
     End Sub
 
@@ -202,7 +202,7 @@ Namespace Global.Basic.CodeAnalysis.Syntax
         End Select
       End While
 
-      _Kind = SyntaxKind.MultiLineCommentToken
+      _Kind = SyntaxKind.MultiLineCommentTrivia
 
     End Sub
 
@@ -249,7 +249,7 @@ Namespace Global.Basic.CodeAnalysis.Syntax
         Position += 1
       End While
 
-      Kind = SyntaxKind.WhitespaceToken
+      Kind = SyntaxKind.WhitespaceTrivia
 
     End Sub
 

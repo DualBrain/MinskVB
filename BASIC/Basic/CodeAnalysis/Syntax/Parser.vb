@@ -22,10 +22,7 @@ Namespace Global.Basic.CodeAnalysis.Syntax
       Dim token As SyntaxToken
       Do
         token = lexer.Lex
-        If token.Kind <> SyntaxKind.WhitespaceToken AndAlso
-           token.Kind <> SyntaxKind.SingleLineCommentToken AndAlso
-           token.Kind <> SyntaxKind.MultiLineCommentToken AndAlso
-           token.Kind <> SyntaxKind.BadToken Then
+        If Not token.Kind.IsTrivia Then
           tokens.Add(token)
         End If
       Loop While token.Kind <> SyntaxKind.EndOfFileToken

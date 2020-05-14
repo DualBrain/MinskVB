@@ -186,14 +186,27 @@ Namespace Global.Basic.CodeAnalysis.Syntax
     End Function
 
     <Extension>
+    Public Function IsTrivia(kind As SyntaxKind) As Boolean
+      Select Case kind
+        Case SyntaxKind.WhitespaceTrivia,
+             SyntaxKind.SingleLineCommentTrivia,
+             SyntaxKind.MultiLineCommentTrivia,
+             SyntaxKind.BadTokenTrivia
+          Return True
+        Case Else
+          Return False
+      End Select
+    End Function
+
+    <Extension>
     Public Function IsKeyword(kind As SyntaxKind) As Boolean
       Return kind.ToString.EndsWith("Keyword")
     End Function
 
     <Extension>
     Public Function IsToken(kind As SyntaxKind) As Boolean
-      Return kind.IsKeyword OrElse
-             kind.ToString.EndsWith("Token")
+      Return Not kind.IsTrivia AndAlso
+             (kind.IsKeyword OrElse kind.ToString.EndsWith("Token"))
     End Function
 
   End Module

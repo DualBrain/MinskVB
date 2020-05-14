@@ -30,14 +30,12 @@ Namespace Global.Basic.Tests.CodeAnalysis.Syntax
 
       Dim tokenKinds = System.Enum.GetValues(GetType(SyntaxKind)) _
                                   .Cast(Of SyntaxKind) _
-                                  .Where(Function(k) k <> SyntaxKind.SingleLineCommentToken AndAlso
-                                                     k <> SyntaxKind.MultiLineCommentToken) _
                                   .Where(Function(k) k.IsToken)
 
       Dim testedTokenKinds = GetTokens.Concat(GetSeparators).Select(Function(t) t.kind)
 
       Dim untestedTokenKinds = New SortedSet(Of SyntaxKind)(tokenKinds)
-      untestedTokenKinds.Remove(SyntaxKind.BadToken)
+      untestedTokenKinds.Remove(SyntaxKind.BadTokenTrivia)
       untestedTokenKinds.Remove(SyntaxKind.EndOfFileToken)
       untestedTokenKinds.ExceptWith(testedTokenKinds)
 
@@ -129,11 +127,11 @@ Namespace Global.Basic.Tests.CodeAnalysis.Syntax
 
     Private Shared Function GetSeparators() As (kind As SyntaxKind, text As String)()
 
-      Return {(SyntaxKind.WhitespaceToken, " "),
-                                (SyntaxKind.WhitespaceToken, "  "),
-                                (SyntaxKind.WhitespaceToken, vbCr),
-                                (SyntaxKind.WhitespaceToken, vbLf),
-                                (SyntaxKind.WhitespaceToken, vbCrLf)}
+      Return {(SyntaxKind.WhitespaceTrivia, " "),
+                                (SyntaxKind.WhitespaceTrivia, "  "),
+                                (SyntaxKind.WhitespaceTrivia, vbCr),
+                                (SyntaxKind.WhitespaceTrivia, vbLf),
+                                (SyntaxKind.WhitespaceTrivia, vbCrLf)}
 
     End Function
 
@@ -164,8 +162,8 @@ Namespace Global.Basic.Tests.CodeAnalysis.Syntax
       If kind1 = SyntaxKind.PipeToken AndAlso kind2 = SyntaxKind.PipePipeToken Then Return True
       If kind1 = SyntaxKind.SlashToken AndAlso kind2 = SyntaxKind.SlashToken Then Return True
       If kind1 = SyntaxKind.SlashToken AndAlso kind2 = SyntaxKind.StarToken Then Return True
-      If kind1 = SyntaxKind.SlashToken AndAlso kind2 = SyntaxKind.SingleLineCommentToken Then Return True
-      If kind1 = SyntaxKind.SlashToken AndAlso kind2 = SyntaxKind.MultiLineCommentToken Then Return True
+      If kind1 = SyntaxKind.SlashToken AndAlso kind2 = SyntaxKind.SingleLineCommentTrivia Then Return True
+      If kind1 = SyntaxKind.SlashToken AndAlso kind2 = SyntaxKind.MultiLineCommentTrivia Then Return True
 
       'TODO: More cases...
 

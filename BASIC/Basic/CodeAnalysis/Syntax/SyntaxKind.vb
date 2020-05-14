@@ -7,11 +7,11 @@ Namespace Global.Basic.CodeAnalysis.Syntax
   Public Enum SyntaxKind
 
     ' Tokens
-    BadToken
+    BadTokenTrivia
     EndOfFileToken
-    WhitespaceToken
-    SingleLineCommentToken
-    MultiLineCommentToken
+    WhitespaceTrivia
+    SingleLineCommentTrivia
+    MultiLineCommentTrivia
     NumberToken
     StringToken
     PlusToken
