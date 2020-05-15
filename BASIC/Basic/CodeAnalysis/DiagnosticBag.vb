@@ -27,8 +27,8 @@ Namespace Global.Basic.CodeAnalysis
       m_diagnostics.Add(diagnostic)
     End Sub
 
-    Public Sub AddRange(diagnostics As DiagnosticBag)
-      m_diagnostics.AddRange(diagnostics.m_diagnostics)
+    Public Sub AddRange(diagnostics As IEnumerable(Of Diagnostic))
+      m_diagnostics.AddRange(diagnostics)
     End Sub
 
     Public Sub Concat(diagnostics As DiagnosticBag)

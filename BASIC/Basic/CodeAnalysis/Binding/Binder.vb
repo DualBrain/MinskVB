@@ -19,7 +19,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
     Private ReadOnly m_loopStack As New Stack(Of (BreakLabel As BoundLabel, ContinueLabel As BoundLabel))
     Private m_labelCounter As Integer
 
-    Public Sub New(isScript As Boolean, parent As BoundScope, [function] As FunctionSymbol)
+    Private Sub New(isScript As Boolean, parent As BoundScope, [function] As FunctionSymbol)
 
       m_scope = New BoundScope(parent)
       m_isScript = isScript
@@ -37,6 +37,11 @@ Namespace Global.Basic.CodeAnalysis.Binding
 
       Dim parentScope = CreateParentScopes(previous)
       Dim binder = New Binder(isScript, parentScope, Nothing)
+
+      binder.Diagnostics.AddRange(syntaxTrees.SelectMany(Function(st) st.Diagnostics))
+      If binder.Diagnostics.Any Then
+        Return New BoundGlobalScope(previous, binder.Diagnostics.ToImmutableArray, Nothing, Nothing, ImmutableArray(Of FunctionSymbol).Empty, ImmutableArray(Of VariableSymbol).Empty, ImmutableArray(Of BoundStatement).Empty)
+      End If
 
       Dim functionDeclarations = syntaxTrees.SelectMany(Function(st) st.Root.Members).OfType(Of FunctionDeclarationSyntax)
 
@@ -121,6 +126,10 @@ Namespace Global.Basic.CodeAnalysis.Binding
     Public Shared Function BindProgram(isScript As Boolean, previous As BoundProgram, globalScope As BoundGlobalScope) As BoundProgram
 
       Dim parentScope = CreateParentScopes(globalScope)
+
+      If globalScope.Diagnostics.Any Then
+        Return New BoundProgram(previous, globalScope.Diagnostics, Nothing, Nothing, ImmutableDictionary(Of FunctionSymbol, BoundBlockStatement).Empty)
+      End If
 
       Dim functionBodies = ImmutableDictionary.CreateBuilder(Of FunctionSymbol, BoundBlockStatement)
       Dim diagnostics = ImmutableArray.CreateBuilder(Of Diagnostic)

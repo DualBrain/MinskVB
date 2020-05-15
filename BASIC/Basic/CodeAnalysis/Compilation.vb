@@ -112,11 +112,15 @@ Namespace Global.Basic.CodeAnalysis
 
     Public Function Evaluate(variables As Dictionary(Of VariableSymbol, Object)) As EvaluationResult
 
-      Dim parseDiagnostics = SyntaxTrees.SelectMany(Function(st) st.Diagnostics)
+      'Dim parseDiagnostics = SyntaxTrees.SelectMany(Function(st) st.Diagnostics)
 
-      Dim diagnostics = parseDiagnostics.Concat(GlobalScope.Diagnostics).ToImmutableArray
-      If diagnostics.Any Then
-        Return New EvaluationResult(diagnostics, Nothing)
+      'Dim diagnostics = parseDiagnostics.Concat(GlobalScope.Diagnostics).ToImmutableArray
+      'If diagnostics.Any Then
+      '  Return New EvaluationResult(diagnostics, Nothing)
+      'End If
+
+      If GlobalScope.Diagnostics.Any Then
+        Return New EvaluationResult(GlobalScope.Diagnostics, Nothing)
       End If
 
       Dim program = GetProgram()
