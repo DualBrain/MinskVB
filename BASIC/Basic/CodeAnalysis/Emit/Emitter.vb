@@ -1,6 +1,7 @@
 ﻿Option Explicit On
 Option Strict On
 Option Infer On
+
 Imports System.Collections.Immutable
 Imports System.Reflection
 Imports Basic.CodeAnalysis.Binding
@@ -12,6 +13,7 @@ Imports Mono.Cecil.Rocks
 Imports System.Security.Cryptography
 Imports Microsoft.VisualBasic.CompilerServices
 Imports Basic.CodeAnalysis.Syntax
+Imports System.Text
 
 Namespace Global.Basic.CodeAnalysis.Emit
 
@@ -22,7 +24,10 @@ Namespace Global.Basic.CodeAnalysis.Emit
     Private ReadOnly _objectEqualsReference As MethodReference
     Private ReadOnly _consoleReadLineReference As MethodReference
     Private ReadOnly _consoleWriteLineReference As MethodReference
-    Private ReadOnly _stringConcatReference As MethodReference
+    Private ReadOnly _stringConcat2Reference As MethodReference
+    Private ReadOnly _stringConcat3Reference As MethodReference
+    Private ReadOnly _stringConcat4Reference As MethodReference
+    Private ReadOnly _stringConcatArrayReference As MethodReference
     Private ReadOnly _convertToBooleanReference As MethodReference
     Private ReadOnly _convertToInt32Reference As MethodReference
     Private ReadOnly _convertToStringReference As MethodReference
@@ -71,7 +76,10 @@ Namespace Global.Basic.CodeAnalysis.Emit
       _objectEqualsReference = Emit_ResolveMethod(assemblies, "System.Object", "Equals", {"System.Object", "System.Object"})
       _consoleReadLineReference = Emit_ResolveMethod(assemblies, "System.Console", "ReadLine", Array.Empty(Of String))
       _consoleWriteLineReference = Emit_ResolveMethod(assemblies, "System.Console", "WriteLine", {"System.Object"})
-      _stringConcatReference = Emit_ResolveMethod(assemblies, "System.String", "Concat", {"System.String", "System.String"})
+      _stringConcat2Reference = Emit_ResolveMethod(assemblies, "System.String", "Concat", {"System.String", "System.String"})
+      _stringConcat3Reference = Emit_ResolveMethod(assemblies, "System.String", "Concat", {"System.String", "System.String", "System.String"})
+      _stringConcat4Reference = Emit_ResolveMethod(assemblies, "System.String", "Concat", {"System.String", "System.String", "System.String", "System.String"})
+      _stringConcatArrayReference = Emit_ResolveMethod(assemblies, "System.String", "Concat", {"System.String[]"})
       _convertToBooleanReference = Emit_ResolveMethod(assemblies, "System.Convert", "ToBoolean", {"System.Object"})
       _convertToInt32Reference = Emit_ResolveMethod(assemblies, "System.Convert", "ToInt32", {"System.Object"})
       _convertToStringReference = Emit_ResolveMethod(assemblies, "System.Convert", "ToString", {"System.Object"})
@@ -182,7 +190,7 @@ Namespace Global.Basic.CodeAnalysis.Emit
 
     Private Sub EmitGotoStatement(ilProcessor As ILProcessor, node As BoundGotoStatement)
       _fixups.Add((ilProcessor.Body.Instructions.Count, node.Label))
-      ilProcessor.Emit(OpCodes.Br, instruction.Create(OpCodes.Nop))
+      ilProcessor.Emit(OpCodes.Br, Instruction.Create(OpCodes.Nop))
     End Sub
 
     Private Sub EmitConditionalGotoStatement(ilProcessor As ILProcessor, node As BoundConditionalGotoStatement)
@@ -273,16 +281,16 @@ Namespace Global.Basic.CodeAnalysis.Emit
 
     Private Sub EmitBinaryExpression(ilProcessor As ILProcessor, node As BoundBinaryExpression)
 
-      EmitExpression(ilProcessor, node.Left)
-      EmitExpression(ilProcessor, node.Right)
-
       ' +(string, string)
       If node.Op.Kind = BoundBinaryOperatorKind.Addition Then
         If node.Left.Type Is TypeSymbol.String AndAlso node.Right.Type Is TypeSymbol.String Then
-          ilProcessor.Emit(OpCodes.Call, _stringConcatReference)
+          EmitStringConcatExpression(ilProcessor, node)
           Return
         End If
       End If
+
+      EmitExpression(ilProcessor, node.Left)
+      EmitExpression(ilProcessor, node.Right)
 
       ' ==(any, any)
       ' ==(string, string)
@@ -474,6 +482,115 @@ Namespace Global.Basic.CodeAnalysis.Emit
     End Function
 
 #End Region
+
+    Private Sub EmitStringConcatExpression(_ilProcessor As ILProcessor, node As BoundBinaryExpression)
+
+      ' Flatten the expression tree to a sequence of nodes to concatenate, then fold consecutive constants in that sequence.
+      ' This approach enables constant folding of non-sibling nodes, which cannot be done in the ConstantFolding class as it would require changing the tree.
+      ' Example: folding b And c in ((a + b) + c) if they are constant.
+
+      Dim nodes = EmitStringConcatExpression_FoldConstants(EmitStringConcatExpression_Flatten(node)).ToList()
+
+      Select Case nodes.Count
+        Case 0
+          _ilProcessor.Emit(OpCodes.Ldstr, String.Empty)
+
+        Case 1
+          EmitExpression(_ilProcessor, nodes(0))
+
+        Case 2
+          EmitExpression(_ilProcessor, nodes(0))
+          EmitExpression(_ilProcessor, nodes(1))
+          _ilProcessor.Emit(OpCodes.[Call], _stringConcat2Reference)
+
+        Case 3
+          EmitExpression(_ilProcessor, nodes(0))
+          EmitExpression(_ilProcessor, nodes(1))
+          EmitExpression(_ilProcessor, nodes(2))
+          _ilProcessor.Emit(OpCodes.[Call], _stringConcat3Reference)
+
+        Case 4
+          EmitExpression(_ilProcessor, nodes(0))
+          EmitExpression(_ilProcessor, nodes(1))
+          EmitExpression(_ilProcessor, nodes(2))
+          EmitExpression(_ilProcessor, nodes(3))
+          _ilProcessor.Emit(OpCodes.[Call], _stringConcat4Reference)
+
+        Case Else
+          _ilProcessor.Emit(OpCodes.Ldc_I4, nodes.Count)
+          _ilProcessor.Emit(OpCodes.Newarr, _knownTypes(TypeSymbol.[String]))
+          For i = 0 To nodes.Count - 1
+            _ilProcessor.Emit(OpCodes.Dup)
+            _ilProcessor.Emit(OpCodes.Ldc_I4, i)
+            EmitExpression(_ilProcessor, nodes(i))
+            _ilProcessor.Emit(OpCodes.Stelem_Ref)
+          Next
+          _ilProcessor.Emit(OpCodes.[Call], _stringConcatArrayReference)
+
+      End Select
+
+    End Sub
+
+    Private Iterator Function EmitStringConcatExpression_Flatten(node As BoundExpression) As IEnumerable(Of BoundExpression)
+
+      Dim binaryExpression = TryCast(node, BoundBinaryExpression)
+      If binaryExpression IsNot Nothing AndAlso
+         binaryExpression.Op.Kind = BoundBinaryOperatorKind.Addition AndAlso
+         binaryExpression.Left.Type Is TypeSymbol.[String] AndAlso
+         binaryExpression.Right.Type Is TypeSymbol.[String] Then
+
+        For Each result In EmitStringConcatExpression_Flatten(binaryExpression.Left)
+          Yield result
+        Next
+
+        For Each result In EmitStringConcatExpression_Flatten(binaryExpression.Right)
+          Yield result
+        Next
+
+      Else
+
+        If node.Type IsNot TypeSymbol.[String] Then
+          Throw New Exception($"Unexpected node type in string concatenation: {node.Type}")
+        End If
+
+        Yield node
+
+      End If
+
+    End Function
+
+    Private Iterator Function EmitStringConcatExpression_FoldConstants(nodes As IEnumerable(Of BoundExpression)) As IEnumerable(Of BoundExpression)
+
+      Dim sb As StringBuilder = Nothing
+
+      For Each node In nodes
+        If node.ConstantValue IsNot Nothing Then
+          Dim stringValue = CStr(node.ConstantValue.Value)
+
+          If String.IsNullOrEmpty(stringValue) Then
+            Continue For
+          End If
+
+          sb = If(sb, New StringBuilder)
+          sb.Append(stringValue)
+
+        Else
+
+          If sb?.Length > 0 Then
+            Yield New BoundLiteralExpression(sb.ToString())
+            sb.Clear()
+          End If
+
+          Yield node
+
+        End If
+      Next
+
+      If sb?.Length > 0 Then
+        Yield New BoundLiteralExpression(sb.ToString())
+      End If
+
+    End Function
 
   End Class
 
