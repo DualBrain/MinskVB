@@ -216,6 +216,7 @@ Namespace Global.Basic.CodeAnalysis.Emit
 
       If node.ConstantValue IsNot Nothing Then
         EmitConstantExpression(ilProcessor, node)
+        Return
       End If
 
       Select Case node.Kind

@@ -1,1 +1,2 @@
-print("hello world")
+var _abc = "hello world"
+print(_abc)
