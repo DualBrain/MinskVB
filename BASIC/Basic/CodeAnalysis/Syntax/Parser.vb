@@ -17,14 +17,38 @@ Namespace Global.Basic.CodeAnalysis.Syntax
     Private Property Position As Integer
 
     Sub New(tree As SyntaxTree)
+
       Dim tokens = New List(Of SyntaxToken)
+      Dim badTokens = New List(Of SyntaxToken)
+
       Dim lexer = New Lexer(tree)
       Dim token As SyntaxToken
       Do
+
         token = lexer.Lex
-        If Not token.Kind.IsTrivia Then
+
+        If token.Kind = SyntaxKind.BadToken Then
+          badTokens.Add(token)
+        Else
+          If badTokens.Count > 0 Then
+            Dim leadingTrivia = token.LeadingTrivia.ToBuilder
+            Dim index = 0
+            For Each badToken In badTokens
+              For Each lt In badToken.LeadingTrivia
+                leadingTrivia.Insert(index, lt) : index += 1
+              Next
+              Dim trivia = New SyntaxTrivia(tree, SyntaxKind.SkippedTextTrivia, badToken.Position, badToken.Text)
+              leadingTrivia.Insert(index, trivia) : index += 1
+              For Each tt In badToken.TrailingTrivia
+                leadingTrivia.Insert(index, tt) : index += 1
+              Next
+            Next
+            badTokens.Clear()
+            token = New SyntaxToken(token.SyntaxTree, token.Kind, token.Position, token.Text, token.Value, leadingTrivia.ToImmutable, token.TrailingTrivia)
+          End If
           tokens.Add(token)
         End If
+
       Loop While token.Kind <> SyntaxKind.EndOfFileToken
       m_syntaxTree = tree
       Text = tree.Text
@@ -55,7 +79,7 @@ Namespace Global.Basic.CodeAnalysis.Syntax
         Return NextToken()
       Else
         Diagnostics.ReportUnexpectedToken(Current.Location, Current.Kind, kind)
-        Return New SyntaxToken(m_syntaxTree, kind, Current.Position, Nothing, Nothing)
+        Return New SyntaxToken(m_syntaxTree, kind, Current.Position, Nothing, Nothing, ImmutableArray(Of SyntaxTrivia).Empty, ImmutableArray(Of SyntaxTrivia).Empty)
       End If
     End Function
 

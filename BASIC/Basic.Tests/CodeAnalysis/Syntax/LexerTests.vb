@@ -35,7 +35,7 @@ Namespace Global.Basic.Tests.CodeAnalysis.Syntax
       Dim testedTokenKinds = GetTokens.Concat(GetSeparators).Select(Function(t) t.kind)
 
       Dim untestedTokenKinds = New SortedSet(Of SyntaxKind)(tokenKinds)
-      untestedTokenKinds.Remove(SyntaxKind.BadTokenTrivia)
+      untestedTokenKinds.Remove(SyntaxKind.BadToken)
       untestedTokenKinds.Remove(SyntaxKind.EndOfFileToken)
       untestedTokenKinds.ExceptWith(testedTokenKinds)
 

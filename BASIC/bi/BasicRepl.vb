@@ -2,17 +2,14 @@
 Option Strict On
 Option Infer On
 
-Imports Basic.CodeAnalysis
-Imports Basic.CodeAnalysis.Symbols
-Imports Basic.CodeAnalysis.Syntax
-Imports Basic.CodeAnalysis.Text
-Imports Basic.IO
-Imports System.Collections.Immutable
+Imports BASIC.CodeAnalysis
+Imports BASIC.CodeAnalysis.Symbols
+Imports BASIC.CodeAnalysis.Syntax
+Imports BASIC.CodeAnalysis.Authoring
+Imports BASIC.IO
 Imports System.Console
 Imports System.ConsoleColor
 Imports System.IO
-
-Imports Basic.CodeAnalysis.Syntax.SyntaxFacts
 
 Friend NotInheritable Class BasicRepl
   Inherits Repl
@@ -28,67 +25,51 @@ Friend NotInheritable Class BasicRepl
     LoadSubmissions()
   End Sub
 
-  Private NotInheritable Class RenderState
+  'Private NotInheritable Class RenderState
 
-    Public Sub New(text As SourceText, tokens As ImmutableArray(Of SyntaxToken))
-      Me.Text = text
-      Me.Tokens = tokens
-    End Sub
+  '  Public Sub New(text As SourceText, tree As SyntaxTree)
+  '    Me.Text = text
+  '    Me.SyntaxTree = tree
+  '  End Sub
 
-    Public ReadOnly Property Text As SourceText
-    Public ReadOnly Property Tokens As ImmutableArray(Of SyntaxToken)
+  '  Public ReadOnly Property Text As SourceText
+  '  Public ReadOnly Property SyntaxTree As SyntaxTree
 
-  End Class
+  'End Class
 
   Protected Overrides Function RenderLine(lines As IReadOnlyList(Of String), lineIndex As Integer, state As Object) As Object
 
-    Dim renderState As RenderState
+    Dim tree As SyntaxTree
 
     If state Is Nothing Then
       Dim text = String.Join(Environment.NewLine, lines)
-      Dim st = SourceText.From(text)
-      Dim tokens = SyntaxTree.ParseTokens(st)
-      renderState = New RenderState(st, tokens)
+      tree = SyntaxTree.Parse(text)
     Else
-      renderState = CType(state, RenderState)
+      tree = CType(state, SyntaxTree)
     End If
 
-    Dim lineSpan = renderState.Text.Lines(lineIndex).Span
+    Dim lineSpan = tree.Text.Lines(lineIndex).Span
+    Dim classifiedSpans = Classifier.Classify(tree, lineSpan)
 
-    For Each token In renderState.Tokens
+    For Each classifiedSpan In classifiedSpans
 
-      If Not lineSpan.OverlapsWith(token.Span) Then Continue For
+      Dim classifiedText = tree.Text.ToString(classifiedSpan.Span)
 
-      Dim tokenStart = Math.Max(token.Span.Start, lineSpan.Start)
-      Dim tokenEnd = Math.Min(token.Span.End, lineSpan.End)
-      Dim tokenSpan = TextSpan.FromBounds(tokenStart, tokenEnd)
-      Dim tokenText = renderState.Text.ToString(tokenSpan)
+      Select Case classifiedSpan.Classification
+        Case Classification.Keyword : ForegroundColor = Blue
+        Case Classification.Identifier : ForegroundColor = DarkYellow
+        Case Classification.Number : ForegroundColor = Cyan
+        Case Classification.String : ForegroundColor = Magenta
+        Case Classification.Comment : ForegroundColor = Green
+        Case Else : ForegroundColor = DarkGray
+      End Select
 
-      Dim isKeyword = token.Kind.IsKeyword
-      Dim isNumber = token.Kind = SyntaxKind.NumberToken
-      Dim isIdentifier = token.Kind = SyntaxKind.IdentifierToken
-      Dim isString = token.Kind = SyntaxKind.StringToken
-      Dim isComment = token.Kind.IsComment
-
-      If isKeyword Then
-        ForegroundColor = Blue
-      ElseIf isIdentifier Then
-        ForegroundColor = DarkYellow
-      ElseIf isNumber Then
-        ForegroundColor = Cyan
-      ElseIf isString Then
-        ForegroundColor = Magenta
-      ElseIf isComment Then
-        ForegroundColor = Green
-      Else
-        ForegroundColor = DarkGray
-      End If
-      Write(tokenText)
+      Write(classifiedText)
       ResetColor()
 
     Next
 
-    Return renderState
+    Return tree
 
   End Function
 
@@ -181,10 +162,10 @@ Friend NotInheritable Class BasicRepl
     If String.IsNullOrEmpty(text) Then Return True
 
     Dim lastTwoLinesAreBlank = text.Split(Environment.NewLine).
-                                        Reverse().
-                                        TakeWhile(Function(s) String.IsNullOrEmpty(s)).
-                                        Take(2).
-                                        Count() = 2
+                                          Reverse().
+                                          TakeWhile(Function(s) String.IsNullOrEmpty(s)).
+                                          Take(2).
+                                          Count() = 2
 
     If lastTwoLinesAreBlank Then
       Return True
@@ -205,7 +186,7 @@ Friend NotInheritable Class BasicRepl
   Protected Overrides Sub EvaluateSubmission(text As String)
 
     Dim tree = SyntaxTree.Parse(text)
-    Dim compilation = Basic.CodeAnalysis.Compilation.CreateScript(m_previous, tree)
+    Dim compilation = BASIC.CodeAnalysis.Compilation.CreateScript(m_previous, tree)
 
     If m_showTree Then
       Dim color = Console.ForegroundColor

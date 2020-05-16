@@ -6,12 +6,17 @@ Namespace Global.Basic.CodeAnalysis.Syntax
 
   Public Enum SyntaxKind
 
-    ' Tokens
-    BadTokenTrivia
-    EndOfFileToken
+    BadToken
+
+    ' Trivia
+    SkippedTextTrivia
+    LineBreakTrivia
     WhitespaceTrivia
     SingleLineCommentTrivia
     MultiLineCommentTrivia
+
+    ' Tokens
+    EndOfFileToken
     NumberToken
     StringToken
     PlusToken

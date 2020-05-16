@@ -199,10 +199,11 @@ Namespace Global.Basic.CodeAnalysis.Syntax
     <Extension>
     Public Function IsTrivia(kind As SyntaxKind) As Boolean
       Select Case kind
-        Case SyntaxKind.WhitespaceTrivia,
+        Case SyntaxKind.SkippedTextTrivia,
+             SyntaxKind.LineBreakTrivia,
+             SyntaxKind.WhitespaceTrivia,
              SyntaxKind.SingleLineCommentTrivia,
-             SyntaxKind.MultiLineCommentTrivia,
-             SyntaxKind.BadTokenTrivia
+             SyntaxKind.MultiLineCommentTrivia
           Return True
         Case Else
           Return False

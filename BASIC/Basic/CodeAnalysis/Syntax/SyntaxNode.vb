@@ -29,6 +29,14 @@ Namespace Global.Basic.CodeAnalysis.Syntax
       End Get
     End Property
 
+    Public Overridable ReadOnly Property FullSpan() As TextSpan
+      Get
+        Dim first = GetChildren.First.FullSpan
+        Dim last = GetChildren.Last.FullSpan
+        Return TextSpan.FromBounds(first.Start, last.End)
+      End Get
+    End Property
+
     Public ReadOnly Property Location As TextLocation
       Get
         Return New TextLocation(SyntaxTree.Text, Span)
@@ -76,23 +84,43 @@ Namespace Global.Basic.CodeAnalysis.Syntax
 
     Private Shared Sub PrettyPrint(writer As TextWriter, node As SyntaxNode, Optional indent As String = "", Optional isLast As Boolean = True)
 
+      ' HACK: node should never be null, but that's tracked by #141
+      If node Is Nothing Then Return
+
       Dim isToConsole = writer Is Console.Out
-      Dim marker = If(isLast, "└──", "├──")
+      Dim token = TryCast(node, SyntaxToken)
 
-      If isToConsole Then
-        ForegroundColor = DarkGray
+      If token IsNot Nothing Then
+        For Each trivia In token.LeadingTrivia
+
+          If isToConsole Then ForegroundColor = DarkGray
+
+          writer.Write(indent)
+          writer.Write("├──")
+
+          If isToConsole Then ForegroundColor = DarkGreen
+
+          writer.WriteLine($"L: {trivia.Kind}")
+
+        Next
       End If
+
+      Dim hasTrailingTrivia = token IsNot Nothing AndAlso token.TrailingTrivia.Any
+      Dim tokenMarker = If(Not hasTrailingTrivia AndAlso isLast, "└──", "├──")
+
+      If isToConsole Then ForegroundColor = DarkGray
+
       writer.Write(indent)
-      writer.Write(marker)
+      writer.Write(tokenMarker)
 
       If isToConsole Then
-        ForegroundColor = If(TypeOf node Is SyntaxToken, Green, Cyan)
+        ForegroundColor = If(TypeOf node Is SyntaxToken, Blue, Cyan)
       End If
       writer.Write($"{node.Kind}")
 
-      If TryCast(node, SyntaxToken)?.Value IsNot Nothing Then
+      If token IsNot Nothing AndAlso token.Value IsNot Nothing Then
         writer.Write(" ")
-        writer.Write(DirectCast(node, SyntaxToken).Value)
+        writer.Write(token.Value)
       End If
 
       If isToConsole Then
@@ -100,6 +128,24 @@ Namespace Global.Basic.CodeAnalysis.Syntax
       End If
 
       writer.WriteLine()
+
+      If token IsNot Nothing Then
+        For Each trivia In token.TrailingTrivia
+
+          Dim isLastTrailingTrivia = trivia Is token.TrailingTrivia.Last
+          Dim triviaMarker = If(isLast AndAlso isLastTrailingTrivia, "└──", "├──")
+
+          If isToConsole Then ForegroundColor = DarkGray
+
+          writer.Write(indent)
+          writer.Write(triviaMarker)
+
+          If isToConsole Then ForegroundColor = DarkGreen
+
+          writer.WriteLine($"T: {trivia.Kind}")
+
+        Next
+      End If
 
       indent += If(isLast, "   ", "│  ")
 
