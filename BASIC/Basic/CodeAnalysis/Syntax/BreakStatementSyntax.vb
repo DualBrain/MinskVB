@@ -4,7 +4,7 @@ Option Infer On
 
 Namespace Global.Basic.CodeAnalysis.Syntax
 
-  Friend Class BreakStatementSyntax
+  Partial Friend Class BreakStatementSyntax
     Inherits StatementSyntax
 
     Public Sub New(tree As SyntaxTree, keyword As SyntaxToken)

@@ -4,7 +4,7 @@ Option Infer On
 
 Namespace Global.Basic.CodeAnalysis.Syntax
 
-  Public NotInheritable Class WhileStatementSyntax
+  Partial Public NotInheritable Class WhileStatementSyntax
     Inherits StatementSyntax
 
     Sub New(tree As SyntaxTree, whileKeyword As SyntaxToken, condition As ExpressionSyntax, body As StatementSyntax)

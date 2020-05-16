@@ -4,7 +4,7 @@ Option Infer On
 
 Namespace Global.Basic.CodeAnalysis.Syntax
 
-  Public NotInheritable Class CallExpressionSyntax
+  Partial Public NotInheritable Class CallExpressionSyntax
     Inherits ExpressionSyntax
 
     Sub New(tree As SyntaxTree, identifier As SyntaxToken, openParen As SyntaxToken, arguments As SeparatedSyntaxList(Of ExpressionSyntax), closeParen As SyntaxToken)

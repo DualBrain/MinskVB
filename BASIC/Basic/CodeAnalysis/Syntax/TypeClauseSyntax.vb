@@ -4,7 +4,7 @@ Option Infer On
 
 Namespace Global.Basic.CodeAnalysis.Syntax
 
-  Public NotInheritable Class TypeClauseSyntax
+  Partial Public NotInheritable Class TypeClauseSyntax
     Inherits SyntaxNode
 
     Sub New(tree As SyntaxTree, colonToken As SyntaxToken, identifier As SyntaxToken)

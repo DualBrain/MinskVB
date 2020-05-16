@@ -6,7 +6,7 @@ Imports System.Collections.Immutable
 
 Namespace Global.Basic.CodeAnalysis.Syntax
 
-  Public NotInheritable Class CompilationUnitSyntax
+  Partial Public NotInheritable Class CompilationUnitSyntax
     Inherits SyntaxNode
 
     Sub New(tree As SyntaxTree, members As ImmutableArray(Of MemberSyntax), endOfFileToken As SyntaxToken)

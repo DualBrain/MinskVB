@@ -4,7 +4,7 @@ Option Infer On
 
 Namespace Global.Basic.CodeAnalysis.Syntax
 
-  Public NotInheritable Class ExpressionStatementSyntax
+  Partial Public NotInheritable Class ExpressionStatementSyntax
     Inherits StatementSyntax
 
     ' a = 10

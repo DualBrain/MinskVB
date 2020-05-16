@@ -4,7 +4,7 @@ Option Infer On
 
 Namespace Global.Basic.CodeAnalysis.Syntax
 
-  Public NotInheritable Class FunctionDeclarationSyntax
+  Partial Public NotInheritable Class FunctionDeclarationSyntax
     Inherits MemberSyntax
 
     Sub New(tree As SyntaxTree, functionKeyword As SyntaxToken,

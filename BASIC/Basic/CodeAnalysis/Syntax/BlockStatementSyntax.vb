@@ -6,9 +6,8 @@ Imports System.Collections.Immutable
 
 Namespace Global.Basic.CodeAnalysis.Syntax
 
-  Public NotInheritable Class BlockStatementSyntax
+  Partial Public NotInheritable Class BlockStatementSyntax
     Inherits StatementSyntax
-
     Sub New(tree As SyntaxTree, openBraceToken As SyntaxToken, statements As ImmutableArray(Of StatementSyntax), closeBraceToken As SyntaxToken)
       MyBase.New(tree)
       Me.OpenBraceToken = openBraceToken

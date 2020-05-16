@@ -4,7 +4,7 @@ Option Infer On
 
 Namespace Global.Basic.CodeAnalysis.Syntax
 
-  Public NotInheritable Class DoWhileStatementSyntax
+  Partial Public NotInheritable Class DoWhileStatementSyntax
     Inherits StatementSyntax
 
     Sub New(tree As SyntaxTree, doKeyword As SyntaxToken, body As StatementSyntax, whileKeyword As SyntaxToken, condition As ExpressionSyntax)

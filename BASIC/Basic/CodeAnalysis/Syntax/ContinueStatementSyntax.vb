@@ -4,7 +4,7 @@ Option Infer On
 
 Namespace Global.Basic.CodeAnalysis.Syntax
 
-  Friend Class ContinueStatementSyntax
+  Partial Friend Class ContinueStatementSyntax
     Inherits StatementSyntax
 
     Public Sub New(tree As SyntaxTree, keyword As SyntaxToken)

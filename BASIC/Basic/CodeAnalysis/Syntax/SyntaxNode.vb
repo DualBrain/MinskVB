@@ -43,38 +43,34 @@ Namespace Global.Basic.CodeAnalysis.Syntax
       End Get
     End Property
 
-    ' TODO: This method is "generated" by the new C# Syntax Generator feature - need to investigate further.
-    '       For now, it appears to still be working as desired; but at some point this could be an area where
-    '       Minsk and this project fail to be able to remain in sync.
-    '  
-    '   Public MustOverride Iterator Function GetChildren() As IEnumerable(Of SyntaxNode)
-    '
-    Public Iterator Function GetChildren() As IEnumerable(Of SyntaxNode)
+    Public MustOverride Iterator Function GetChildren() As IEnumerable(Of SyntaxNode)
 
-      Dim properties = [GetType].GetProperties(BindingFlags.[Public] Or BindingFlags.Instance)
+    'Public Iterator Function GetChildren() As IEnumerable(Of SyntaxNode)
 
-      For Each p In properties
-        If GetType(SyntaxNode).IsAssignableFrom(p.PropertyType) Then
-          Dim child = DirectCast(p.GetValue(Me), SyntaxNode)
-          If child IsNot Nothing Then
-            Yield child
-          End If
-        ElseIf GetType(SeparatedSyntaxList).IsAssignableFrom(p.PropertyType) Then
-          Dim separatedSyntaxList = DirectCast(p.GetValue(Me), SeparatedSyntaxList)
-          For Each child In separatedSyntaxList.GetWithSeparators
-            Yield child
-          Next
-        ElseIf GetType(IEnumerable(Of SyntaxNode)).IsAssignableFrom(p.PropertyType) Then
-          Dim children = DirectCast(p.GetValue(Me), IEnumerable(Of SyntaxNode))
-          For Each child In children
-            If child IsNot Nothing Then
-              Yield child
-            End If
-          Next
-        End If
-      Next
+    '  Dim properties = [GetType].GetProperties(BindingFlags.[Public] Or BindingFlags.Instance)
 
-    End Function
+    '  For Each p In properties
+    '    If GetType(SyntaxNode).IsAssignableFrom(p.PropertyType) Then
+    '      Dim child = DirectCast(p.GetValue(Me), SyntaxNode)
+    '      If child IsNot Nothing Then
+    '        Yield child
+    '      End If
+    '    ElseIf GetType(SeparatedSyntaxList).IsAssignableFrom(p.PropertyType) Then
+    '      Dim separatedSyntaxList = DirectCast(p.GetValue(Me), SeparatedSyntaxList)
+    '      For Each child In separatedSyntaxList.GetWithSeparators
+    '        Yield child
+    '      Next
+    '    ElseIf GetType(IEnumerable(Of SyntaxNode)).IsAssignableFrom(p.PropertyType) Then
+    '      Dim children = DirectCast(p.GetValue(Me), IEnumerable(Of SyntaxNode))
+    '      For Each child In children
+    '        If child IsNot Nothing Then
+    '          Yield child
+    '        End If
+    '      Next
+    '    End If
+    '  Next
+
+    'End Function
 
     Public Function GetLastToken() As SyntaxToken
       If TypeOf Me Is SyntaxToken Then

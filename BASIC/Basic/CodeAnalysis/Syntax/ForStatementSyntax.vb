@@ -4,7 +4,7 @@ Option Infer On
 
 Namespace Global.Basic.CodeAnalysis.Syntax
 
-  Public NotInheritable Class ForStatementSyntax
+  Partial Public NotInheritable Class ForStatementSyntax
     Inherits StatementSyntax
 
     Sub New(tree As SyntaxTree, keyword As SyntaxToken, identifier As SyntaxToken, equalsToken As SyntaxToken, lowerBound As ExpressionSyntax, toKeyword As SyntaxToken, upperBound As ExpressionSyntax, body As StatementSyntax)
