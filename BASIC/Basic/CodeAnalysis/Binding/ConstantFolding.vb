@@ -82,7 +82,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
           End If
         Case BoundBinaryOperatorKind.LogicalAnd : Return New BoundConstant(CBool(l) And CBool(r))
         Case BoundBinaryOperatorKind.LogicalOr : Return New BoundConstant(CBool(l) Or CBool(r))
-        Case BoundBinaryOperatorKind.Equals : Return New BoundConstant(Equals(l, right))
+        Case BoundBinaryOperatorKind.Equals : Return New BoundConstant(Equals(l, r))
         Case BoundBinaryOperatorKind.NotEquals : Return New BoundConstant(Not Equals(l, r))
         Case BoundBinaryOperatorKind.Less : Return New BoundConstant(CInt(l) < CInt(r))
         Case BoundBinaryOperatorKind.Greater : Return New BoundConstant(CInt(l) > CInt(r))

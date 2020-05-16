@@ -25,8 +25,6 @@ Namespace Global.Basic.Tests.CodeAnalysis
     <InlineData("3 == 3", True)>
     <InlineData("12 != 3", True)>
     <InlineData("3 != 3", False)>
-    <InlineData("12 <> 3", True)>
-    <InlineData("3 <> 3", False)>
     <InlineData("3 < 4", True)>
     <InlineData("5 < 4", False)>
     <InlineData("4 <= 4", True)>
@@ -49,7 +47,6 @@ Namespace Global.Basic.Tests.CodeAnalysis
     <InlineData("false != false", False)>
     <InlineData("true != false", True)>
     <InlineData("true && true", True)>
-    <InlineData("false or false", False)>
     <InlineData("false | false", False)>
     <InlineData("false | true", True)>
     <InlineData("true | false", True)>
@@ -65,7 +62,6 @@ Namespace Global.Basic.Tests.CodeAnalysis
     <InlineData("true", True)>
     <InlineData("false", False)>
     <InlineData("!true", False)>
-    <InlineData("not true", False)>
     <InlineData("!false", True)>
     <InlineData("var a = 10 return a", 10)>
     <InlineData(ChrW(34) + "test" + ChrW(34), "test")>
@@ -75,19 +71,12 @@ Namespace Global.Basic.Tests.CodeAnalysis
     <InlineData(ChrW(34) + "test" & ChrW(34) & " == " & ChrW(34) & "abc" & ChrW(34), False)>
     <InlineData(ChrW(34) + "test" & ChrW(34) & " != " & ChrW(34) & "abc" & ChrW(34), True)>
     <InlineData(ChrW(34) + "test" & ChrW(34) & " + " & ChrW(34) & "abc" & ChrW(34), "testabc")>
-    <InlineData("not false", True)>
     <InlineData("false || true", True)>
-    <InlineData("false or true", True)>
     <InlineData("true || true", True)>
-    <InlineData("true or true", True)>
     <InlineData("false || false", False)>
-    <InlineData("false or false", False)>
     <InlineData("true && false", False)>
-    <InlineData("true and false", False)>
     <InlineData("false && false", False)>
-    <InlineData("false and false", False)>
     <InlineData("true && true", True)>
-    <InlineData("true and true", True)>
     <InlineData("{ var a : any = 0 var b : any = " + Chr(34) + "b" + Chr(34) + " return a == b }", False)>
     <InlineData("{ var a : any = 0 var b : any = " + Chr(34) + "b" + Chr(34) + " return a != b }", True)>
     <InlineData("{ var a : any = 0 var b : any = 0 return a == b }", True)>

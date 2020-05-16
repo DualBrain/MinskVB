@@ -56,6 +56,19 @@ Namespace Global.Basic.Tests.CodeAnalysis.Syntax
     End Sub
 
     <Theory>
+    <MemberData(NameOf(GetSeparatorsData))>
+    Sub Lexer_Lexes_Separator(kind As SyntaxKind, text As String)
+
+      Dim tokens = SyntaxTree.ParseTokens(text, includeEndOfFile:=True)
+
+      Dim token = Assert.Single(tokens)
+      Dim trivia = Assert.Single(token.LeadingTrivia)
+      Assert.Equal(kind, trivia.Kind)
+      Assert.Equal(text, trivia.Text)
+
+    End Sub
+
+    <Theory>
     <MemberData(NameOf(GetTokenPairsData))>
     Sub Lexer_Lexes_TokenPair(kind1 As SyntaxKind, text1 As String, kind2 As SyntaxKind, text2 As String)
 
@@ -72,25 +85,34 @@ Namespace Global.Basic.Tests.CodeAnalysis.Syntax
 
     <Theory>
     <MemberData(NameOf(GetTokenPairsWithSeparatorData))>
-    Sub Lexer_Lexes_TokenPairWithSeparator(kind1 As SyntaxKind, text1 As String,
-                                           separatorKind As SyntaxKind, separatorText As String,
-                                           kind2 As SyntaxKind, text2 As String)
+    Sub Lexer_Lexes_TokenPairs_WithSeparator(kind1 As SyntaxKind, text1 As String,
+                                             separatorKind As SyntaxKind, separatorText As String,
+                                             kind2 As SyntaxKind, text2 As String)
 
       Dim text = text1 & separatorText & text2
       Dim tokens = SyntaxTree.ParseTokens(text).ToArray
 
-      Assert.Equal(3, tokens.Length)
+      Assert.Equal(2, tokens.Length)
       Assert.Equal(kind1, tokens(0).Kind)
       Assert.Equal(text1, tokens(0).Text)
-      Assert.Equal(separatorKind, tokens(1).Kind)
-      Assert.Equal(separatorText, tokens(1).Text)
-      Assert.Equal(kind2, tokens(2).Kind)
-      Assert.Equal(text2, tokens(2).Text)
+
+      Dim separator = Assert.Single(tokens(0).TrailingTrivia)
+      Assert.Equal(separatorKind, separator.Kind)
+      Assert.Equal(separatorText, separator.Text)
+
+      Assert.Equal(kind2, tokens(1).Kind)
+      Assert.Equal(text2, tokens(1).Text)
 
     End Sub
 
     Public Shared Iterator Function GetTokensData() As IEnumerable(Of Object)
-      For Each t In GetTokens.Concat(GetSeparators)
+      For Each t In GetTokens()
+        Yield New Object() {t.kind, t.text}
+      Next
+    End Function
+
+    Public Shared Iterator Function GetSeparatorsData() As IEnumerable(Of Object)
+      For Each t In GetSeparators()
         Yield New Object() {t.kind, t.text}
       Next
     End Function
@@ -115,11 +137,11 @@ Namespace Global.Basic.Tests.CodeAnalysis.Syntax
                                           .Where(Function(t) t.Text IsNot Nothing)
 
       Dim dynamicTokens = {(SyntaxKind.NumberToken, "1"),
-                                             (SyntaxKind.NumberToken, "123"),
-                                             (SyntaxKind.IdentifierToken, "a"),
-                                             (SyntaxKind.IdentifierToken, "abc"),
-                                             (SyntaxKind.StringToken, $"{ChrW(34)}Test{ChrW(34)}"),
-                                             (SyntaxKind.StringToken, $"{ChrW(34)}Te{ChrW(34)}{ChrW(34)}st{ChrW(34)}")}
+                           (SyntaxKind.NumberToken, "123"),
+                           (SyntaxKind.IdentifierToken, "a"),
+                           (SyntaxKind.IdentifierToken, "abc"),
+                           (SyntaxKind.StringToken, $"{ChrW(34)}Test{ChrW(34)}"),
+                           (SyntaxKind.StringToken, $"{ChrW(34)}Te{ChrW(34)}{ChrW(34)}st{ChrW(34)}")}
 
       Return fixedTokens.Concat(dynamicTokens)
 
@@ -128,10 +150,11 @@ Namespace Global.Basic.Tests.CodeAnalysis.Syntax
     Private Shared Function GetSeparators() As (kind As SyntaxKind, text As String)()
 
       Return {(SyntaxKind.WhitespaceTrivia, " "),
-                                (SyntaxKind.WhitespaceTrivia, "  "),
-                                (SyntaxKind.WhitespaceTrivia, vbCr),
-                                (SyntaxKind.WhitespaceTrivia, vbLf),
-                                (SyntaxKind.WhitespaceTrivia, vbCrLf)}
+              (SyntaxKind.WhitespaceTrivia, "  "),
+              (SyntaxKind.LineBreakTrivia, vbCr),
+              (SyntaxKind.LineBreakTrivia, vbLf),
+              (SyntaxKind.LineBreakTrivia, vbCrLf),
+              (SyntaxKind.MultiLineCommentTrivia, "/**/")}
 
     End Function
 
