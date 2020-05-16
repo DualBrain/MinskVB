@@ -106,7 +106,7 @@ Namespace Global.Basic.CodeAnalysis
     End Function
 
     Private Function GetProgram() As BoundProgram
-      Dim previous = If(Me.Previous Is Nothing, Nothing, Me.Previous.GetProgram)
+      Dim previous = Me.Previous?.GetProgram
       Return Binder.BindProgram(IsScript, previous, GlobalScope)
     End Function
 

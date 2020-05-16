@@ -25,11 +25,11 @@ Friend MustInherit Class Repl
 
   Private Sub InitializeMetaCommands()
 
-    Dim methods = Me.GetType().GetMethods(BindingFlags.Public Or
-                                          BindingFlags.NonPublic Or
-                                          BindingFlags.Static Or
-                                          BindingFlags.Instance Or
-                                          BindingFlags.FlattenHierarchy)
+    Dim methods = [GetType]().GetMethods(BindingFlags.Public Or
+                                         BindingFlags.NonPublic Or
+                                         BindingFlags.Static Or
+                                         BindingFlags.Instance Or
+                                         BindingFlags.FlattenHierarchy)
 
     For Each method In methods
 
@@ -237,6 +237,8 @@ Friend MustInherit Class Repl
   End Sub
 
   Private Sub HandleLeftArrow(document As ObservableCollection(Of String), view As SubmissionView)
+    If document Is Nothing Then
+    End If
     If view.CurrentCharacter > 0 Then
       view.CurrentCharacter -= 1
     End If
@@ -250,6 +252,8 @@ Friend MustInherit Class Repl
   End Sub
 
   Private Sub HandleUpArrow(document As ObservableCollection(Of String), view As SubmissionView)
+    If document Is Nothing Then
+    End If
     If view.CurrentLine > 0 Then
       view.CurrentLine -= 1
     End If
@@ -300,6 +304,8 @@ Friend MustInherit Class Repl
   End Sub
 
   Private Sub HandleHome(document As ObservableCollection(Of String), view As SubmissionView)
+    If document Is Nothing Then
+    End If
     view.CurrentCharacter = 0
   End Sub
 

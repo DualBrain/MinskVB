@@ -35,7 +35,7 @@ Namespace Global.Basic.CodeAnalysis.Syntax
     End Property
 
     Public Function GetSeparator(index As Integer) As SyntaxToken
-      If index = Count - 1 Then Return Nothing
+      If index < 0 OrElse index >= Count - 1 Then Throw New ArgumentOutOfRangeException(NameOf(index))
       Return CType(m_nodesAndSeparators(index * 2 + 1), SyntaxToken)
     End Function
 

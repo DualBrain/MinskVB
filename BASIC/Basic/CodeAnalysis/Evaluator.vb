@@ -18,7 +18,7 @@ Namespace Global.Basic.CodeAnalysis
     Private m_lastValue As Object
 
     Sub New(program As BoundProgram, variables As Dictionary(Of VariableSymbol, Object))
-      Me.m_program = program
+      m_program = program
       m_globals = variables
       m_locals.Push(New Dictionary(Of VariableSymbol, Object))
 
@@ -89,6 +89,7 @@ Namespace Global.Basic.CodeAnalysis
 
     Private Sub EvaluateVariableDeclaration(node As BoundVariableDeclaration)
       Dim value = EvaluateExpression(node.Initializer)
+      Debug.Assert(value IsNot Nothing)
       m_lastValue = value
       Assign(node.Variable, value)
     End Sub
@@ -106,8 +107,8 @@ Namespace Global.Basic.CodeAnalysis
       Select Case node.Kind
         Case BoundNodeKind.VariableExpression : Return EvaluateVariableExpression(DirectCast(node, BoundVariableExpression))
         Case BoundNodeKind.AssignmentExpression : Return EvaluateAssignmentExpression(DirectCast(node, BoundAssignmentExpression))
-        Case BoundNodeKind.UnaryExpression : Return EvaluateUnaryExpression(node)
-        Case BoundNodeKind.BinaryExpression : Return EvaluateBinaryExpression(node)
+        Case BoundNodeKind.UnaryExpression : Return EvaluateUnaryExpression(DirectCast(node, BoundUnaryExpression))
+        Case BoundNodeKind.BinaryExpression : Return EvaluateBinaryExpression(DirectCast(node, BoundBinaryExpression))
         Case BoundNodeKind.CallExpression : Return EvaluateCallExpression(DirectCast(node, BoundCallExpression))
         Case BoundNodeKind.ConversionExpression : Return EvaluateConversionExpression(DirectCast(node, BoundConversionExpression))
         Case Else
@@ -117,6 +118,7 @@ Namespace Global.Basic.CodeAnalysis
     End Function
 
     Private Function EvaluateConstantExpression(node As BoundExpression) As Object
+      Debug.Assert(node.ConstantValue IsNot Nothing)
       Return node.ConstantValue.Value
     End Function
 
@@ -131,14 +133,15 @@ Namespace Global.Basic.CodeAnalysis
 
     Private Function EvaluateAssignmentExpression(a As BoundAssignmentExpression) As Object
       Dim value = EvaluateExpression(a.Expression)
+      Debug.Assert(value IsNot Nothing)
       Assign(a.Variable, value)
       Return value
     End Function
 
-    Private Function EvaluateUnaryExpression(node As BoundExpression) As Object
-      Dim u = DirectCast(node, BoundUnaryExpression)
-      Dim operand = EvaluateExpression(u.Operand)
-      Select Case u.Op.Kind
+    Private Function EvaluateUnaryExpression(node As BoundUnaryExpression) As Object
+      Dim operand = EvaluateExpression(node.Operand)
+      Debug.Assert(operand IsNot Nothing)
+      Select Case node.Op.Kind
         Case BoundUnaryOperatorKind.Identity
           Return CInt(operand)
         Case BoundUnaryOperatorKind.Negation
@@ -148,14 +151,14 @@ Namespace Global.Basic.CodeAnalysis
         Case BoundUnaryOperatorKind.Onescomplement
           Return Not CInt(operand)
         Case Else
-          Throw New Exception($"Unexpected unary operator {u.Op}")
+          Throw New Exception($"Unexpected unary operator {node.Op}")
       End Select
     End Function
 
-    Private Function EvaluateBinaryExpression(node As BoundExpression) As Object
-      Dim b = DirectCast(node, BoundBinaryExpression)
+    Private Function EvaluateBinaryExpression(b As BoundBinaryExpression) As Object
       Dim left = EvaluateExpression(b.Left)
       Dim right = EvaluateExpression(b.Right)
+      Debug.Assert(left IsNot Nothing AndAlso right IsNot Nothing)
       Select Case b.Op.Kind
         Case BoundBinaryOperatorKind.Addition
           If b.Type Is TypeSymbol.Int Then
@@ -263,6 +266,7 @@ Namespace Global.Basic.CodeAnalysis
         For i = 0 To node.Arguments.Length - 1
           Dim parameter = node.Function.Parameters(i)
           Dim value = EvaluateExpression(node.Arguments(i))
+          Debug.Assert(value IsNot Nothing)
           locals.Add(parameter, value)
         Next
         m_locals.Push(locals)

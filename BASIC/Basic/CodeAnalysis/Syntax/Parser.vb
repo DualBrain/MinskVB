@@ -267,15 +267,15 @@ Namespace Global.Basic.CodeAnalysis.Syntax
       Dim keyword = MatchToken(SyntaxKind.IfKeyword)
       Dim condition = ParseExpression
       Dim statement = ParseStatement()
-      Dim elseClause = ParseElseClause()
+      Dim elseClause = ParseOptionalElseClause()
       Return New IfStatementSyntax(m_syntaxTree, keyword, condition, statement, elseClause)
     End Function
 
-    Private Function ParseElseClause() As ElseClauseSyntax
+    Private Function ParseOptionalElseClause() As ElseClauseSyntax
       If Current.Kind <> SyntaxKind.ElseKeyword Then
         Return Nothing
       End If
-      Dim keyword = NextToken
+      Dim keyword = NextToken()
       Dim statement = ParseStatement()
       Return New ElseClauseSyntax(m_syntaxTree, keyword, statement)
     End Function

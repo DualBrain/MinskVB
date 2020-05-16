@@ -186,7 +186,8 @@ Namespace Global.Basic.CodeAnalysis.Binding
       Dim type = If(BindTypeClause(syntax.Type), TypeSymbol.Void)
       Dim func = New FunctionSymbol(syntax.Identifier.Text, parameters.ToImmutable, type, syntax)
       'If Not m_scope.TryDeclareFunction(func) Then
-      If (func.Declaration.Identifier.Text IsNot Nothing AndAlso
+      'If (func.Declaration.Identifier.Text IsNot Nothing AndAlso
+      If (syntax.Identifier.Text IsNot Nothing AndAlso
           Not m_scope.TryDeclareFunction(func)) Then
         Diagnostics.ReportSymbolAlreadyDeclared(syntax.Identifier.Location, func.Name)
       End If

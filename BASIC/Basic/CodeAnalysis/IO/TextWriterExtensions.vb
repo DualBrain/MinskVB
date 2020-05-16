@@ -53,7 +53,9 @@ Namespace Global.Basic.IO
 
     <Extension>
     Public Sub WriteKeyword(writer As TextWriter, kind As SyntaxKind)
-      writer.WriteKeyword(SyntaxFacts.GetText(kind))
+      Dim text = SyntaxFacts.GetText(kind)
+      Debug.Assert(kind.IsKeyword AndAlso text IsNot Nothing)
+      writer.WriteKeyword(text)
     End Sub
 
     <Extension>
@@ -92,7 +94,9 @@ Namespace Global.Basic.IO
 
     <Extension>
     Public Sub WritePunctuation(writer As TextWriter, kind As SyntaxKind)
-      writer.WritePunctuation(SyntaxFacts.GetText(kind))
+      Dim text = SyntaxFacts.GetText(kind)
+      Debug.Assert(text IsNot Nothing)
+      writer.WritePunctuation(text)
     End Sub
 
     <Extension>

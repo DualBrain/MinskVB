@@ -238,6 +238,7 @@ ScanAgain:
           Return New BoundLiteralExpression(Not value)
         End If
         Dim op = BoundUnaryOperator.Bind(SyntaxKind.BangToken, TypeSymbol.Bool)
+        Debug.Assert(op IsNot Nothing)
         Return New BoundUnaryExpression(op, condition)
       End Function
     End Class

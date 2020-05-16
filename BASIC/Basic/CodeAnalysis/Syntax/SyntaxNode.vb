@@ -43,6 +43,12 @@ Namespace Global.Basic.CodeAnalysis.Syntax
       End Get
     End Property
 
+    ' TODO: This method is "generated" by the new C# Syntax Generator feature - need to investigate further.
+    '       For now, it appears to still be working as desired; but at some point this could be an area where
+    '       Minsk and this project fail to be able to remain in sync.
+    '  
+    '   Public MustOverride Iterator Function GetChildren() As IEnumerable(Of SyntaxNode)
+    '
     Public Iterator Function GetChildren() As IEnumerable(Of SyntaxNode)
 
       Dim properties = [GetType].GetProperties(BindingFlags.[Public] Or BindingFlags.Instance)

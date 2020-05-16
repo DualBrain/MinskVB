@@ -14,7 +14,8 @@ Namespace Global.Basic.CodeAnalysis.Syntax
       MyBase.New(tree)
       Me.Kind = kind
       Me.Position = position
-      Me.Text = text
+      Me.Text = If(text, String.Empty)
+      IsMissing = text Is Nothing
       Me.Value = value
       Me.LeadingTrivia = leadingTrivia
       Me.TrailingTrivia = trailingTrivia
@@ -27,7 +28,7 @@ Namespace Global.Basic.CodeAnalysis.Syntax
 
     Public Overrides ReadOnly Property Span As TextSpan
       Get
-        Return New TextSpan(Position, If(Text?.Length, 0))
+        Return New TextSpan(Position, Text.Length)
       End Get
     End Property
 
@@ -48,11 +49,11 @@ Namespace Global.Basic.CodeAnalysis.Syntax
       End Get
     End Property
 
+    ''' <summary>
+    ''' A token is missing if it was inserted by the parser and doesn't appear in source
+    ''' </summary>
+    ''' <returns></returns>
     Public ReadOnly Property IsMissing As Boolean
-      Get
-        Return Text Is Nothing
-      End Get
-    End Property
 
   End Class
 

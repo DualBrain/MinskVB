@@ -40,7 +40,7 @@ Namespace Global.Basic.CodeAnalysis.Emit
     Private ReadOnly _labels As New Dictionary(Of BoundLabel, Integer)
     Private ReadOnly _fixups As New List(Of (InstructionIndex As Integer, Target As BoundLabel))
 
-    Private _typeDefinition As TypeDefinition
+    Private ReadOnly _typeDefinition As TypeDefinition
     Private _randomFieldDefinition As FieldDefinition
 
     Private Sub New(moduleName As String, references() As String)
@@ -88,6 +88,14 @@ Namespace Global.Basic.CodeAnalysis.Emit
       _randomCtorReference = Emit_ResolveMethod(assemblies, "System.Random", ".ctor", Array.Empty(Of String))
       _randomNextReference = Emit_ResolveMethod(assemblies, "System.Random", "Next", {"System.Int32"})
 
+      Dim objectType = _knownTypes(TypeSymbol.Any)
+      If objectType IsNot Nothing Then
+        _typeDefinition = New TypeDefinition("", "Program", Ccl.TypeAttributes.Abstract Or Ccl.TypeAttributes.Sealed, objectType)
+        _assemblyDefinition.MainModule.Types.Add(_typeDefinition)
+      Else
+        _typeDefinition = Nothing
+      End If
+
     End Sub
 
     Public Shared Function Emit(program As BoundProgram, moduleName As String, references() As String, outputPath As String) As ImmutableArray(Of Diagnostic)
@@ -102,10 +110,6 @@ Namespace Global.Basic.CodeAnalysis.Emit
     Public Function Emit(program As BoundProgram, outputPath As String) As ImmutableArray(Of Diagnostic)
 
       If _diagnostics.Any Then Return _diagnostics.ToImmutableArray
-
-      Dim objectType = _knownTypes(TypeSymbol.Any)
-      _typeDefinition = New Ccl.TypeDefinition("", "Program", Ccl.TypeAttributes.Abstract Or Ccl.TypeAttributes.Sealed, objectType)
-      _assemblyDefinition.MainModule.Types.Add(_typeDefinition)
 
       For Each functionWithBody In program.Functions
         EmitFunctionDeclaration(functionWithBody.Key)
@@ -172,6 +176,8 @@ Namespace Global.Basic.CodeAnalysis.Emit
     End Sub
 
     Private Sub EmitNopStatement(ilProcessor As ILProcessor, node As BoundNopStatement)
+      If node Is Nothing Then
+      End If
       ilProcessor.Emit(OpCodes.Nop)
     End Sub
 
@@ -232,6 +238,9 @@ Namespace Global.Basic.CodeAnalysis.Emit
     End Sub
 
     Private Sub EmitConstantExpression(ilProcessor As ILProcessor, node As BoundExpression)
+
+      Debug.Assert(node.ConstantValue IsNot Nothing)
+
       If node.Type Is TypeSymbol.Bool Then
         Dim value = CBool(node.ConstantValue.Value)
         Dim instruction = If(value, OpCodes.Ldc_I4_1, OpCodes.Ldc_I4_0)

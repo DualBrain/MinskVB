@@ -19,7 +19,7 @@ Namespace Global.Basic.CodeAnalysis.Syntax
     Private m_start As Integer
     Private m_kind As SyntaxKind
     Private m_value As Object
-    Private m_triviaBuilder As ImmutableArray(Of SyntaxTrivia).Builder = ImmutableArray.CreateBuilder(Of SyntaxTrivia)
+    Private ReadOnly m_triviaBuilder As ImmutableArray(Of SyntaxTrivia).Builder = ImmutableArray.CreateBuilder(Of SyntaxTrivia)
 
     Public Sub New(tree As SyntaxTree)
       m_syntaxTree = tree

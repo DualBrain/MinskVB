@@ -132,6 +132,8 @@ Namespace Global.Basic.CodeAnalysis.Binding
     End Sub
 
     Private Sub WriteNopStatement(node As BoundNopStatement, writer As IndentedTextWriter)
+      If node Is Nothing Then
+      End If
       writer.WriteKeyword("nop")
       writer.WriteLine()
     End Sub
@@ -245,6 +247,8 @@ Namespace Global.Basic.CodeAnalysis.Binding
     End Sub
 
     Private Sub WriteErrorExpression(node As BoundErrorExpression, writer As IndentedTextWriter)
+      If node Is Nothing Then
+      End If
       writer.WriteKeyword("?")
     End Sub
 
