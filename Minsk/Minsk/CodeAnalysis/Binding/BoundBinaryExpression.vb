@@ -13,7 +13,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
       Me.Left = left
       Me.Op = op
       Me.Right = right
-      ConstantValue = ConstantFolding.ComputeConstant(left, op, right)
+      ConstantValue = ConstantFolding.Fold(left, op, right)
     End Sub
 
     Public Overrides ReadOnly Property Kind As BoundNodeKind = BoundNodeKind.BinaryExpression

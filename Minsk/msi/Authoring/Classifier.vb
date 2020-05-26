@@ -18,8 +18,7 @@ Namespace Global.BASIC.CodeAnalysis.Authoring
     End Function
 
     Private Shared Sub ClassifyNode(node As SyntaxNode, span As TextSpan, result As ImmutableArray(Of ClassifiedSpan).Builder)
-      ' HACK: node should never be null, but that's tracked by #141
-      If node Is Nothing OrElse Not node.FullSpan.OverlapsWith(span) Then Return
+      If Not node.FullSpan.OverlapsWith(span) Then Return
       If TypeOf node Is SyntaxToken Then
         ClassifyToken(CType(node, SyntaxToken), span, result)
       End If

@@ -184,6 +184,7 @@ Namespace Global.Basic.CodeAnalysis
 
     End Sub
 
+    ' TODO: References should be part of the compilation, not arguments for Emit
     Public Function Emit(moduleName As String, references As String(), outputPath As String) As ImmutableArray(Of Diagnostic)
 
       Dim parseDiagnostics = SyntaxTrees.SelectMany(Function(st) st.Diagnostics)

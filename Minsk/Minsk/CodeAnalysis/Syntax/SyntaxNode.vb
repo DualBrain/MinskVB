@@ -11,6 +11,7 @@ Imports System.ConsoleColor
 
 Namespace Global.Basic.CodeAnalysis.Syntax
 
+  ' TODO: All custructors should be internal
   Public MustInherit Class SyntaxNode
 
     Friend Sub New(tree As SyntaxTree)
@@ -85,9 +86,6 @@ Namespace Global.Basic.CodeAnalysis.Syntax
     End Sub
 
     Private Shared Sub PrettyPrint(writer As TextWriter, node As SyntaxNode, Optional indent As String = "", Optional isLast As Boolean = True)
-
-      ' HACK: node should never be null, but that's tracked by #141
-      If node Is Nothing Then Return
 
       Dim isToConsole = writer Is Console.Out
       Dim token = TryCast(node, SyntaxToken)

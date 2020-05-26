@@ -8,6 +8,7 @@ Namespace Global.Basic.CodeAnalysis.Symbols
 
   Public MustInherit Class Symbol
 
+    ' TODO: Constructors should be internal
     Protected Friend Sub New(name As String)
       Me.Name = name
     End Sub

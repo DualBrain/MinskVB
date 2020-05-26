@@ -7,6 +7,7 @@ Imports Basic.CodeAnalysis.Symbols
 
 Namespace Global.Basic.CodeAnalysis
 
+  ' TODO: Get rid of evaluator in favor of Emitter (see #113)
   Friend NotInheritable Class Evaluator
 
     Private ReadOnly m_program As BoundProgram

@@ -9,6 +9,7 @@ Imports Basic.CodeAnalysis.Syntax
 
 Namespace Global.Basic.CodeAnalysis.Lowering
 
+  ' TODO: Consider creating a BoundNodeFactory to construct nodes to make lowering easier to read.
   Friend NotInheritable Class Lowerer
     Inherits BoundTreeRewriter
 
@@ -52,9 +53,6 @@ Namespace Global.Basic.CodeAnalysis.Lowering
     End Function
 
     Private Shared Function CanFallThrough(boundStatement As BoundStatement) As Boolean
-      'TODO: We don't rewrite conditional gotos where the condition is always true.
-      '      We shouldn't handle this here, because we should really rewrite those
-      '      to unconditional gotos in the first place.
       Return boundStatement.Kind <> BoundNodeKind.ReturnStatement AndAlso
              boundStatement.Kind <> BoundNodeKind.GotoStatement
     End Function

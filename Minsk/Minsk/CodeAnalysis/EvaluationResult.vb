@@ -14,6 +14,8 @@ Namespace Global.Basic.CodeAnalysis
       WarningDiagnostics = diagnostics.Where(Function(d) d.IsWarning).ToImmutableArray
     End Sub
 
+    ' TODO: I think we should not have separate collections but instead
+    '       have an extension method over ImmutableArray(Of Diagnostic)
     Public ReadOnly Property Diagnostics As ImmutableArray(Of Diagnostic)
     Public ReadOnly Property ErrorDiagnostics As ImmutableArray(Of Diagnostic)
     Public ReadOnly Property WarningDiagnostics As ImmutableArray(Of Diagnostic)

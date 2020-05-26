@@ -4,6 +4,7 @@ Option Infer On
 
 Imports Xunit
 Imports Basic.CodeAnalysis.Syntax
+Imports System.Diagnostics
 
 Namespace Global.Basic.Tests.CodeAnalysis.Syntax
 
@@ -19,6 +20,9 @@ Namespace Global.Basic.Tests.CodeAnalysis.Syntax
       Dim op2Text = SyntaxFacts.GetText(op2)
       Dim text = $"a {op1Text} b {op2Text} c"
       Dim expression = ParseExpression(text)
+
+      Debug.Assert(op1Text IsNot Nothing)
+      Debug.Assert(op2Text IsNot Nothing)
 
       If op1Precedence >= op2Precedence Then
 
@@ -76,6 +80,9 @@ Namespace Global.Basic.Tests.CodeAnalysis.Syntax
       Dim binaryText = SyntaxFacts.GetText(binaryKind)
       Dim text = $"{unaryText} a {binaryText} b"
       Dim expression = ParseExpression(text)
+
+      Debug.Assert(unaryText IsNot Nothing)
+      Debug.Assert(binaryText IsNot Nothing)
 
       If unaryPrecedence >= binaryPrecedence Then
 

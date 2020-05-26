@@ -24,7 +24,7 @@ Namespace Global.Basic.CodeAnalysis.Binding
       Return Nothing
     End Function
 
-    Public Function ComputeConstant(left As BoundExpression, op As BoundBinaryOperator, right As BoundExpression) As BoundConstant
+    Public Function Fold(left As BoundExpression, op As BoundBinaryOperator, right As BoundExpression) As BoundConstant
 
       Dim leftConstant = left.ConstantValue
       Dim rightConstant = right.ConstantValue

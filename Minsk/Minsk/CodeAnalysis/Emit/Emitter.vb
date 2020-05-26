@@ -43,6 +43,7 @@ Namespace Global.Basic.CodeAnalysis.Emit
     Private ReadOnly _typeDefinition As TypeDefinition
     Private _randomFieldDefinition As FieldDefinition
 
+    ' TODO: This constructor does too much. Resolution should be factored out.
     Private Sub New(moduleName As String, references() As String)
 
       Dim assemblies = New List(Of AssemblyDefinition)
@@ -334,10 +335,10 @@ Namespace Global.Basic.CodeAnalysis.Emit
         Case BoundBinaryOperatorKind.Division
           ilProcessor.Emit(OpCodes.Div)
         Case BoundBinaryOperatorKind.LogicalAnd
-          'TODO: Implement short-circuit evaluation.
+          'TODO: Implement short-circuit evaluation #111
           ilProcessor.Emit(OpCodes.And)
         Case BoundBinaryOperatorKind.LogicalOr
-          'TODO: Implement short-circuit evaluation.
+          'TODO: Implement short-circuit evaluation #111
           ilProcessor.Emit(OpCodes.Or)
         Case BoundBinaryOperatorKind.BitwiseAnd
           ilProcessor.Emit(OpCodes.And)

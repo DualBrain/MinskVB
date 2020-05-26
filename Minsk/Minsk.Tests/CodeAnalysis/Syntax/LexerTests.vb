@@ -133,8 +133,9 @@ Namespace Global.Basic.Tests.CodeAnalysis.Syntax
 
       Dim fixedTokens = System.Enum.GetValues(GetType(SyntaxKind)) _
                                           .Cast(Of SyntaxKind)() _
-                                          .Select(Function(k) (Kind:=k, Text:=SyntaxFacts.GetText(k))) _
-                                          .Where(Function(t) t.Text IsNot Nothing)
+                                          .Select(Function(k) (k, Text:=SyntaxFacts.GetText(k))) _
+                                          .Where(Function(t) t.Text IsNot Nothing) _
+                                          .Cast(Of (SyntaxKind, String))
 
       Dim dynamicTokens = {(SyntaxKind.NumberToken, "1"),
                            (SyntaxKind.NumberToken, "123"),
