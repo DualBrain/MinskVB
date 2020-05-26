@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "bc": {
+      "commandName": "Project",
+      "commandLineArgs": "C:\\GitHub\\BASIC\\BASIC\\Samples\\Hello\\Hello.ms -r \"C:\\Program Files (x86)\\Reference Assemblies\\Microsoft\\Framework\\.NETFramework\\v4.7.2\\mscorlib.dll\""
+    }
+  }
+}

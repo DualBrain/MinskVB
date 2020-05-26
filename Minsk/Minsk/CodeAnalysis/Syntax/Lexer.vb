@@ -202,30 +202,19 @@ Namespace Global.Basic.CodeAnalysis.Syntax
       m_kind = SyntaxKind.BadToken
       m_value = Nothing
 
-      ' + Plus (Addition, String Concat)
-      ' - Minus (Subtraction, Negation)
-      ' * Multiply
-      ' / Divide (Floating Point)
-      ' \ Divide (Integer)
-      ' ^ Raise Power
-      ' : Command Separator
-
       Select Case Current
-        Case ChrW(0) : m_kind = SyntaxKind.EndOfFileToken
+        Case ChrW(0) : m_kind = SyntaxKind.EndOfFileToken ': Me.Position += 1
         Case "+"c : m_kind = SyntaxKind.PlusToken : m_position += 1
         Case "-"c : m_kind = SyntaxKind.MinusToken : m_position += 1
         Case "*"c : m_kind = SyntaxKind.StarToken : m_position += 1
         Case "/"c : m_kind = SyntaxKind.SlashToken : m_position += 1
-        'Case "\"c : m_kind = SyntaxKind.BackslashToken : m_position += 1
         Case "("c : m_kind = SyntaxKind.OpenParenToken : m_position += 1
         Case ")"c : m_kind = SyntaxKind.CloseParenToken : m_position += 1
         Case "{"c : m_kind = SyntaxKind.OpenBraceToken : m_position += 1
         Case "}"c : m_kind = SyntaxKind.CloseBraceToken : m_position += 1
         Case ":"c : m_kind = SyntaxKind.ColonToken : m_position += 1
         Case ","c : m_kind = SyntaxKind.CommaToken : m_position += 1
-        'Case ";"c : m_kind = SyntaxKind.SemicolonToken : m_position += 1
         Case "~"c : m_kind = SyntaxKind.TildeToken : m_position += 1
-        'Case "'"c : m_kind = SyntaxKind.ApostropheToken : m_position += 1
         Case "^"c : m_kind = SyntaxKind.HatToken : m_position += 1
         Case "&"c
           If LookAhead = "&"c Then

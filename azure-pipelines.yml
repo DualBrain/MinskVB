@@ -1,35 +1,31 @@
-# .NET Desktop
-# Build and run tests for .NET Desktop or Windows classic desktop solutions.
-# Add steps that publish symbols, save build artifacts, and more:
-# https://docs.microsoft.com/azure/devops/pipelines/apps/windows/dot-net
+# https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
 
-trigger:
-- master
-
-# pool:
-#  vmImage: 'windows-latest'
 pool:
-  vmImage: 'windows-2019'
+  vmImage: 'ubuntu-latest'
 
 variables:
-  solution: '**/*.sln'
-  buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
+  sln: './Minsk/minsk.sln'
+  tests: './Minsk/Minsk.Tests/Minsk.Tests.csproj'
+  samples: './samples/samples.sln'
 
 steps:
-- task: NuGetToolInstaller@0
-
-- task: NuGetCommand@2
+- task: DotNetCoreCLI@2
+  displayName: Build minsk ($(buildConfiguration))
   inputs:
-    restoreSolution: '$(solution)'
-
-- task: VSBuild@1
+    command: build
+    projects: $(sln)
+    arguments: -c $(buildConfiguration)
+- task: DotNetCoreCLI@2
+  displayName: Run tests ($(buildConfiguration))
   inputs:
-    solution: '$(solution)'
-    platform: '$(buildPlatform)'
-    configuration: '$(buildConfiguration)'
-
-- task: VSTest@2
+    command: test
+    projects: $(tests)
+    arguments: -c $(buildConfiguration)
+    publishTestResults: true
+- task: DotNetCoreCLI@2
+  displayName: Build samples ($(buildConfiguration))
   inputs:
-    platform: '$(buildPlatform)'
-    configuration: '$(buildConfiguration)'
+    command: build
+    projects: $(samples)
+    arguments: -c $(buildConfiguration)
