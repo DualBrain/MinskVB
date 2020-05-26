@@ -110,8 +110,8 @@ Namespace Global.Basic.IO
     Public Sub WriteDiagnostics(writer As TextWriter, diagnostics As IEnumerable(Of Diagnostic))
 
       For Each diagnostic In diagnostics.Where(Function(diag) diag.Location.Text Is Nothing)
-        writer.SetForeground(DarkRed)
-        'writer.Write(diagnostic.Message)
+        Dim messageColor = If(diagnostic.IsWarning, DarkYellow, DarkRed)
+        writer.SetForeground(messageColor)
         writer.WriteLine(diagnostic.Message)
         writer.ResetColor()
       Next
@@ -138,7 +138,8 @@ Namespace Global.Basic.IO
         ' An extra line before for clarity...
         writer.WriteLine()
 
-        writer.SetForeground(DarkRed)
+        Dim messageColor = If(diagnostic.IsWarning, DarkYellow, DarkRed)
+        writer.SetForeground(messageColor)
         writer.Write($"{filename}({startLine},{startCharacter},{endLine},{endCharacter}): ")
         writer.WriteLine(diagnostic)
         writer.ResetColor()

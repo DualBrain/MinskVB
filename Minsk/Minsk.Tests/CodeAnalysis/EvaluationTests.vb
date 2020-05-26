@@ -317,6 +317,68 @@ Namespace Global.Basic.Tests.CodeAnalysis
 
     End Sub
 
+    <Fact>
+    Public Sub Evaluator_IfStatement_Reports_NotReachableCode_Warning()
+      Dim text As String = "
+        function test()
+        {
+          let x = 4 * 3
+          if x > 12
+          {
+            [print](""x"")
+          }
+          else
+          {
+            print(""x"")
+          }
+        }"
+
+      Dim diagnostics As String = "
+        Unreachable code detected."
+
+      AssertDiagnostics(text, diagnostics, assertWarnings:=True)
+
+    End Sub
+
+    <Fact>
+    Public Sub Evaluator_ElseStatement_Reports_NotReachableCode_Warning()
+      Dim text As String = "
+        function test(): int
+        {
+          if true
+          {
+            return 1
+          }
+          else
+          {
+            [return] 0
+          }
+        }"
+
+      Dim diagnostics As String = "
+        Unreachable code detected."
+
+      AssertDiagnostics(text, diagnostics, assertWarnings:=True)
+    End Sub
+
+    <Fact>
+    Public Sub Evaluator_WhileStatement_Reports_NotReachableCode_Warning()
+      Dim text As String = "
+        function test()
+        {
+          while false
+          {
+            [continue]
+          }
+        }"
+
+      Dim diagnostics As String = $"
+        Unreachable code detected."
+
+      AssertDiagnostics(text, diagnostics AssertWarnings:=True)
+
+    End Sub
+
     <Theory, InlineData("[break]", "break"), InlineData("[continue]", "continue")>
     Public Sub Evaluator_Invalid_Break_Or_Continue(ByVal text As String, ByVal keyword As String)
 
@@ -604,13 +666,13 @@ Namespace Global.Basic.Tests.CodeAnalysis
       Dim variables = New Dictionary(Of VariableSymbol, Object)
       Dim result = compilation.Evaluate(variables)
 
-      Assert.Empty(result.Diagnostics)
+      Assert.Empty(result.ErrorDiagnostics)
 
       Assert.Equal(expectedValue, result.Value)
 
     End Sub
 
-    Private Sub AssertDiagnostics(text As String, diagnosticText As String)
+    Private Sub AssertDiagnostics(text As String, diagnosticText As String, Optional assertWarnings As Boolean = False)
 
       Dim at = AnnotatedText.Parse(text)
       Dim tree = SyntaxTree.Parse(at.Text)
@@ -623,16 +685,17 @@ Namespace Global.Basic.Tests.CodeAnalysis
         Throw New Exception("ERROR: Must mark as many spans as there are expected diagnostics.")
       End If
 
-      Assert.Equal(expectedDiagnostics.Length, result.Diagnostics.Length)
+      Dim diagnostics = If(assertWarnings, result.Diagnostics, result.ErrorDiagnostics)
+      Assert.Equal(expectedDiagnostics.Length, diagnostics.Length)
 
       For i = 0 To expectedDiagnostics.Length - 1
 
         Dim expectedMessage = expectedDiagnostics(i)
-        Dim actualMessage = result.Diagnostics(i).Message
+        Dim actualMessage = diagnostics(i).Message
         Assert.Equal(expectedMessage, actualMessage)
 
         Dim expectedSpan = at.Spans(i)
-        Dim actualSpan = result.Diagnostics(i).Location.Span
+        Dim actualSpan = diagnostics(i).Location.Span
         Assert.Equal(expectedSpan, actualSpan)
 
       Next

@@ -134,14 +134,14 @@ Namespace Global.Basic.CodeAnalysis
       '  cfg.WriteTo(streamWriter)
       'End Using
 
-      If program.Diagnostics.Any Then
-        Return New EvaluationResult(program.Diagnostics.ToImmutableArray, Nothing)
+      If program.ErrorDiagnostics.Any Then
+        Return New EvaluationResult(program.Diagnostics, Nothing)
       End If
 
       Dim evaluator = New Evaluator(program, variables)
       Dim value = evaluator.Evaluate
 
-      Return New EvaluationResult(ImmutableArray(Of Diagnostic).Empty, value)
+      Return New EvaluationResult(program.WarningDiagnostics, value)
 
     End Function
 
@@ -188,7 +188,10 @@ Namespace Global.Basic.CodeAnalysis
 
       Dim parseDiagnostics = SyntaxTrees.SelectMany(Function(st) st.Diagnostics)
       Dim diagnostics = parseDiagnostics.Concat(GlobalScope.Diagnostics).ToImmutableArray()
-      If diagnostics.Any() Then Return diagnostics
+      Dim errorDiagnostics = diagnostics.Where(Function(d) d.IsError)
+      If errorDiagnostics.Any Then
+        Return diagnostics
+      End If
 
       Dim program = GetProgram()
 

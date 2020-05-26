@@ -100,7 +100,7 @@ Namespace Global.Basic.CodeAnalysis.Emit
 
     Public Shared Function Emit(program As BoundProgram, moduleName As String, references() As String, outputPath As String) As ImmutableArray(Of Diagnostic)
 
-      If program.Diagnostics.Any Then Return program.Diagnostics
+      If program.ErrorDiagnostics.Any Then Return program.Diagnostics
 
       Dim emitter = New Emitter(moduleName, references)
       Return emitter.Emit(program, outputPath)

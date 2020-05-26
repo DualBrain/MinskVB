@@ -202,7 +202,9 @@ Friend NotInheritable Class MinskRepl
 
     Dim result = compilation.Evaluate(m_variables)
 
-    If Not result.Diagnostics.Any Then
+    If Not result.ErrorDiagnostics.Any Then
+
+      Console.Out.WriteDiagnostics(result.WarningDiagnostics)
 
       If result.Value IsNot Nothing Then
         ForegroundColor = White

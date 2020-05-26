@@ -23,8 +23,13 @@ Namespace Global.Basic.CodeAnalysis
     End Function
 
     Private Sub Report(location As TextLocation, message As String)
-      Dim diagnostic = New Diagnostic(location, message)
-      m_diagnostics.Add(diagnostic)
+      Dim d = Diagnostic.Error(location, message)
+      m_diagnostics.Add(d)
+    End Sub
+
+    Private Sub ReportWarning(location As TextLocation, message As String)
+      Dim d = Diagnostic.Warning(location, message)
+      m_diagnostics.Add(d)
     End Sub
 
     Public Sub AddRange(diagnostics As IEnumerable(Of Diagnostic))
@@ -174,6 +179,42 @@ Namespace Global.Basic.CodeAnalysis
       Dim parameterTypeNameList = String.Join(", ", parameterTypeNames)
       Report(Nothing, $"The required method '{typeName}.{methodName}({parameterTypeNameList})' cann be resolved among the given references.")
     End Sub
+
+    Public Sub ReportUnreachableCode(location As TextLocation)
+      Report(location, $"Unreachable code detected.")
+    End Sub
+
+    Public Sub ReportUnreachableCode(node As SyntaxNode)
+      Select Case node.Kind
+        Case SyntaxKind.BlockStatement
+          Dim firstStatement = CType(node, BlockStatementSyntax).Statements.FirstOrDefault()
+          ' Report just for non empty blocks.
+          If firstStatement IsNot Nothing Then ReportUnreachableCode(firstStatement)
+        Case SyntaxKind.VariableDeclaration
+          ReportUnreachableCode(CType(node, VariableDeclarationSyntax).Keyword.Location)
+        Case SyntaxKind.IfStatement
+          ReportUnreachableCode(CType(node, IfStatementSyntax).IfKeyword.Location)
+        Case SyntaxKind.WhileStatement
+          ReportUnreachableCode(CType(node, WhileStatementSyntax).WhileKeyword.Location)
+        Case SyntaxKind.DoWhileStatement
+          ReportUnreachableCode(CType(node, DoWhileStatementSyntax).DoKeyword.Location)
+        Case SyntaxKind.ForStatement
+          ReportUnreachableCode(CType(node, ForStatementSyntax).Keyword.Location)
+        Case SyntaxKind.BreakStatement
+          ReportUnreachableCode(CType(node, BreakStatementSyntax).Keyword.Location)
+        Case SyntaxKind.ContinueStatement
+          ReportUnreachableCode(CType(node, ContinueStatementSyntax).Keyword.Location)
+        Case SyntaxKind.ReturnStatement
+          ReportUnreachableCode(CType(node, ReturnStatementSyntax).ReturnKeyword.Location)
+        Case SyntaxKind.ExpressionStatement
+          ReportUnreachableCode(CType(node, ExpressionStatementSyntax).Expression)
+        Case SyntaxKind.CallExpression
+          ReportUnreachableCode(CType(node, CallExpressionSyntax).Identifier.Location)
+        Case Else
+          Throw New Exception($"Unexpected syntax {node.Kind}")
+      End Select
+    End Sub
+
 
   End Class
 
