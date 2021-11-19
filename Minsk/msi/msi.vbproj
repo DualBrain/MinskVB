@@ -6,7 +6,7 @@
     <IsPackable>false</IsPackable>
     <ProjectName>Minsk</ProjectName>
     <RootNamespace>Minsk</RootNamespace>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>

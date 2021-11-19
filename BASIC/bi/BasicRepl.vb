@@ -74,12 +74,12 @@ Friend NotInheritable Class BasicRepl
   End Function
 
   <MetaCommand("exit", "Exits the REPL")>
-  Protected Sub EvaluateExit()
+  Protected Shared Sub EvaluateExit()
     Environment.Exit(0)
   End Sub
 
   <MetaCommand("cls", "Clears the screen")>
-  Protected Sub EvaluateCls()
+  Protected Shared Sub EvaluateCls()
     Clear()
   End Sub
 
@@ -250,14 +250,14 @@ Friend NotInheritable Class BasicRepl
 
   End Sub
 
-  Private Sub ClearSubmissions()
+  Private Shared Sub ClearSubmissions()
     Dim dir = GetSubmissionsDirectory()
     If Directory.Exists(dir) Then
       Directory.Delete(dir, recursive:=True)
     End If
   End Sub
 
-  Private Sub SaveSubmission(text As String)
+  Private Shared Sub SaveSubmission(text As String)
     If m_loadingSubmission Then Return
     Dim submissionsDirectory = GetSubmissionsDirectory()
     Directory.CreateDirectory(submissionsDirectory)

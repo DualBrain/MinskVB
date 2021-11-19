@@ -207,7 +207,7 @@ Friend MustInherit Class Repl
     End If
   End Sub
 
-  Private Sub HandleEscape(document As ObservableCollection(Of String), view As SubmissionView)
+  Private Shared Sub HandleEscape(document As ObservableCollection(Of String), view As SubmissionView)
     document.Clear()
     document.Add(String.Empty)
     view.CurrentLine = 0
@@ -223,7 +223,7 @@ Friend MustInherit Class Repl
     InsertLine(document, view)
   End Sub
 
-  Private Sub HandleControlEnter(document As ObservableCollection(Of String), view As SubmissionView)
+  Private Shared Sub HandleControlEnter(document As ObservableCollection(Of String), view As SubmissionView)
     InsertLine(document, view)
   End Sub
 
@@ -236,7 +236,7 @@ Friend MustInherit Class Repl
     view.CurrentLine = lineIndex
   End Sub
 
-  Private Sub HandleLeftArrow(document As ObservableCollection(Of String), view As SubmissionView)
+  Private Shared Sub HandleLeftArrow(document As ObservableCollection(Of String), view As SubmissionView)
     If document Is Nothing Then
     End If
     If view.CurrentCharacter > 0 Then
@@ -244,14 +244,14 @@ Friend MustInherit Class Repl
     End If
   End Sub
 
-  Private Sub HandleRightArrow(document As ObservableCollection(Of String), view As SubmissionView)
+  Private Shared Sub HandleRightArrow(document As ObservableCollection(Of String), view As SubmissionView)
     Dim line = document(view.CurrentLine)
     If view.CurrentCharacter <= line.Length - 1 Then
       view.CurrentCharacter += 1
     End If
   End Sub
 
-  Private Sub HandleUpArrow(document As ObservableCollection(Of String), view As SubmissionView)
+  Private Shared Sub HandleUpArrow(document As ObservableCollection(Of String), view As SubmissionView)
     If document Is Nothing Then
     End If
     If view.CurrentLine > 0 Then
@@ -259,13 +259,13 @@ Friend MustInherit Class Repl
     End If
   End Sub
 
-  Private Sub HandleDownArrow(document As ObservableCollection(Of String), view As SubmissionView)
+  Private Shared Sub HandleDownArrow(document As ObservableCollection(Of String), view As SubmissionView)
     If view.CurrentLine < document.Count - 1 Then
       view.CurrentLine += 1
     End If
   End Sub
 
-  Private Sub HandleBackspace(document As ObservableCollection(Of String), view As SubmissionView)
+  Private Shared Sub HandleBackspace(document As ObservableCollection(Of String), view As SubmissionView)
     Dim start = view.CurrentCharacter
     If start = 0 Then
       If view.CurrentLine = 0 Then Return
@@ -285,7 +285,7 @@ Friend MustInherit Class Repl
     End If
   End Sub
 
-  Private Sub HandleDelete(document As ObservableCollection(Of String), view As SubmissionView)
+  Private Shared Sub HandleDelete(document As ObservableCollection(Of String), view As SubmissionView)
     Dim lineIndex = view.CurrentLine
     Dim line = document(lineIndex)
     Dim start = view.CurrentCharacter
@@ -303,13 +303,13 @@ Friend MustInherit Class Repl
     document(lineIndex) = before & after
   End Sub
 
-  Private Sub HandleHome(document As ObservableCollection(Of String), view As SubmissionView)
+  Private Shared Sub HandleHome(document As ObservableCollection(Of String), view As SubmissionView)
     If document Is Nothing Then
     End If
     view.CurrentCharacter = 0
   End Sub
 
-  Private Sub HandleEnd(document As ObservableCollection(Of String), view As SubmissionView)
+  Private Shared Sub HandleEnd(document As ObservableCollection(Of String), view As SubmissionView)
     view.CurrentCharacter = document(view.CurrentLine).Length
   End Sub
 
@@ -342,7 +342,7 @@ Friend MustInherit Class Repl
     view.CurrentCharacter = document(view.CurrentLine).Length
   End Sub
 
-  Private Sub HandleTab(document As ObservableCollection(Of String), view As SubmissionView)
+  Private Shared Sub HandleTab(document As ObservableCollection(Of String), view As SubmissionView)
     Const TAB_WIDTH As Integer = 2
     Dim start = view.CurrentCharacter
     Dim remainingSpaces = TAB_WIDTH - start Mod TAB_WIDTH
@@ -351,7 +351,7 @@ Friend MustInherit Class Repl
     view.CurrentCharacter += remainingSpaces
   End Sub
 
-  Private Sub HandleTyping(document As ObservableCollection(Of String), view As SubmissionView, text As String)
+  Private Shared Sub HandleTyping(document As ObservableCollection(Of String), view As SubmissionView, text As String)
     Dim lineIndex = view.CurrentLine
     Dim start = view.CurrentCharacter
     document(lineIndex) = document(lineIndex).Insert(start, text)
