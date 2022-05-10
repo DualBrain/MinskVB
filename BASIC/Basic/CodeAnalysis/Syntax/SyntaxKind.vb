@@ -60,23 +60,43 @@ Namespace Global.Basic.CodeAnalysis.Syntax
     LetKeyword 'TODO: LET has a different behavior in BASIC.
     ReturnKeyword
     VarKeyword
-    'DimKeyword
+    DimKeyword
 
+    AsKeyword
+    BooleanKeyword
+    ShortKeyword
+    IntegerKeyword
+    LongKeyword
+
+    SubKeyword
     FunctionKeyword
 
+    ByRefKeyword
+    ByValKeyword
+    OptionalKeyword
+
     IfKeyword
-    'ThenKeyword
+    ThenKeyword
     BreakKeyword
-    ContinueKeyword
     ElseKeyword
-    'ElseIfKeyword
-    'EndIfKeyword
+    ElseIfKeyword
+    EndKeyword
 
     WhileKeyword
+    WendKeyword
     DoKeyword
+    LoopKeyword
 
     ForKeyword
     ToKeyword
+    StepKeyword
+    NextKeyword
+    ExitKeyword
+    EachKeyword
+    InKeyword
+    ContinueKeyword
+
+    PrintKeyword
 
     ' Nodes
 

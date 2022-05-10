@@ -18,24 +18,48 @@ Namespace Global.Basic.CodeAnalysis.Text
       Lines = ParseLines(Me, text)
     End Sub
 
+    ''' <summary>
+    ''' Parses source text into lines/spans.
+    ''' </summary>
+    ''' <param name="text">source text</param>
+    ''' <param name="fileName">the filename (for reference)</param>
+    ''' <returns></returns>
     Public Shared Function [From](text As String, Optional fileName As String = "") As SourceText
       Return New SourceText(text, fileName)
     End Function
 
+    ''' <summary>
+    ''' Contains zero or more parsed source lines.
+    ''' </summary>
+    ''' <returns></returns>
     Public ReadOnly Property Lines As ImmutableArray(Of TextLine)
 
+    ''' <summary>
+    ''' Provides access to each character of the source text.
+    ''' </summary>
+    ''' <param name="index">character index</param>
+    ''' <returns>character at index</returns>
     Default Public ReadOnly Property Item(index As Integer) As Char
       Get
         Return Text(index)
       End Get
     End Property
 
+    ''' <summary>
+    ''' Overall length of source text.
+    ''' </summary>
+    ''' <returns></returns>
     Public ReadOnly Property Length As Integer
       Get
         Return Text.Length
       End Get
     End Property
 
+    ''' <summary>
+    ''' Returns line index given character position.
+    ''' </summary>
+    ''' <param name="position">character index</param>
+    ''' <returns>line index</returns>
     Public Function GetLineIndex(position As Integer) As Integer
 
       ' Implementing a "Binary Search".
@@ -118,14 +142,29 @@ Namespace Global.Basic.CodeAnalysis.Text
 
     End Function
 
+    ''' <summary>
+    ''' Source Text
+    ''' </summary>
+    ''' <returns></returns>
     Public Overrides Function ToString() As String
       Return Text
     End Function
 
+    ''' <summary>
+    ''' Source text (substring) given start and length.
+    ''' </summary>
+    ''' <param name="start">character start index</param>
+    ''' <param name="length">total number of characters</param>
+    ''' <returns>subtext</returns>
     Public Overloads Function ToString(start As Integer, length As Integer) As String
       Return Text.Substring(start, length)
     End Function
 
+    ''' <summary>
+    ''' Source text (substring) given start and length.
+    ''' </summary>
+    ''' <param name="span">contains start and length</param>
+    ''' <returns>subtext</returns>
     Public Overloads Function ToString(span As TextSpan) As String
       Return Text.Substring(span.Start, span.Length)
     End Function
